@@ -5,9 +5,15 @@ import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import ChatComposer from "@/components/chat/ChatComposer";
 
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+
 export default function ChatPage() {
   const [chatUniqueID, setChatUniqueID] = useState(Date.now());
- 
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -17,7 +23,6 @@ export default function ChatPage() {
     },
   ]);
   const [inputValue, setInputValue] = useState("");
-
 
   const saveChatDataToDatabase = async (data) => {
     try {
@@ -36,7 +41,6 @@ export default function ChatPage() {
     }
   };
 
-
   // normal text message send
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
@@ -46,7 +50,7 @@ export default function ChatPage() {
       sender: "user",
       timestamp: new Date(),
     };
- 
+
     saveChatDataToDatabase(newUserMessage);
 
     setMessages((prev) => [...prev, newUserMessage]);
@@ -80,24 +84,44 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-base-100">
-      <ChatSidebar
-        conversations={[]}
-        activeConversation={1}
-        onConversationSelect={() => {}}
-        onNewChat={() => {
-          setChatUniqueID(Date.now());
-        }}
-      />
-      <div className="flex flex-col flex-1">
-        <ChatWindow messages={messages} />
-
-        <ChatComposer
-          inputValue={inputValue}
-          onInputChange={setInputValue}
-          onSendMessage={handleSendMessage}
+    <SidebarProvider className="flex h-screen bg-base-100">
+      <Sidebar>
+        <ChatSidebar
+          conversations={[]}
+          activeConversation={1}
+          onConversationSelect={() => {}}
+          onNewChat={() => {
+            setChatUniqueID(Date.now());
+          }}
         />
-      </div>
-    </div>
+      </Sidebar>
+
+      <main className="flex flex-col flex-1">
+        <SidebarTrigger />
+        <div className="flex flex-1">
+          <div className="w-1/2 flex flex-col m-2 border-r  border-purple-400">
+            <ChatWindow messages={messages} />
+
+            <ChatComposer
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              onSendMessage={handleSendMessage}
+            />
+          </div>
+
+          <div className="w-1/2 border-r flex">
+            <div className="w-1/2 border-r border-purple-300 p-4">
+              <h2 className="font-bold text-lg mb-2">Normal Summarization</h2>
+            </div>
+
+            <div className="w-1/2 p-4">
+              <h2 className="font-bold text-lg mb-2">
+                Increamental Summarization
+              </h2>
+            </div>
+          </div>
+        </div>
+      </main>
+    </SidebarProvider>
   );
 }
