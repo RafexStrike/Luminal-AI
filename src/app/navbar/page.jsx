@@ -21,6 +21,8 @@ const routes = [
   { href: "/upload", label: "Upload" },
   { href: "/flashcard", label: "Flashcard" },
   { href: "/takeNotes", label: "Take Notes" },
+  { href: "/chatWithSummarization", label: "Summarization Chat" },
+
 ];
 
 export default function Navbar() {
