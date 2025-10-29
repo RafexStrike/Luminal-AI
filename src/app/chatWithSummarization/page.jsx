@@ -4,6 +4,7 @@ import { useState } from "react";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import ChatComposer from "@/components/chat/ChatComposer";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   SidebarProvider,
@@ -45,6 +46,7 @@ export default function ChatPage() {
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
     const newUserMessage = {
+      uniqueMessageId: uuidv4(),
       id: chatUniqueID,
       content: message,
       sender: "user",
@@ -63,6 +65,7 @@ export default function ChatPage() {
       });
       const data = await res.json();
       const newBotMessage = {
+        uniqueMessageId: uuidv4(),
         id: chatUniqueID,
         content: data.reply || "No response",
         sender: "bot",
@@ -74,6 +77,7 @@ export default function ChatPage() {
       setMessages((prev) => [
         ...prev,
         {
+          uniqueMessageId: uuidv4(),
           id: chatUniqueID,
           content: "Error contacting AI: " + err.message,
           sender: "bot",
