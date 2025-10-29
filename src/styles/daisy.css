@@ -1,0 +1,7 @@
+/* src/styles/daisy.css */
+/* @tailwind base; */
+/* @import "tailwindcss/preflight"; */
+/* @tailwind components; */
+@tailwind utilities;
+
+@plugin "daisyui";

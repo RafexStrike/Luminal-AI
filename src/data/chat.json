@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "dateCreated": "2025-09-18",
+    "topicTitle": "JavaScript Basics",
+    "authorName": "Yusuf",
+    "flashcards": [
+      {
+        "question": "What is a closure in JavaScript?",
+        "answer": "A closure is a function that remembers its outer scope variables even after the outer function has returned."
+      },
+      {
+        "question": "Difference between var, let, and const?",
+        "answer": "var is function scoped, let and const are block scoped. const cannot be reassigned."
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "dateCreated": "2025-09-17",
+    "topicTitle": "Node.js Concepts",
+    "authorName": "Yusuf",
+    "flashcards": [
+      {
+        "question": "What is Express.js?",
+        "answer": "A minimal and flexible Node.js web application framework that provides a robust set of features."
+      },
+      {
+        "question": "What is middleware in Express?",
+        "answer": "Functions that execute during the lifecycle of a request to the server, used for logging, auth, parsing, etc."
+      }
+    ]
+  }
+]
