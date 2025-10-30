@@ -6,14 +6,26 @@ export default function ChatWindow({ messages }) {
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const [selectedMessages, setSelectedMessages] = useState({});
+  const [selectedMessages, setSelectedMessages] = useState([]);
 
   const handleSelectedMessages = (uniqueMessageId) => {
-    console.log(
-      "The checkbox button has been selected for the id:",
-      uniqueMessageId
-    );
+    // console.log(
+    //   "The checkbox button has been selected for the id:",
+    //   uniqueMessageId
+    // );
+    setSelectedMessages((previouslySelectedMessages) => {
+      if (previouslySelectedMessages.includes(uniqueMessageId)) {
+        return previouslySelectedMessages.filter(
+          (id) => id !== uniqueMessageId
+        );
+      } else {
+        return [...previouslySelectedMessages, uniqueMessageId];
+      }
+    });
   };
+  useEffect(() => {
+    console.log("Selected messages:", selectedMessages);
+  }, [selectedMessages]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -168,10 +180,10 @@ export default function ChatWindow({ messages }) {
                 <div>
                   <input
                     type="checkbox"
-                    onClick={() =>
+                    onChange={() =>
                       handleSelectedMessages(message.uniqueMessageId)
                     }
-                    // onClick={()=>{console.log(message)}}
+                    checked={selectedMessages.includes(message.uniqueMessageId)}
                   />
                 </div>
               </div>
