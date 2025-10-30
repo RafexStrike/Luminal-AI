@@ -1,12 +1,13 @@
+// src/components/ChatWidow.jsx
+
 "use client";
 import { User, Bot, Copy, CheckCheck } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-export default function ChatWindow({ messages }) {
+export default function ChatWindow({ messages, selectedMessages, setSelectedMessages }) {
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const [selectedMessages, setSelectedMessages] = useState([]);
 
   const handleSelectedMessages = (uniqueMessageId) => {
     // console.log(

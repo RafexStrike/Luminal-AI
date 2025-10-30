@@ -1,3 +1,4 @@
+// src/appchatWithSummarization/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -11,9 +12,12 @@ import {
   Sidebar,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import IncrementalSummarization from "@/components/IncrementalSummarization/IncrementalSummarization";
+import NormalSummarization from "@/components/NormalSummarization/NormalSummarization";
 
 export default function ChatPage() {
   const [chatUniqueID, setChatUniqueID] = useState(Date.now());
+  const [selectedMessages, setSelectedMessages] = useState([]);
 
   const [messages, setMessages] = useState([
     {
@@ -104,7 +108,11 @@ export default function ChatPage() {
         <SidebarTrigger />
         <div className="flex flex-1">
           <div className="w-1/2 flex flex-col m-2 border-r  border-purple-400">
-            <ChatWindow messages={messages} />
+            <ChatWindow
+              messages={messages}
+              selectedMessages={selectedMessages}
+              setSelectedMessages={setSelectedMessages}
+            />
 
             <ChatComposer
               inputValue={inputValue}
@@ -116,12 +124,14 @@ export default function ChatPage() {
           <div className="w-1/2 border-r flex">
             <div className="w-1/2 border-r border-purple-300 p-4">
               <h2 className="font-bold text-lg mb-2">Normal Summarization</h2>
+              <NormalSummarization selectedMessages={selectedMessages}/>
             </div>
 
             <div className="w-1/2 p-4">
               <h2 className="font-bold text-lg mb-2">
                 Increamental Summarization
               </h2>
+              <IncrementalSummarization />
             </div>
           </div>
         </div>
