@@ -9,18 +9,18 @@ export default function ChatWindow({ messages, selectedMessages, setSelectedMess
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
-  const handleSelectedMessages = (uniqueMessageId) => {
+  const handleSelectedMessages = (messageContent) => {
     // console.log(
     //   "The checkbox button has been selected for the id:",
-    //   uniqueMessageId
+    //   messageContent
     // );
     setSelectedMessages((previouslySelectedMessages) => {
-      if (previouslySelectedMessages.includes(uniqueMessageId)) {
+      if (previouslySelectedMessages.includes(messageContent)) {
         return previouslySelectedMessages.filter(
-          (id) => id !== uniqueMessageId
+          (id) => id !== messageContent
         );
       } else {
-        return [...previouslySelectedMessages, uniqueMessageId];
+        return [...previouslySelectedMessages, messageContent];
       }
     });
   };
@@ -182,9 +182,10 @@ export default function ChatWindow({ messages, selectedMessages, setSelectedMess
                   <input
                     type="checkbox"
                     onChange={() =>
-                      handleSelectedMessages(message.uniqueMessageId)
+                      // handleSelectedMessages(message.uniqueMessageId)
+                      handleSelectedMessages(message.content)
                     }
-                    checked={selectedMessages.includes(message.uniqueMessageId)}
+                    checked={selectedMessages.includes(message.messageContent)}
                   />
                 </div>
               </div>

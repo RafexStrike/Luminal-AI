@@ -131,7 +131,7 @@ export default function ChatPage() {
               <h2 className="font-bold text-lg mb-2">
                 Increamental Summarization
               </h2>
-              <IncrementalSummarization />
+              <IncrementalSummarization selectedMessages={selectedMessages}/>
             </div>
           </div>
         </div>
