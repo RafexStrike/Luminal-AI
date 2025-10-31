@@ -1,6 +1,16 @@
 // src/app/api/getRevisionItems/route.js
+//                                                                                                                                                                    
+//     mm    mm                                                mm               mmmm                                                                                  
+//     ##    ##                                                ##             ##""""#                                                                          ##     
+//     ##    ##  ##m####m  ##    ##  mm#####m   m####m    m###m##            ##"        m####m   ####m##m  ##m###m    m####m   ##m####m   m####m   ##m####m  #######  
+//     ##    ##  ##"   ##  ##    ##  ##mmmm "  ##mmmm##  ##"  "##            ##        ##"  "##  ## ## ##  ##"  "##  ##"  "##  ##"   ##  ##mmmm##  ##"   ##    ##     
+//     ##    ##  ##    ##  ##    ##   """"##m  ##""""""  ##    ##            ##m       ##    ##  ## ## ##  ##    ##  ##    ##  ##    ##  ##""""""  ##    ##    ##     
+//     "##mm##"  ##    ##  ##mmm###  #mmmmm##  "##mmmm#  "##mm###             ##mmmm#  "##mm##"  ## ## ##  ###mm##"  "##mm##"  ##    ##  "##mmmm#  ##    ##    ##mmm  
+//       """"    ""    ""   """" ""   """"""     """""     """ ""               """"     """"    "" "" ""  ## """      """"    ""    ""    """""   ""    ""     """"  
+//                                                                                                         ##                                                         
+//                                                                                                                                                                    
 import { generateResourcesForRevision } from "@/lib/generateResourcesForRevision";
-import { connectDB } from "@/lib/mongodb";
+// import { connectDB } from "@/lib/mongodb";
 // import Chat from "@/models/Chat"; 
 
 export async function POST(req) {
