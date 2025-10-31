@@ -1,7 +1,7 @@
 // src/app/api/getRevisionItems/route.js
 import { generateResourcesForRevision } from "@/lib/generateResourcesForRevision";
 import { connectDB } from "@/lib/mongodb";
-import Chat from "@/models/Chat"; // your Mongoose model
+// import Chat from "@/models/Chat"; 
 
 export async function POST(req) {
   try {
