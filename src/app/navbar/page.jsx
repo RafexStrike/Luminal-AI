@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const routes = [
   { href: "/", label: "Home" },
@@ -27,7 +28,8 @@ const routes = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { data: session } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -82,7 +84,7 @@ export default function Navbar() {
           {/* Auth Section */}
           {mounted && (
             <>
-              {status === "authenticated" ? (
+              {session?.user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -102,21 +104,25 @@ export default function Navbar() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem>{session.user.name || session.user.email}</DropdownMenuItem>
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => signOut()}>
+                    <DropdownMenuItem onClick={async () => {
+                      const { signOut } = await import("@/lib/auth-client");
+                      await signOut();
+                    }}>
                       Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
                 <div className="flex gap-2">
-                  <Link href="/login">
+                  <Link href="/auth/login">
                     <Button variant="outline" size="sm">
                       Sign In
                     </Button>
                   </Link>
-                  <Link href="/register">
+                  <Link href="/auth/signup">
                     <Button size="sm">Sign Up</Button>
                   </Link>
                 </div>

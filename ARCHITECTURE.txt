@@ -1,0 +1,333 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         ARCHITECTURE DIAGRAM                              ║
+║                  Better Auth + SecondStage Route Protection                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  CLIENT LAYER (React Components)                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │     Home     │  │    Login     │  │   Signup     │  │   Profile    │   │
+│  │   /          │  │  /auth/login │  │/auth/signup  │  │/auth/profile │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘   │
+│         │                │                │                │               │
+│         └────────────────┴────────────────┴────────────────┘               │
+│                          │                                                 │
+│                  All use authClient from                                   │
+│              src/lib/auth-client.js (React)                                │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────────┐          │
+│  │      SecondStage Page (/secondStage) - PROTECTED            │          │
+│  │  ┌─────────────────────────────────────────────────────┐    │          │
+│  │  │  Top Bar: User Info (name, email)                  │    │          │
+│  │  │           Profile Button (👤)                      │    │          │
+│  │  │           Sign Out Button                          │    │          │
+│  │  ├─────────────────────────────────────────────────────┤    │          │
+│  │  │  Full AI Learning UI:                              │    │          │
+│  │  │  - Chat Window                                    │    │          │
+│  │  │  - Flashcards Panel                               │    │          │
+│  │  │  - Quizzes Panel                                  │    │          │
+│  │  │  - Notes Panel                                    │    │          │
+│  │  └─────────────────────────────────────────────────────┘    │          │
+│  │  Uses: useAuth() hook to get user info                     │          │
+│  └──────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              │
+                              │ useAuth() returns session
+                              │ authClient.signIn/signUp/signOut
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  MIDDLEWARE LAYER                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  src/middleware.js (Next.js Middleware)                                    │
+│  ┌──────────────────────────────────────────────────────────────┐          │
+│  │  Request to /secondStage                                     │          │
+│  │         │                                                    │          │
+│  │         ├─→ Check for better-auth.session_token cookie     │          │
+│  │         │                                                    │          │
+│  │         ├─→ Token found? YES → Allow request ✓              │          │
+│  │         │                                                    │          │
+│  │         ├─→ Token found? NO → Redirect to               │          │
+│  │         │   /auth/login?redirectTo=/secondStage            │          │
+│  │         │                                                    │          │
+│  │         └─→ Pass request to page                            │          │
+│  └──────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              │
+                              │ POST /api/auth/*
+                              │ GET /api/auth/session
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  API LAYER (Next.js Route Handlers)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  src/app/api/auth/[...all]/route.js                                        │
+│  ┌──────────────────────────────────────────────────────────────┐          │
+│  │  Better Auth Handler (POST/GET for all auth routes)         │          │
+│  │                                                              │          │
+│  │  /api/auth/sign-in/email        Email/password login       │          │
+│  │  /api/auth/sign-up/email        Email/password signup      │          │
+│  │  /api/auth/sign-in/google       Google OAuth               │          │
+│  │  /api/auth/sign-out             Logout                     │          │
+│  │  /api/auth/session              Get session                │          │
+│  │                                                              │          │
+│  │  Uses: auth.toNextJsHandler() from src/lib/auth.js        │          │
+│  └──────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Database operations
+                              │ Session token creation
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  AUTH SYSTEM (Better Auth Core)                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  src/lib/auth.js (Better Auth Configuration)                              │
+│  ┌──────────────────────────────────────────────────────────────┐          │
+│  │                                                              │          │
+│  │  ┌─ Email/Password Handler                                 │          │
+│  │  │  ├─ Hash password with bcrypt                           │          │
+│  │  │  ├─ Validate credentials                                │          │
+│  │  │  ├─ Auto-signup on first login                          │          │
+│  │  │  └─ Create session token                                │          │
+│  │  │                                                         │          │
+│  │  ┌─ Google OAuth Handler                                   │          │
+│  │  │  ├─ Validate OAuth code                                │          │
+│  │  │  ├─ Fetch user from Google                             │          │
+│  │  │  ├─ Create/link user account                           │          │
+│  │  │  └─ Create session token                                │          │
+│  │  │                                                         │          │
+│  │  └─ Session Management                                     │          │
+│  │     ├─ Create HTTP-only cookie                            │          │
+│  │     ├─ Set 7-day expiration                               │          │
+│  │     └─ Handle token refresh                               │          │
+│  │                                                              │          │
+│  │  MongoDB Adapter: mongodbAdapter(MONGODB_URI)             │          │
+│  │                                                              │          │
+│  └──────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Read/Write operations
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  DATABASE LAYER (MongoDB)                                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  luminalDB (MongoDB Database)                                              │
+│  ┌──────────────────────────────────────────────────────────────┐          │
+│  │                                                              │          │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │          │
+│  │  │ users        │  │ sessions     │  │ accounts     │      │          │
+│  │  │ collection   │  │ collection   │  │ collection   │      │          │
+│  │  ├──────────────┤  ├──────────────┤  ├──────────────┤      │          │
+│  │  │ _id          │  │ _id          │  │ _id          │      │          │
+│  │  │ id           │  │ sessionToken │  │ userId       │      │          │
+│  │  │ name         │  │ userId       │  │ provider     │      │          │
+│  │  │ email        │  │ expires      │  │ providerAccID│      │          │
+│  │  │ hashedPass   │  │ createdAt    │  │ accessToken  │      │          │
+│  │  │ createdAt    │  │ updatedAt    │  │ refreshToken │      │          │
+│  │  │ updatedAt    │  │              │  │ createdAt    │      │          │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘      │          │
+│  │                                                              │          │
+│  └──────────────────────────────────────────────────────────────┘          │
+│  Connection: MONGODB_URI (from .env)                                       │
+│  https://mongodb+srv://rafi_db_user:pass@luminalcluster0.../             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                          AUTH FLOW SEQUENCE                                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+SIGNUP FLOW:
+──────────────────────────────────────────────────────────────────────────────
+
+  1. User visits /auth/signup
+  2. User fills form (name, email, password, confirm)
+  3. User clicks "Sign Up"
+  4. React: authClient.signUp.email({ email, password, name })
+  5. Browser: POST /api/auth/sign-up/email
+  6. Next.js: Route handler → auth.toNextJsHandler()
+  7. Better Auth:
+     ├─ Hash password
+     ├─ Create user in MongoDB (users collection)
+     ├─ Auto-signup = auto account creation
+     └─ Create session token
+  8. Response: { user, session, token }
+  9. Browser: Set HTTP-only cookie (better-auth.session_token)
+  10. React: Redirect to /secondStage
+  11. Browser: GET /secondStage
+  12. Middleware: Check cookie → Found → Allow
+  13. Page: Load with user info
+
+
+LOGIN FLOW:
+──────────────────────────────────────────────────────────────────────────────
+
+  1. User visits /auth/login
+  2. User fills form (email, password)
+  3. User clicks "Log In"
+  4. React: authClient.signIn.email({ email, password })
+  5. Browser: POST /api/auth/sign-in/email
+  6. Next.js: Route handler → auth.toNextJsHandler()
+  7. Better Auth:
+     ├─ Find user in MongoDB (users collection)
+     ├─ Compare password hash
+     ├─ Validate credentials
+     └─ Create session token
+  8. Response: { user, session, token }
+  9. Browser: Set HTTP-only cookie (better-auth.session_token)
+  10. React: Redirect to /secondStage
+  11. Browser: GET /secondStage
+  12. Middleware: Check cookie → Found → Allow
+  13. Page: Load with user info
+
+
+GOOGLE OAUTH FLOW:
+──────────────────────────────────────────────────────────────────────────────
+
+  1. User visits /auth/login or /auth/signup
+  2. User clicks "Log in with Google" / "Sign up with Google"
+  3. React: authClient.signIn.social({ provider: 'google', callbackURL: '...' })
+  4. Browser: Redirect to Google OAuth screen
+  5. Google: User logs in / authorizes app
+  6. Google: Redirect to /api/auth/callback/google?code=...
+  7. Next.js: Route handler receives auth code
+  8. Better Auth:
+     ├─ Exchange code for access token (Google API)
+     ├─ Fetch user data from Google
+     ├─ Find or create user in MongoDB (users collection)
+     ├─ Create account link (accounts collection)
+     └─ Create session token
+  9. Response: { user, session, token }
+  10. Browser: Set HTTP-only cookie (better-auth.session_token)
+  11. Browser: Redirect to /secondStage (callbackURL)
+  12. Middleware: Check cookie → Found → Allow
+  13. Page: Load with user info
+
+
+PROTECTED ROUTE ACCESS:
+──────────────────────────────────────────────────────────────────────────────
+
+  Not Logged In:
+  1. User visits /secondStage
+  2. Browser: GET /secondStage
+  3. Middleware: Check for better-auth.session_token cookie
+  4. Middleware: Cookie NOT found
+  5. Middleware: Redirect to /auth/login?redirectTo=/secondStage
+  6. Browser: Navigates to /auth/login with redirect param
+  7. Page: Shows login form
+
+  After Login:
+  8. User logs in (see LOGIN FLOW above)
+  9. Session token set in cookie
+  10. Redirect to /secondStage
+  11. Browser: GET /secondStage
+  12. Middleware: Check for better-auth.session_token cookie
+  13. Middleware: Cookie FOUND
+  14. Middleware: Allow request
+  15. Page: Loads AI learning UI
+
+
+LOGOUT FLOW:
+──────────────────────────────────────────────────────────────────────────────
+
+  1. User clicks "Sign Out" button (in top-right of /secondStage)
+  2. React: signOut() or authClient.signOut()
+  3. Browser: POST /api/auth/sign-out
+  4. Next.js: Route handler
+  5. Better Auth:
+     ├─ Invalidate session token
+     ├─ Remove from sessions collection (MongoDB)
+     └─ Clear cookie
+  6. Response: Success
+  7. Browser: Clear HTTP-only cookie
+  8. React: Redirect to /auth/login
+  9. Next request to /secondStage gets redirected (no cookie)
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                           FILE DEPENDENCIES                                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+src/app/page.jsx (Home)
+  ├─ imports: useRouter, useAuth
+  └─ uses: /auth/login, /auth/signup
+
+src/app/auth/login/page.jsx
+  ├─ imports: authClient, useRouter
+  └─ calls: authClient.signIn.email(), authClient.signIn.social()
+
+src/app/auth/signup/page.jsx
+  ├─ imports: authClient, useRouter
+  └─ calls: authClient.signUp.email(), authClient.signIn.social()
+
+src/app/auth/profile/page.jsx
+  ├─ imports: useAuth, signOut, useRouter
+  └─ displays: User info, logout button
+
+src/app/secondStage/page.jsx (PROTECTED)
+  ├─ imports: useAuth, signOut, useRouter
+  ├─ displays: User info, logout button, SecondStageLayout
+  └─ behavior: Redirects if not authenticated
+
+src/middleware.js
+  ├─ protects: /secondStage paths
+  └─ checks: better-auth.session_token cookie
+
+src/lib/auth-client.js
+  ├─ exports: authClient (for React components)
+  └─ exports: useAuth, signOut (helper hooks)
+
+src/lib/auth.js
+  ├─ exports: auth (Better Auth instance)
+  ├─ config: MongoDB adapter
+  ├─ config: Email/password + Google OAuth
+  └─ config: Session management
+
+src/app/api/auth/[...all]/route.js
+  ├─ imports: auth from src/lib/auth.js
+  ├─ exports: POST, GET handlers
+  └─ delegates to: Better Auth
+
+.env
+  ├─ BETTER_AUTH_SECRET (for token signing)
+  ├─ NEXT_PUBLIC_APP_URL (for callbacks)
+  ├─ MONGODB_URI (database connection)
+  ├─ Google_Client_ID (OAuth)
+  └─ Google_Client_Secret (OAuth)
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                            DEPLOYMENT NOTES                                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Production Changes:
+1. NEXT_PUBLIC_APP_URL = your domain
+2. BETTER_AUTH_SECRET = generate new unique secret
+3. MONGODB_URI = production MongoDB instance
+4. Google OAuth = update redirect URIs in Google Console
+5. Enable HTTPS (cookies need Secure flag)
+6. Set secure: true in session config
+7. Increase session expiration if needed
+
+
+Security Checklist:
+✅ Passwords hashed (bcrypt)
+✅ Sessions HTTP-only cookies
+✅ CSRF protection (Better Auth built-in)
+✅ Rate limiting (implement if needed)
+✅ Input validation (implement if needed)
+✅ SQL injection (MongoDB prevents)
+✅ XSS protection (React escapes content)
+
+
+═══════════════════════════════════════════════════════════════════════════════

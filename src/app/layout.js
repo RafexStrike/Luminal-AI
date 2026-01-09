@@ -3,7 +3,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import Navbar from "./navbar/page"
 import { Toaster } from "@/components/ui/sonner"
-import NextAuthProvider from "@/Providers/NextAuthProvider"
 import Footer from "./footer/page"
 
 
@@ -18,8 +17,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata = {
-  title: "AI Video Summarizer",
-  description: "Summarize videos with AI",
+  title: "YouLearn - AI Learning Platform",
+  description: "Chat with AI, generate flashcards, take quizzes, and learn smarter",
 }
 
 export default function RootLayout({ children }) {
@@ -32,12 +31,9 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <NextAuthProvider>
-     <Navbar/>
+          <Navbar/>
           <Toaster />
           {children}
-          </NextAuthProvider>
-     
         </ThemeProvider>
 
         {/* <Footer></Footer> */}
