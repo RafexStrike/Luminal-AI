@@ -72,7 +72,6 @@ export default function SECONDARY_FlashcardsPanel({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
           <p className="text-gray-600">Loading flashcards...</p>
         </div>
       </div>
@@ -83,7 +82,6 @@ export default function SECONDARY_FlashcardsPanel({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <div className="text-4xl mb-4">🎴</div>
           <p className="text-gray-600 mb-4">No flashcards yet</p>
           <p className="text-sm text-gray-500 max-w-sm">
             Select messages in the chat and click "Generate Flashcards" to create flashcard sets
@@ -110,7 +108,9 @@ export default function SECONDARY_FlashcardsPanel({
               className="px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2"
               title="Export as JSON"
             >
-              <span>📥</span>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12M8 11l4 4 4-4" />
+              </svg>
               Export
             </button>
           </div>
@@ -142,8 +142,8 @@ export default function SECONDARY_FlashcardsPanel({
                   <div className="text-gray-900 font-medium line-clamp-3">{card.q}</div>
                   <div className="text-xs text-gray-500 mt-3">
                     {expandedCardId === `${setIndex}-${cardIndex}`
-                      ? '👇 Click to hide answer'
-                      : '👉 Click to reveal answer'}
+                      ? 'Click to hide answer'
+                      : 'Click to reveal answer'}
                   </div>
                 </button>
 
@@ -184,7 +184,7 @@ export default function SECONDARY_FlashcardsPanel({
                       onClick={() => handleCopyCard(card)}
                       className="w-full py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
                     >
-                      📋 Copy Card
+                      Copy Card
                     </button>
                   </div>
                 )}

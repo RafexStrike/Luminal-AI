@@ -12,10 +12,10 @@ import SECONDARY_NotesPanel from './SECONDARY_NotesPanel';
 import SECONDARY_TopHero from './SECONDARY_TopHero';
 
 const TABS = [
-  { id: 'chat', label: 'Chat', icon: '💬' },
-  { id: 'flashcards', label: 'Flashcards', icon: '🎴' },
-  { id: 'quizzes', label: 'Quizzes', icon: '📝' },
-  { id: 'notes', label: 'Notes', icon: '📓' },
+  { id: 'chat', label: 'Chat' },
+  { id: 'flashcards', label: 'Flashcards' },
+  { id: 'quizzes', label: 'Quizzes' },
+  { id: 'notes', label: 'Notes' },
 ];
 
 /**
@@ -39,6 +39,8 @@ const TABS = [
  *   - User selects messages and generates summaries/flashcards/quizzes
  *   - Results displayed in respective tabs
  */
+import theme from '../design/theme.config';
+
 export default function SECONDARY_ChatLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('chat');
@@ -105,7 +107,7 @@ export default function SECONDARY_ChatLayout() {
   };
 
   return (
-    <div className="flex h-full bg-gray-50">
+    <div className={`flex h-full ${theme.colors.background}`}>
       {/* Sidebar */}
       <SECONDARY_ChatSidebar
         collapsed={sidebarCollapsed}
@@ -119,19 +121,14 @@ export default function SECONDARY_ChatLayout() {
         <SECONDARY_TopHero onChatCreated={setCurrentChatId} />
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 bg-white px-6 py-3 flex gap-4">
+        <div className={`border-b ${theme.colors.border} ${theme.colors.panel} px-6 py-3 flex gap-4`}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 font-medium text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
+              className={`px-4 py-2 font-medium text-sm rounded-lg transition-colors ${activeTab === tab.id ? ` ${theme.colors.accentBg} ${theme.colors.accent}` : `text-gray-700 hover:bg-gray-100`}`}
               aria-pressed={activeTab === tab.id}
             >
-              <span>{tab.icon}</span>
               {tab.label}
             </button>
           ))}

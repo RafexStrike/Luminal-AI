@@ -430,12 +430,28 @@ export async function getChatList({ userId }) {
   const db = client.db();
   const collection = db.collection('stage2_chats');
 
-  const chats = await collection
-    .find({ userId })
-    .sort({ updatedAt: -1 })
-    .projection({ title: 1, createdAt: 1, updatedAt: 1, messageCount: 1 })
-    .toArray();
+  // const chats = await collection
+  //   .find({ userId })
+  //   .sort({ updatedAt: -1 })
+  //   .projection({ title: 1, createdAt: 1, updatedAt: 1, messageCount: 1 })
+  //   .toArray();
 
+  const chats = await collection
+  .find(
+    { userId },
+    {
+      projection: {
+        title: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        messageCount: 1,
+      },
+    }
+  )
+  .sort({ updatedAt: -1 })
+  .toArray();
+
+  
   return chats;
 }
 

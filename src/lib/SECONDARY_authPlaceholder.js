@@ -19,6 +19,7 @@ export async function getUserIfAuthenticated(req) {
         name: user.name,
       };
     }
+    console.log(user)
     return null;
   } catch (error) {
     console.error("Error getting authenticated user:", error);

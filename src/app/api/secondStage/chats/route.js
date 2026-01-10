@@ -36,6 +36,8 @@ export async function GET(req) {
   try {
     // Get authenticated user
     const user = await getUserIfAuthenticated(req);
+    console.log("user.id:", user.id, typeof user.id);
+
     if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
