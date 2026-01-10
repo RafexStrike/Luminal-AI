@@ -97,6 +97,7 @@ export default function SECONDARY_ChatLayout() {
       case 'notes':
         return (
           <SECONDARY_NotesPanel
+            chatId={currentChatId}
             onDataSaved={handleDataSaved}
             refreshTrigger={refreshTrigger}
           />

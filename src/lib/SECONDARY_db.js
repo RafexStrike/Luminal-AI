@@ -240,18 +240,23 @@ export async function getQuizzes({ userId, chatId }) {
 }
 
 /**
- * saveNotes({ userId, content })
- * Saves or updates user notes
+ * saveNotes({ userId, content, chatId })
+ * Saves or updates user notes (global or per-chat if chatId provided)
  */
-export async function saveNotes({ userId, content }) {
+export async function saveNotes({ userId, content, chatId = null }) {
   if (!userId || !content) throw new Error('userId and content required');
 
   const client = await getMongoClient();
   const db = client.db();
   const collection = db.collection('stage2_notes');
 
+  // Build query filter - use chatId if provided, otherwise update global notes
+  const filter = chatId 
+    ? { userId, chatId }
+    : { userId, chatId: null };
+
   const result = await collection.updateOne(
-    { userId },
+    filter,
     {
       $set: {
         content,
@@ -259,6 +264,8 @@ export async function saveNotes({ userId, content }) {
       },
       $setOnInsert: {
         createdAt: new Date(),
+        userId,
+        chatId: chatId || null,
       },
     },
     { upsert: true }
@@ -268,17 +275,22 @@ export async function saveNotes({ userId, content }) {
 }
 
 /**
- * getNotes({ userId })
- * Retrieves user notes
+ * getNotes({ userId, chatId })
+ * Retrieves user notes (global if no chatId, or per-chat if chatId provided)
  */
-export async function getNotes({ userId }) {
+export async function getNotes({ userId, chatId = null }) {
   if (!userId) throw new Error('userId required');
 
   const client = await getMongoClient();
   const db = client.db();
   const collection = db.collection('stage2_notes');
 
-  const result = await collection.findOne({ userId });
+  // Build query filter - use chatId if provided, otherwise get global notes
+  const filter = chatId 
+    ? { userId, chatId }
+    : { userId, chatId: null };
+
+  const result = await collection.findOne(filter);
   return result || { userId, content: '', createdAt: new Date(), updatedAt: new Date() };
 }
 

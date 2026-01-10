@@ -1,27 +1,38 @@
 // FILE: src/components/SECONDARY_NotesPanel.jsx
-// DESCRIPTION: Simple floating notes editor with local storage and server sync
+// DESCRIPTION: Notion-like notes editor with Tiptap, slash commands, and server sync
 
 'use client';
 
 import { useState, useEffect } from 'react';
+import SECONDARY_TiptapEditor from './SECONDARY_TiptapEditor';
 
 /**
  * SECONDARY_NotesPanel
  * 
  * Features:
- *   - Simple text area for note-taking
+ *   - Notion-like rich text editor with Tiptap
+ *   - Slash commands (/) for inserting blocks (headings, lists, quotes, code, etc.)
+ *   - Formatting toolbar (bold, italic, headings, etc.)
  *   - Local storage sync (auto-save)
  *   - "Save to Server" button for persistent storage
  *   - Load notes from server when component mounts
+ *   - Support for HTML-formatted content
  * 
  * Data flow:
  *   - Component loads, fetches notes from /api/secondStage/notes
- *   - User types in textarea -> updates local state
- *   - Auto-save to localStorage every 1 second
+ *   - User edits in Tiptap editor -> updates local state with HTML
+ *   - Auto-save to localStorage every 2 seconds
  *   - User clicks "Save to Server" -> POST to /api/secondStage/notes
- *   - Server saves to MongoDB (requires auth)
+ *   - Server saves HTML content to MongoDB (requires auth)
+ * 
+ * UI Structure:
+ *   - Header: Last saved time, Export, Save button
+ *   - Toolbar: Formatting buttons (bold, italic, headings, lists, etc.)
+ *   - Editor: Tiptap editor with placeholder and slash commands
+ *   - Footer: Character count and auto-save indicator
  */
 export default function SECONDARY_NotesPanel({
+  chatId = null,
   onDataSaved = () => {},
   refreshTrigger = 0,
 }) {
@@ -30,32 +41,65 @@ export default function SECONDARY_NotesPanel({
   const [lastSaved, setLastSaved] = useState(null);
   const [saveStatus, setSaveStatus] = useState('');
 
-  // Load notes from server on mount
+  // Load notes from server on mount and when chat changes
   useEffect(() => {
     const loadNotes = async () => {
+      console.log('NotesPanel loadNotes triggered, chatId:', chatId);
       try {
-        const response = await fetch('/api/secondStage/notes');
+        // Fetch notes for current chat from server
+        const url = chatId 
+          ? `/api/secondStage/notes?chatId=${chatId}`
+          : '/api/secondStage/notes';
+        console.log('Fetching from:', url);
+        const response = await fetch(url);
+        console.log('Fetch response status:', response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched data:', data);
+          // Set content from server, which will be synced to editor via Tiptap's useEffect
           setContent(data.content || '');
+          console.log('Content set to state:', data.content);
+        } else {
+          console.log('Response not ok, trying localStorage fallback');
+          // If fetch fails, try localStorage fallback
+          try {
+            const savedNotes = localStorage.getItem('youlearn_stage2_notes');
+            if (savedNotes) {
+              const parsed = JSON.parse(savedNotes);
+              // Support both old format (plain text) and new format (JSON with content)
+              setContent(parsed.content || savedNotes);
+              console.log('Loaded from localStorage');
+            }
+          } catch (e) {
+            console.warn('Could not parse localStorage notes:', e);
+          }
         }
       } catch (error) {
         console.error('Error loading notes:', error);
-        // Try to load from localStorage fallback
-        const savedNotes = localStorage.getItem('youlearn_stage2_notes');
-        if (savedNotes) {
-          setContent(savedNotes);
+        // Try localStorage fallback
+        try {
+          const savedNotes = localStorage.getItem('youlearn_stage2_notes');
+          if (savedNotes) {
+            const parsed = JSON.parse(savedNotes);
+            setContent(parsed.content || savedNotes);
+          }
+        } catch (e) {
+          console.warn('Could not parse localStorage notes:', e);
         }
       }
     };
-    loadNotes();
-  }, [refreshTrigger]);
+    
+    // Only load if we have a chatId (don't load for anonymous users)
+    if (chatId) {
+      loadNotes();
+    }
+  }, [chatId, refreshTrigger]);
 
-  // Auto-save to localStorage every 1 second
+  // Auto-save to localStorage every 2 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
-      localStorage.setItem('youlearn_stage2_notes', content);
-    }, 1000);
+      localStorage.setItem('youlearn_stage2_notes', JSON.stringify({ content, updatedAt: new Date().toISOString() }));
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [content]);
@@ -68,7 +112,10 @@ export default function SECONDARY_NotesPanel({
       const response = await fetch('/api/secondStage/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ 
+          content,
+          chatId,
+        }),
       });
 
       if (!response.ok) {
@@ -138,18 +185,22 @@ export default function SECONDARY_NotesPanel({
         </div>
       </div>
 
-      {/* Notes Editor */}
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Start taking notes here... (auto-saved to browser)"
-        className="flex-1 p-4 outline-none resize-none text-gray-900 placeholder-gray-400"
-      />
+      {/* Notes Editor with Tiptap */}
+      <div className="flex-1 overflow-auto bg-white">
+        <SECONDARY_TiptapEditor
+          key={`editor-${chatId || 'default'}`}
+          value={content}
+          onChange={(html) => {
+            console.log('Editor onChange called with:', html.substring(0, 50));
+            setContent(html);
+          }}
+        />
+      </div>
 
       {/* Footer Info */}
       <div className="border-t border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500 flex justify-between">
-        <div>{content.length} characters</div>
-        <div>Auto-saved to browser locally</div>
+        <div>Press "/" for slash commands</div>
+        <div>Auto-saved to browser</div>
       </div>
     </div>
   );

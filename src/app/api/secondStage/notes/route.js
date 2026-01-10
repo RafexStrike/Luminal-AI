@@ -7,19 +7,25 @@ import { saveNotes, getNotes } from '@/lib/SECONDARY_db';
 /**
  * GET /api/secondStage/notes
  * 
+ * Query params: chatId (optional) - if provided, returns notes associated with that chat
+ * 
  * Response:
  *   {
- *     content: string (markdown or plain text),
+ *     content: string (HTML formatted by Tiptap),
  *     createdAt: string (ISO),
  *     updatedAt: string (ISO)
  *   }
  * 
  * Data flow:
- *   - Authenticated user: fetch from DB
+ *   - Authenticated user: fetch from DB (filtered by chatId if provided)
  *   - Anonymous: return empty notes object
+ *   - Content is stored as HTML (Tiptap format)
  */
 export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const chatId = searchParams.get('chatId');
+    
     const user = await getUserIfAuthenticated(req);
 
     if (!user) {
@@ -31,7 +37,7 @@ export async function GET(req) {
       });
     }
 
-    const notes = await getNotes({ userId: user.id });
+    const notes = await getNotes({ userId: user.id, chatId });
     return Response.json({
       content: notes.content || '',
       createdAt: notes.createdAt?.toISOString(),
@@ -51,7 +57,8 @@ export async function GET(req) {
  * 
  * Request body:
  *   {
- *     content: string
+ *     content: string (HTML formatted by Tiptap),
+ *     chatId: string (optional - associates note with specific chat)
  *   }
  * 
  * Response:
@@ -62,12 +69,14 @@ export async function GET(req) {
  * 
  * Behavior:
  *   - Requires authentication (returns 401 if not authenticated)
- *   - Saves/updates notes in MongoDB
+ *   - Saves/updates notes in MongoDB with HTML format
+ *   - Associates with chatId if provided
  *   - Updates updatedAt timestamp
+ *   - Content is HTML from Tiptap editor, supports rich formatting
  */
 export async function POST(req) {
   try {
-    const { content } = await req.json();
+    const { content, chatId } = await req.json();
 
     if (typeof content !== 'string') {
       return Response.json(
@@ -89,6 +98,7 @@ export async function POST(req) {
     await saveNotes({
       userId: user.id,
       content,
+      chatId,
     });
 
     return Response.json({
