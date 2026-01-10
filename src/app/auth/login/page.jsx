@@ -3,12 +3,12 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/secondStage";
@@ -157,7 +157,6 @@ export default function LoginPage() {
             </svg>
             {googleLoading ? "Logging in..." : "Log in with Google"}
           </button>
-
           {/* Signup Link */}
           <div className="text-center mt-6">
             <p className="text-gray-600">
@@ -170,5 +169,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

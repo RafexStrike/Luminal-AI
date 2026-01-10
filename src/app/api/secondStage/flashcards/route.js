@@ -3,7 +3,7 @@
 
 import { callProvider } from '@/lib/SECONDARY_providers';
 import { getUserIfAuthenticated } from '@/lib/SECONDARY_authPlaceholder';
-import { saveFlashcards, getFlashcards } from '@/lib/SECONDARY_db';
+import { saveFlashcards, getFlashcards, getMessageHistory } from '@/lib/SECONDARY_db';
 
 /**
  * POST /api/secondStage/flashcards
@@ -37,12 +37,24 @@ import { saveFlashcards, getFlashcards } from '@/lib/SECONDARY_db';
  */
 export async function POST(req) {
   try {
+    // Parse the request body
+    let body = {};
+    try {
+      body = await req.json();
+    } catch (parseErr) {
+      console.error('JSON parse error:', parseErr);
+      return Response.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
     const {
       chatId,
       messageIds = [],
       provider = 'openai',
       apiKey,
-    } = await req.json();
+    } = body;
 
     // Validate input
     if (!chatId || !messageIds || messageIds.length === 0) {
@@ -55,22 +67,42 @@ export async function POST(req) {
     // Get authenticated user
     const user = await getUserIfAuthenticated(req);
 
-    // TODO: Fetch actual messages from DB using messageIds
-    const placeholderMessages = messageIds.map((id) => ({
-      role: 'assistant',
-      content: `[Message ${id} content placeholder]`,
-    }));
+    // Determine which provider to use - default to huggingface if no provider specified and no api key
+    let providerToUse = provider;
+    if (!apiKey && provider === 'openai' && !process.env.OPENAI_API_KEY) {
+      console.log('OpenAI API key not found, switching to HuggingFace');
+      providerToUse = 'huggingface';
+    }
+
+    // Fetch actual message content from database
+    let messageContent = '';
+    try {
+      if (user) {
+        const messages = await getMessageHistory({ userId: user.id, chatId });
+        // Filter to only selected messages and extract content
+        const selectedMessages = messages.filter((msg) =>
+          messageIds.includes(msg._id?.toString() || msg._id) || messageIds.includes(`msg_${msg.sequenceNumber}`)
+        );
+        messageContent = selectedMessages.map((msg) => msg.content).join('\n\n');
+      }
+      
+      // Fallback if no messages found
+      if (!messageContent) {
+        messageContent = 'No message content available';
+      }
+    } catch (err) {
+      console.error('Error fetching message history:', err);
+      messageContent = 'Unable to retrieve message content';
+    }
 
     const systemPrompt =
       'You are an expert tutor. Generate flashcards in JSON array format. Each card: {q: "question", a: "answer", difficulty: "easy|medium|hard", tags: ["tag1", "tag2"]}. Respond ONLY with JSON array, no markdown.';
 
-    const userPrompt = `Generate 10 flashcards from this content:\n\n${placeholderMessages
-      .map((msg) => msg.content)
-      .join('\n\n')}\n\nReturn ONLY a JSON array.`;
+    const userPrompt = `Generate 5 flashcards from this content:\n\n${messageContent}\n\nReturn ONLY a JSON array of flashcards. Example: [{"q": "What is X?", "a": "X is Y", "difficulty": "easy", "tags": ["topic"]}]`;
 
     // Call provider
     const flashcardsResponse = await callProvider({
-      provider,
+      provider: providerToUse,
       apiKey,
       messages: [
         {

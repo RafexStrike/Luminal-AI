@@ -116,7 +116,7 @@ export default function SECONDARY_ChatSidebar({
     >
       {/* Header */}
       <div className={`flex items-center justify-between ${layout.sidebar.padding} border-b ${theme.colors.border}`}>
-        {!collapsed && <h2 className={`${theme.typography.heading} ${theme.colors.text}`}>YouLearn</h2>}
+        {!collapsed && <h2 className={`${theme.typography.heading} ${theme.colors.text}`}>Luminal AI</h2>}
         <button
           onClick={onToggleCollapse}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
