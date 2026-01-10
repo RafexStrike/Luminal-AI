@@ -281,3 +281,170 @@ export async function getNotes({ userId }) {
   const result = await collection.findOne({ userId });
   return result || { userId, content: '', createdAt: new Date(), updatedAt: new Date() };
 }
+
+/**
+ * ============================================
+ * MESSAGE-LEVEL STORAGE FUNCTIONS
+ * ============================================
+ * 
+ * Store messages individually for flexibility and querying
+ * Collection: stage2_messages
+ * Schema: { _id, chatId, userId, role, content, createdAt, sequenceNumber }
+ */
+
+/**
+ * saveMessage({ userId, chatId, role, content })
+ * Saves a single message to the database
+ * Returns: { _id, ...document }
+ */
+export async function saveMessage({ userId, chatId, role, content }) {
+  if (!userId || !chatId || !role || !content) {
+    throw new Error('userId, chatId, role, and content are required');
+  }
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_messages');
+
+  // Get sequence number for this chat (for ordering)
+  const lastMessage = await collection
+    .findOne(
+      { chatId, userId },
+      { sort: { sequenceNumber: -1 }, projection: { sequenceNumber: 1 } }
+    );
+
+  const sequenceNumber = (lastMessage?.sequenceNumber || 0) + 1;
+
+  const doc = {
+    userId,
+    chatId,
+    role, // 'system' | 'user' | 'assistant'
+    content,
+    sequenceNumber,
+    createdAt: new Date(),
+  };
+
+  const result = await collection.insertOne(doc);
+  return { _id: result.insertedId, ...doc };
+}
+
+/**
+ * getMessageHistory({ userId, chatId })
+ * Retrieves all messages for a chat, ordered by sequence
+ * Used to build the full context for the LLM
+ * Returns: array of message documents
+ */
+export async function getMessageHistory({ userId, chatId }) {
+  if (!userId || !chatId) throw new Error('userId and chatId required');
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_messages');
+
+  const messages = await collection
+    .find({ userId, chatId })
+    .sort({ sequenceNumber: 1 })
+    .toArray();
+
+  return messages;
+}
+
+/**
+ * createNewChat({ userId, title })
+ * Creates a new chat session with a system message
+ * Returns: { chatId, title, createdAt }
+ */
+export async function createNewChat({ userId, title = null }) {
+  if (!userId) throw new Error('userId required');
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const chatsCollection = db.collection('stage2_chats');
+  const messagesCollection = db.collection('stage2_messages');
+
+  // Generate a unique chatId (using MongoDB ObjectId as string)
+  const { ObjectId } = await import('mongodb');
+  const chatId = new ObjectId().toString();
+
+  // Create chat document
+  const chatDoc = {
+    _id: chatId,
+    userId,
+    title: title || 'New Chat',
+    messageCount: 0, // Track message count for efficiency
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await chatsCollection.insertOne(chatDoc);
+
+  // Initialize with system message
+  const systemMessage = {
+    userId,
+    chatId,
+    role: 'system',
+    content: 'You are a helpful tutor. Explain concepts clearly and provide examples when helpful.',
+    sequenceNumber: 0,
+    createdAt: new Date(),
+  };
+
+  await messagesCollection.insertOne(systemMessage);
+
+  return { chatId, title: chatDoc.title, createdAt: chatDoc.createdAt };
+}
+
+/**
+ * updateChatTitle({ userId, chatId, title })
+ * Updates the title of a chat (e.g., after generating from first user message)
+ */
+export async function updateChatTitle({ userId, chatId, title }) {
+  if (!userId || !chatId || !title) {
+    throw new Error('userId, chatId, and title are required');
+  }
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_chats');
+
+  const { ObjectId } = await import('mongodb');
+  await collection.updateOne(
+    { _id: chatId, userId },
+    {
+      $set: {
+        title,
+        updatedAt: new Date(),
+      },
+    }
+  );
+}
+
+/**
+ * getChatList({ userId })
+ * Retrieves all chat sessions for a user (for sidebar)
+ * Returns: array of { _id, title, createdAt, updatedAt, messageCount }
+ */
+export async function getChatList({ userId }) {
+  if (!userId) throw new Error('userId required');
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_chats');
+
+  const chats = await collection
+    .find({ userId })
+    .sort({ updatedAt: -1 })
+    .projection({ title: 1, createdAt: 1, updatedAt: 1, messageCount: 1 })
+    .toArray();
+
+  return chats;
+}
+
+/**
+ * generateChatTitle(userMessage)
+ * Generates a title from the first 5-7 words of the user's first message
+ * Helper utility for chat title generation
+ */
+export function generateChatTitle(userMessage) {
+  const words = userMessage.trim().split(/\s+/).slice(0, 7).join(' ');
+  return words || 'New Chat';
+}

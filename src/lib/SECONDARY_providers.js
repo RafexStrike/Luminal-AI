@@ -70,45 +70,63 @@ async function callOpenAI({ apiKey, messages, stream, systemPrompt }) {
 }
 
 /**
- * HuggingFace adapter
- * Requires: apiKey from environment variable
- * Endpoint: https://api-inference.huggingface.co/models/{model}/v1/chat/completions
+ * HuggingFace adapter using InferenceClient
+ * Uses: @huggingface/inference client for streaming support
+ * Model: NousResearch/Hermes-3-Llama-3.1-8B
+ * 
+ * IMPORTANT: HuggingFace API is STATELESS.
+ * Context is ONLY derived from the messages array passed in each request.
+ * The adapter sends the FULL conversation history to get context-aware responses.
  */
 async function callHuggingFace({ apiKey, messages, stream, systemPrompt }) {
-  // TODO: Insert real HuggingFace API key from env
   const apiKeyToUse = apiKey || process.env.HUGGINGFACE_API_KEY;
   if (!apiKeyToUse) throw new Error('HuggingFace API key not provided');
 
-  const model = process.env.HUGGINGFACE_MODEL || 'meta-llama/Llama-2-7b-chat-hf';
-  const payload = {
-    messages: [
-      { role: 'system', content: systemPrompt || 'You are a helpful tutor.' },
+  // Use the specified Hermes model
+  const model = 'NousResearch/Hermes-3-Llama-3.1-8B';
+  
+  try {
+    // Import InferenceClient dynamically
+    const { InferenceClient } = await import('@huggingface/inference');
+    const client = new InferenceClient(apiKeyToUse);
+
+    // Build full message array with system prompt
+    const fullMessages = [
+      { role: 'system', content: systemPrompt || 'You are a helpful tutor. Explain concepts clearly and provide examples when helpful.' },
       ...messages
-    ],
-    stream: stream,
-  };
+    ];
 
-  const response = await fetch(
-    `https://api-inference.huggingface.co/models/${model}/v1/chat/completions`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKeyToUse}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+    if (stream) {
+      // Return a streaming response compatible with SSE
+      // The caller will handle the stream iteration
+      const streamIterator = await client.chatCompletionStream({
+        model,
+        messages: fullMessages,
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+
+      return { stream: true, iterator: streamIterator };
+    } else {
+      // Non-streaming: collect full response
+      let fullContent = '';
+      const streamIterator = await client.chatCompletionStream({
+        model,
+        messages: fullMessages,
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+
+      for await (const chunk of streamIterator) {
+        if (chunk.choices && chunk.choices[0]) {
+          fullContent += chunk.choices[0].delta?.content || '';
+        }
+      }
+
+      return fullContent;
     }
-  );
-
-  if (!response.ok) {
-    throw new Error(`HuggingFace API error: ${response.status} ${response.statusText}`);
-  }
-
-  if (stream) {
-    return response;
-  } else {
-    const data = await response.json();
-    return data.choices[0]?.message?.content || '';
+  } catch (error) {
+    throw new Error(`HuggingFace API error: ${error.message}`);
   }
 }
 

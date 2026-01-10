@@ -49,16 +49,48 @@ export default function SECONDARY_ChatWindow({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // TODO: Load chat history from DB on chatId change
+  // Load chat history when chatId changes
   useEffect(() => {
     if (chatId) {
-      // Fetch chat messages from API
-      // const loadMessages = async () => { ... }
+      const loadMessages = async () => {
+        try {
+          const response = await fetch(
+            `/api/secondStage/chat-history?chatId=${chatId}`
+          );
+
+          if (!response.ok) {
+            console.error('Failed to load chat history');
+            return;
+          }
+
+          const data = await response.json();
+          // Filter out system message and convert to component format
+          const conversationMessages = (data.messages || [])
+            .filter((msg) => msg.role !== 'system')
+            .map((msg) => ({
+              id: msg._id || `msg_${msg.sequenceNumber}`,
+              role: msg.role,
+              content: msg.content,
+              selected: false,
+            }));
+
+          setMessages(conversationMessages);
+        } catch (error) {
+          console.error('Error loading chat history:', error);
+        }
+      };
+
+      loadMessages();
     }
   }, [chatId, refreshTrigger]);
 
   const handleSendMessage = async () => {
-    if (!composerText.trim()) return;
+    if (!composerText.trim() || !chatId) {
+      if (!chatId) {
+        alert('No chat selected. Please create or select a chat first.');
+      }
+      return;
+    }
 
     const userMessage = {
       id: `msg_${Date.now()}`,
@@ -73,29 +105,22 @@ export default function SECONDARY_ChatWindow({
     setShowStreamingPlaceholder(true);
 
     try {
-      // TODO: Get provider and apiKey from user settings (currently placeholder)
-      const provider = localStorage.getItem('youlearn_provider') || 'openai';
-      const apiKey = localStorage.getItem('youlearn_apikey') || '';
-
+      // Send only chatId and prompt - backend loads context from DB
       const response = await fetch('/api/secondStage/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          provider,
-          apiKey,
-          messages: [
-            ...messages,
-            userMessage,
-          ].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          stream: false, // TODO: enable streaming support
+          chatId,           // Required: identifies which chat
+          prompt: composerText,  // Required: user's message
+          stream: false,    // TODO: enable streaming support
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `API error: ${response.status}`
+        );
       }
 
       const data = await response.json();
