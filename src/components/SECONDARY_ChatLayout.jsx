@@ -8,11 +8,13 @@ import SECONDARY_ChatSidebar from './SECONDARY_ChatSidebar';
 import SECONDARY_ChatWindow from './SECONDARY_ChatWindow';
 import SECONDARY_FlashcardsPanel from './SECONDARY_FlashcardsPanel';
 import SECONDARY_QuizzesPanel from './SECONDARY_QuizzesPanel';
+import SECONDARY_SummaryPanel from './SECONDARY_SummaryPanel';
 import SECONDARY_NotesPanel from './SECONDARY_NotesPanel';
 import SECONDARY_TopHero from './SECONDARY_TopHero';
 
 const TABS = [
   { id: 'chat', label: 'Chat' },
+  { id: 'summary', label: 'Summary' },
   { id: 'flashcards', label: 'Flashcards' },
   { id: 'quizzes', label: 'Quizzes' },
   { id: 'notes', label: 'Notes' },
@@ -77,6 +79,14 @@ export default function SECONDARY_ChatLayout() {
           <SECONDARY_ChatWindow
             chatId={currentChatId}
             onDataSaved={handleDataSaved}
+            onTabChange={setActiveTab}
+            refreshTrigger={refreshTrigger}
+          />
+        );
+      case 'summary':
+        return (
+          <SECONDARY_SummaryPanel
+            chatId={currentChatId}
             refreshTrigger={refreshTrigger}
           />
         );

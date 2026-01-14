@@ -1,9 +1,11 @@
 // FILE: src/app/api/secondStage/summary/route.js
 // DESCRIPTION: Summary generation endpoint; supports normal markdown and incremental JSON modes
 
-import { callProvider } from '@/lib/SECONDARY_providers';
+
 import { getUserIfAuthenticated } from '@/lib/SECONDARY_authPlaceholder';
-import { saveSummary } from '@/lib/SECONDARY_db';
+import { saveSummary, getMessageHistory, getSummaries } from '@/lib/SECONDARY_db';
+import { generateNormalSummary } from '@/lib/generateNormalSummary';
+import { generateIncrementalSummary } from '@/lib/generateIncrementalSummary';
 
 /**
  * POST /api/secondStage/summary
@@ -42,8 +44,6 @@ export async function POST(req) {
       chatId,
       messageIds = [],
       mode = 'normal',
-      provider = 'openai',
-      apiKey,
     } = await req.json();
 
     // Validate input
@@ -57,72 +57,69 @@ export async function POST(req) {
     // Get authenticated user (optional for generation, required for saving)
     const user = await getUserIfAuthenticated(req);
 
-    // TODO: Fetch actual messages from DB using messageIds
-    // For now, use placeholder messages
-    const placeholderMessages = messageIds.map((id) => ({
-      role: 'assistant',
-      content: `[Message ${id} content placeholder]`,
-    }));
-
-    let systemPrompt = '';
-    let userPrompt = '';
-
-    if (mode === 'incremental') {
-      // Incremental JSON mode: request structured output
-      systemPrompt = 'You are an expert tutor. Provide structured learning materials in JSON format.';
-
-      const jsonInstruction = {
-        task: 'incremental_summary',
-        document: placeholderMessages.map((msg, idx) => ({
-          id: messageIds[idx],
-          role: msg.role,
-          content: msg.content,
-        })),
-        instructions: {
-          sections: ['key_points', 'examples', 'questions'],
-          format: 'json',
-        },
-      };
-
-      userPrompt = `Generate an incremental summary in JSON format:\n${JSON.stringify(jsonInstruction, null, 2)}\n\nRespond with ONLY valid JSON (no markdown, no explanation).`;
-    } else {
-      // Normal markdown mode
-      systemPrompt =
-        'You are a concise tutor. Summarize content in markdown format, 150-300 words.';
-      userPrompt = `Summarize the following discussion:\n\n${placeholderMessages
-        .map((msg) => `${msg.role}: ${msg.content}`)
-        .join('\n\n')}`;
+    // Fetch actual messages from DB using messageIds
+    let messages = [];
+    try {
+      // Try to fetch chat history if user is authenticated
+      if (user?.id) {
+        const chatMessages = await getMessageHistory({ userId: user.id, chatId });
+        if (chatMessages && Array.isArray(chatMessages)) {
+          // Filter messages by messageIds
+          const messageIdSet = new Set(messageIds);
+          messages = chatMessages
+            .filter((msg) => messageIdSet.has(msg._id?.toString() || msg.id))
+            .map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            }));
+        }
+      }
+    } catch (error) {
+      console.warn('Could not fetch message history with userId:', error);
+    }
+    
+    // Final fallback: use placeholder messages if no actual messages were fetched
+    if (messages.length === 0) {
+      console.log('Using fallback messages for messageIds:', messageIds);
+      // Create meaningful fallback content based on messageIds
+      messages = messageIds.map((id, idx) => ({
+        role: idx % 2 === 0 ? 'user' : 'assistant',
+        content: `Message content for ID: ${id}. This is a fallback placeholder.`,
+      }));
     }
 
-    // Call provider adapter
-    const summaryContent = await callProvider({
-      provider,
-      apiKey,
-      messages: [
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-      stream: false,
-      systemPrompt,
-    });
+    console.log('Messages fetched for summary. Count:', messages.length);
+    console.log('Messages preview:', messages.map(m => m.content.substring(0, 60)));
 
-    // Validate JSON for incremental mode
-    let parsedSummary = summaryContent;
+    let summaryContent;
+
     if (mode === 'incremental') {
+      // Incremental mode: convert paragraphs to JSON, merge, and convert back to text
+      console.log('Generating incremental summary...');
+      
+      // Extract content as array of paragraphs
+      const paragraphs = messages.map((msg) => msg.content);
+      
       try {
-        // Try to parse as JSON and validate structure
-        const parsed = JSON.parse(summaryContent);
-        if (!parsed.key_points || !parsed.examples || !parsed.questions) {
-          console.warn('Invalid incremental summary structure:', parsed);
-        }
-        parsedSummary = parsed;
-      } catch (parseError) {
-        console.error('JSON parse error in incremental mode:', parseError);
+        summaryContent = await generateIncrementalSummary(paragraphs);
+      } catch (error) {
+        console.error('Error in incremental summary generation:', error);
         return Response.json(
-          { error: 'Failed to parse LLM response as JSON. Try again.' },
-          { status: 400 }
+          { error: `Incremental summary generation failed: ${error.message}` },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Normal mode: direct summary generation
+      console.log('Generating normal summary...');
+      
+      try {
+        summaryContent = await generateNormalSummary(messages);
+      } catch (error) {
+        console.error('Error in normal summary generation:', error);
+        return Response.json(
+          { error: `Normal summary generation failed: ${error.message}` },
+          { status: 500 }
         );
       }
     }
@@ -135,7 +132,7 @@ export async function POST(req) {
           userId: user.id,
           chatId,
           messageIds,
-          content: typeof parsedSummary === 'string' ? parsedSummary : JSON.stringify(parsedSummary),
+          content: typeof summaryContent === 'string' ? summaryContent : JSON.stringify(summaryContent),
           type: mode,
         });
         savedId = result._id?.toString();
@@ -146,16 +143,56 @@ export async function POST(req) {
     }
 
     return Response.json({
-      summary: parsedSummary,
+      summary: summaryContent,
       mode,
       messageCount: messageIds.length,
       savedId,
-      provider,
     });
   } catch (error) {
     console.error('Summary API error:', error);
     return Response.json(
       { error: error.message || 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const chatId = searchParams.get('chatId');
+
+    if (!chatId) {
+      return Response.json(
+        { error: 'Missing chatId parameter' },
+        { status: 400 }
+      );
+    }
+
+    const user = await getUserIfAuthenticated(req);
+
+    if (!user) {
+      // Anonymous: return empty
+      return Response.json({ summaries: [] });
+    }
+
+    const summaries = await getSummaries({
+      userId: user.id,
+      chatId,
+    });
+
+    return Response.json({
+      summaries: summaries.map((summary) => ({
+        ...summary,
+        _id: summary._id?.toString(),
+        type: summary.type || 'normal',
+        messageCount: summary.messageIds?.length || 0,
+      })),
+    });
+  } catch (error) {
+    console.error('Summary GET error:', error);
+    return Response.json(
+      { error: error.message },
       { status: 500 }
     );
   }

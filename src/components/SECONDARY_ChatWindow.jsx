@@ -17,6 +17,7 @@ import chat from '../design/chat.config';
 export default function SECONDARY_ChatWindow({
   chatId = null,
   onDataSaved = () => {},
+  onTabChange = () => {},
   refreshTrigger = 0,
 }) {
   const messagesEndRef = useRef(null);
@@ -155,8 +156,11 @@ export default function SECONDARY_ChatWindow({
       const data = await response.json();
       console.log('Summary generated:', data);
       onDataSaved();
+      // Navigate to summary tab
+      onTabChange('summary');
     } catch (error) {
       console.error('Error generating summary:', error);
+      alert('Failed to generate summary: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -189,6 +193,8 @@ export default function SECONDARY_ChatWindow({
       const data = await response.json();
       console.log('Flashcards generated:', data);
       onDataSaved();
+      // Navigate to flashcards tab
+      onTabChange('flashcards');
       alert(`Generated ${data.cards?.length || 0} flashcards!`);
     } catch (error) {
       console.error('Error generating flashcards:', error);
@@ -226,6 +232,8 @@ export default function SECONDARY_ChatWindow({
       const data = await response.json();
       console.log('Quizzes generated:', data);
       onDataSaved();
+      // Navigate to quizzes tab
+      onTabChange('quizzes');
       alert(`Generated ${data.questions?.length || 0} quiz questions!`);
     } catch (error) {
       console.error('Error generating quizzes:', error);
@@ -302,16 +310,24 @@ export default function SECONDARY_ChatWindow({
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
             <h3 className="text-lg font-bold mb-4">Generate Summary</h3>
             <div className="space-y-3 mb-6">
-              <button onClick={() => handleGenerateSummary('normal')} className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors">
+              <button onClick={() => handleGenerateSummary('normal')} disabled={isLoading} className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                 <div className="font-semibold">Regular Summary</div>
                 <div className="text-xs text-gray-500">Markdown format (150-300 words)</div>
               </button>
-              <button onClick={() => handleGenerateSummary('incremental')} className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors">
+              <button onClick={() => handleGenerateSummary('incremental')} disabled={isLoading} className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                 <div className="font-semibold">Incremental JSON</div>
                 <div className="text-xs text-gray-500">Structured: key points, examples, questions</div>
               </button>
             </div>
-            <button onClick={() => setShowSummaryDialog(false)} className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
+            {isLoading && (
+              <div className="text-center py-4">
+                <div className="inline-block">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">Generating summary...</p>
+              </div>
+            )}
+            <button onClick={() => setShowSummaryDialog(false)} disabled={isLoading} className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">Cancel</button>
           </div>
         </div>
       )}
