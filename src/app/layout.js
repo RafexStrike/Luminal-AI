@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata = {
-  title: "YouLearn - AI Learning Platform",
+  title: "Luminal AI Learning Platform",
   description: "Chat with AI, generate flashcards, take quizzes, and learn smarter",
 }
 
@@ -31,8 +31,8 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar/>
-          <Toaster />
+          {/* <Navbar/> */}
+          {/* <Toaster /> */}
           {children}
         </ThemeProvider>
 
