@@ -118,7 +118,7 @@ export default function SECONDARY_ChatLayout() {
   };
 
   return (
-    <div className={`flex h-full ${theme.colors.background}`}>
+    <div className="flex h-full bg-gray-950 text-white">
       {/* Sidebar */}
       <SECONDARY_ChatSidebar
         collapsed={sidebarCollapsed}
@@ -132,21 +132,28 @@ export default function SECONDARY_ChatLayout() {
         {/* <SECONDARY_TopHero onChatCreated={setCurrentChatId} /> */}
 
         {/* Tab Navigation */}
-        <div className={`border-b ${theme.colors.border} ${theme.colors.panel} px-6 py-3 flex gap-4`}>
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 font-medium text-sm rounded-lg transition-colors ${activeTab === tab.id ? ` ${theme.colors.accentBg} ${theme.colors.accent}` : `text-gray-700 hover:bg-gray-100`}`}
-              aria-pressed={activeTab === tab.id}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex gap-2 px-6 py-3 border-b border-gray-800/50 bg-gradient-to-r from-gray-900 to-gray-950 backdrop-blur-sm">
+          {TABS.map((tab) => {
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
+                  active
+                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                }`}
+                aria-pressed={active}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto bg-gray-950">
           {renderTabContent()}
         </div>
       </div>
