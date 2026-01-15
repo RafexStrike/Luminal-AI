@@ -10,7 +10,7 @@ import SECONDARY_FlashcardsPanel from './SECONDARY_FlashcardsPanel';
 import SECONDARY_QuizzesPanel from './SECONDARY_QuizzesPanel';
 import SECONDARY_SummaryPanel from './SECONDARY_SummaryPanel';
 import SECONDARY_NotesPanel from './SECONDARY_NotesPanel';
-import SECONDARY_TopHero from './SECONDARY_TopHero';
+// import SECONDARY_TopHero from './SECONDARY_TopHero';
 
 const TABS = [
   { id: 'chat', label: 'Chat' },
@@ -129,7 +129,7 @@ export default function SECONDARY_ChatLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Hero Section */}
-        <SECONDARY_TopHero onChatCreated={setCurrentChatId} />
+        {/* <SECONDARY_TopHero onChatCreated={setCurrentChatId} /> */}
 
         {/* Tab Navigation */}
         <div className={`border-b ${theme.colors.border} ${theme.colors.panel} px-6 py-3 flex gap-4`}>
