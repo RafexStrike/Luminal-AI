@@ -11,7 +11,7 @@ import chat from '../design/chat.config';
  * SECONDARY_ChatWindow
  *
  * - Keeps existing backend interactions intact
- * - Uses global.css design tokens and purple accent theme
+ * - Uses modern purple gradient theme matching page.jsx
  * - All logic remains unchanged
  */
 export default function SECONDARY_ChatWindow({
@@ -246,13 +246,13 @@ export default function SECONDARY_ChatWindow({
   const getSelectedCount = () => selectedMessageIds.size;
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-gray-950 text-white">
       {/* Messages Area */}
       <div className="flex-1 overflow-auto p-6 space-y-4">
         {messages.length === 0 && (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">Start a conversation to begin learning</p>
+              <p className="text-gray-400">Start a conversation to begin learning</p>
             </div>
           </div>
         )}
@@ -260,18 +260,26 @@ export default function SECONDARY_ChatWindow({
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} gap-3`}>
             {/* Message Container */}
-            <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card text-card-foreground border border-border'} ${selectedMessageIds.has(message.id) ? 'ring-2 ring-ring ring-offset-2 ring-offset-background' : ''}`}>
+            <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg transition-all ${
+              message.role === 'user' 
+                ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30' 
+                : 'bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 border border-gray-700/50'
+            } ${
+              selectedMessageIds.has(message.id) 
+                ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-950' 
+                : ''
+            }`}>
               {message.content}
 
               {/* Selection Checkbox for Assistant Messages */}
               {message.role === 'assistant' && (
                 <button 
                   onClick={() => handleToggleMessageSelection(message.id)} 
-                  className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-border flex items-center justify-center hover:border-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+                  className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 bg-gray-800/50 backdrop-blur-sm" 
                   aria-label="Select message for summary" 
                   title="Select for summary"
                 >
-                  {selectedMessageIds.has(message.id) && <span className="text-purple-500 text-sm">✓</span>}
+                  {selectedMessageIds.has(message.id) && <span className="text-purple-400 text-sm font-bold">✓</span>}
                 </button>
               )}
             </div>
@@ -281,9 +289,9 @@ export default function SECONDARY_ChatWindow({
         {/* Streaming Placeholder */}
         {showStreamingPlaceholder && (
           <div className="flex justify-start gap-3">
-            <div className="bg-muted text-muted-foreground rounded-lg p-4 max-w-md border border-border">
-              <div className="h-2 bg-muted-foreground/20 rounded animate-pulse" />
-              <p className="text-xs text-muted-foreground mt-2">Waiting for response</p>
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-lg p-4 max-w-md border border-gray-700/50">
+              <div className="h-2 bg-purple-500/20 rounded animate-pulse" />
+              <p className="text-xs text-gray-500 mt-2">Waiting for response</p>
             </div>
           </div>
         )}
@@ -293,24 +301,24 @@ export default function SECONDARY_ChatWindow({
 
       {/* Selection Info Bar */}
       {getSelectedCount() > 0 && (
-        <div className="bg-accent/10 border-t border-border px-6 py-3 flex items-center justify-between gap-2">
-          <span className="text-sm text-foreground">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
+        <div className="bg-gradient-to-r from-purple-900/20 to-violet-900/20 border-t border-gray-700/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between gap-2">
+          <span className="text-sm text-gray-300 font-medium">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
           <div className="flex gap-2">
             <button 
               onClick={() => setShowSummaryDialog(true)} 
-              className="px-4 py-2 gradient-purple text-primary-foreground rounded-lg hover:opacity-90 transition-opacity text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
             >
               Generate Summary
             </button>
             <button 
               onClick={() => handleGenerateFlashcards()} 
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
             >
               Generate Flashcards
             </button>
             <button 
               onClick={() => handleGenerateQuizzes()} 
-              className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-lg shadow-violet-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
             >
               Generate Quizzes
             </button>
@@ -321,38 +329,38 @@ export default function SECONDARY_ChatWindow({
       {/* Summary Dialog */}
       {showSummaryDialog && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-card text-card-foreground rounded-lg shadow-lg border border-border p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-bold mb-4">Generate Summary</h3>
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700/50 p-6 max-w-sm w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">Generate Summary</h3>
             <div className="space-y-3 mb-6">
               <button 
                 onClick={() => handleGenerateSummary('normal')} 
                 disabled={isLoading} 
-                className="w-full px-4 py-3 text-left rounded-lg border-2 border-border hover:border-purple-500 hover:bg-accent/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-purple-500/50 hover:bg-purple-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 group"
               >
-                <div className="font-semibold text-foreground">Regular Summary</div>
-                <div className="text-xs text-muted-foreground">Markdown format (150-300 words)</div>
+                <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Regular Summary</div>
+                <div className="text-xs text-gray-400">Markdown format (150-300 words)</div>
               </button>
               <button 
                 onClick={() => handleGenerateSummary('incremental')} 
                 disabled={isLoading} 
-                className="w-full px-4 py-3 text-left rounded-lg border-2 border-border hover:border-purple-500 hover:bg-accent/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-purple-500/50 hover:bg-purple-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 group"
               >
-                <div className="font-semibold text-foreground">Incremental JSON</div>
-                <div className="text-xs text-muted-foreground">Structured: key points, examples, questions</div>
+                <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Incremental JSON</div>
+                <div className="text-xs text-gray-400">Structured: key points, examples, questions</div>
               </button>
             </div>
             {isLoading && (
               <div className="text-center py-4">
                 <div className="inline-block">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                  <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">Generating summary...</p>
+                <p className="text-sm text-gray-400 mt-2">Generating summary...</p>
               </div>
             )}
             <button 
               onClick={() => setShowSummaryDialog(false)} 
               disabled={isLoading} 
-              className="w-full px-4 py-2 text-foreground border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full px-4 py-2 text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
             >
               Cancel
             </button>
@@ -361,12 +369,12 @@ export default function SECONDARY_ChatWindow({
       )}
 
       {/* Composer */}
-      <div className="border-t border-border bg-card p-4">
+      <div className="border-t border-gray-800/50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 backdrop-blur-sm">
         <div className="flex gap-3">
-          <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-muted rounded-lg border border-input">
-            {/* Placeholder buttons (kept minimal and accessible) */}
+          <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-lg border border-gray-700/50 focus-within:border-purple-500/50 transition-colors">
+            {/* Placeholder buttons */}
             <button 
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" 
+              className="p-2 text-gray-500 hover:text-purple-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded" 
               title="Attach file" 
               aria-label="Attach"
             >
@@ -385,10 +393,10 @@ export default function SECONDARY_ChatWindow({
                   handleSendMessage(); 
                 }
               }} 
-              className="flex-1 outline-none bg-transparent text-foreground placeholder:text-muted-foreground focus-visible:outline-none" 
+              className="flex-1 outline-none bg-transparent text-white placeholder:text-gray-500 focus-visible:outline-none" 
             />
             <button 
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" 
+              className="p-2 text-gray-500 hover:text-purple-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded" 
               title="Voice input" 
               aria-label="Voice"
             >
@@ -397,7 +405,7 @@ export default function SECONDARY_ChatWindow({
               </svg>
             </button>
             <button 
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" 
+              className="p-2 text-gray-500 hover:text-purple-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded" 
               title="Add context" 
               aria-label="Context"
             >
@@ -409,7 +417,7 @@ export default function SECONDARY_ChatWindow({
           <button 
             onClick={handleSendMessage} 
             disabled={!composerText.trim() || isLoading} 
-            className="px-6 py-2 gradient-purple text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950" 
             aria-label="Send message"
           >
             Send
