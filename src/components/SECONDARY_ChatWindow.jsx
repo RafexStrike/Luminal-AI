@@ -11,8 +11,8 @@ import chat from '../design/chat.config';
  * SECONDARY_ChatWindow
  *
  * - Keeps existing backend interactions intact
- * - Uses centralized design tokens for visual styling
- * - Removes unprofessional emojis
+ * - Uses global.css design tokens and purple accent theme
+ * - All logic remains unchanged
  */
 export default function SECONDARY_ChatWindow({
   chatId = null,
@@ -246,13 +246,13 @@ export default function SECONDARY_ChatWindow({
   const getSelectedCount = () => selectedMessageIds.size;
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-background">
       {/* Messages Area */}
       <div className="flex-1 overflow-auto p-6 space-y-4">
         {messages.length === 0 && (
-          <div className="h-full flex items-center justify-center text-gray-500">
+          <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-gray-500">Start a conversation to begin learning</p>
+              <p className="text-sm text-muted-foreground">Start a conversation to begin learning</p>
             </div>
           </div>
         )}
@@ -260,13 +260,18 @@ export default function SECONDARY_ChatWindow({
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} gap-3`}>
             {/* Message Container */}
-            <div className={`${chat.messageMaxWidth} p-4 relative ${message.role === 'user' ? chat.bubble.user : chat.bubble.assistant} ${selectedMessageIds.has(message.id) ? theme.colors.focusRing : ''}`}>
+            <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card text-card-foreground border border-border'} ${selectedMessageIds.has(message.id) ? 'ring-2 ring-ring ring-offset-2 ring-offset-background' : ''}`}>
               {message.content}
 
               {/* Selection Checkbox for Assistant Messages */}
               {message.role === 'assistant' && (
-                <button onClick={() => handleToggleMessageSelection(message.id)} className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center hover:border-blue-500 transition-colors" aria-label="Select message for summary" title="Select for summary">
-                  {selectedMessageIds.has(message.id) && <span className="text-blue-600 text-sm">✓</span>}
+                <button 
+                  onClick={() => handleToggleMessageSelection(message.id)} 
+                  className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-border flex items-center justify-center hover:border-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" 
+                  aria-label="Select message for summary" 
+                  title="Select for summary"
+                >
+                  {selectedMessageIds.has(message.id) && <span className="text-purple-500 text-sm">✓</span>}
                 </button>
               )}
             </div>
@@ -276,9 +281,9 @@ export default function SECONDARY_ChatWindow({
         {/* Streaming Placeholder */}
         {showStreamingPlaceholder && (
           <div className="flex justify-start gap-3">
-            <div className="bg-gray-100 text-gray-900 rounded-lg p-4 max-w-md">
-              <div className="h-2 bg-gray-200 rounded animate-pulse" />
-              <p className="text-xs text-gray-500 mt-2">Waiting for response </p>
+            <div className="bg-muted text-muted-foreground rounded-lg p-4 max-w-md border border-border">
+              <div className="h-2 bg-muted-foreground/20 rounded animate-pulse" />
+              <p className="text-xs text-muted-foreground mt-2">Waiting for response</p>
             </div>
           </div>
         )}
@@ -288,16 +293,25 @@ export default function SECONDARY_ChatWindow({
 
       {/* Selection Info Bar */}
       {getSelectedCount() > 0 && (
-        <div className="bg-blue-50 border-t border-blue-200 px-6 py-3 flex items-center justify-between gap-2">
-          <span className="text-sm text-gray-700">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
+        <div className="bg-accent/10 border-t border-border px-6 py-3 flex items-center justify-between gap-2">
+          <span className="text-sm text-foreground">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
           <div className="flex gap-2">
-            <button onClick={() => setShowSummaryDialog(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+            <button 
+              onClick={() => setShowSummaryDialog(true)} 
+              className="px-4 py-2 gradient-purple text-primary-foreground rounded-lg hover:opacity-90 transition-opacity text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               Generate Summary
             </button>
-            <button onClick={() => handleGenerateFlashcards()} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
+            <button 
+              onClick={() => handleGenerateFlashcards()} 
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               Generate Flashcards
             </button>
-            <button onClick={() => handleGenerateQuizzes()} className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium">
+            <button 
+              onClick={() => handleGenerateQuizzes()} 
+              className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               Generate Quizzes
             </button>
           </div>
@@ -306,55 +320,100 @@ export default function SECONDARY_ChatWindow({
 
       {/* Summary Dialog */}
       {showSummaryDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card text-card-foreground rounded-lg shadow-lg border border-border p-6 max-w-sm w-full mx-4">
             <h3 className="text-lg font-bold mb-4">Generate Summary</h3>
             <div className="space-y-3 mb-6">
-              <button onClick={() => handleGenerateSummary('normal')} disabled={isLoading} className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                <div className="font-semibold">Regular Summary</div>
-                <div className="text-xs text-gray-500">Markdown format (150-300 words)</div>
+              <button 
+                onClick={() => handleGenerateSummary('normal')} 
+                disabled={isLoading} 
+                className="w-full px-4 py-3 text-left rounded-lg border-2 border-border hover:border-purple-500 hover:bg-accent/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="font-semibold text-foreground">Regular Summary</div>
+                <div className="text-xs text-muted-foreground">Markdown format (150-300 words)</div>
               </button>
-              <button onClick={() => handleGenerateSummary('incremental')} disabled={isLoading} className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                <div className="font-semibold">Incremental JSON</div>
-                <div className="text-xs text-gray-500">Structured: key points, examples, questions</div>
+              <button 
+                onClick={() => handleGenerateSummary('incremental')} 
+                disabled={isLoading} 
+                className="w-full px-4 py-3 text-left rounded-lg border-2 border-border hover:border-purple-500 hover:bg-accent/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="font-semibold text-foreground">Incremental JSON</div>
+                <div className="text-xs text-muted-foreground">Structured: key points, examples, questions</div>
               </button>
             </div>
             {isLoading && (
               <div className="text-center py-4">
                 <div className="inline-block">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Generating summary...</p>
+                <p className="text-sm text-muted-foreground mt-2">Generating summary...</p>
               </div>
             )}
-            <button onClick={() => setShowSummaryDialog(false)} disabled={isLoading} className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">Cancel</button>
+            <button 
+              onClick={() => setShowSummaryDialog(false)} 
+              disabled={isLoading} 
+              className="w-full px-4 py-2 text-foreground border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
       {/* Composer */}
-      <div className="border-t border-gray-200 bg-white p-4">
+      <div className="border-t border-border bg-card p-4">
         <div className="flex gap-3">
-          <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-300">
+          <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-muted rounded-lg border border-input">
             {/* Placeholder buttons (kept minimal and accessible) */}
-            <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors" title="Attach file" aria-label="Attach">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+            <button 
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" 
+              title="Attach file" 
+              aria-label="Attach"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21.44 11.05L12.98 19.5a5 5 0 01-7.07-7.07l7.07-7.07a3 3 0 114.24 4.24L9.56 17.94" />
               </svg>
             </button>
-            <input type="text" placeholder="Type your message..." value={composerText} onChange={(e) => setComposerText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }}} className="flex-1 outline-none bg-transparent text-gray-900" />
-            <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors" title="Voice input" aria-label="Voice">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+            <input 
+              type="text" 
+              placeholder="Type your message..." 
+              value={composerText} 
+              onChange={(e) => setComposerText(e.target.value)} 
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' && !e.shiftKey) { 
+                  e.preventDefault(); 
+                  handleSendMessage(); 
+                }
+              }} 
+              className="flex-1 outline-none bg-transparent text-foreground placeholder:text-muted-foreground focus-visible:outline-none" 
+            />
+            <button 
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" 
+              title="Voice input" 
+              aria-label="Voice"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 1v11" />
               </svg>
             </button>
-            <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors" title="Add context" aria-label="Context">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+            <button 
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" 
+              title="Add context" 
+              aria-label="Context"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
               </svg>
             </button>
           </div>
-          <button onClick={handleSendMessage} disabled={!composerText.trim() || isLoading} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Send message">Send</button>
+          <button 
+            onClick={handleSendMessage} 
+            disabled={!composerText.trim() || isLoading} 
+            className="px-6 py-2 gradient-purple text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+            aria-label="Send message"
+          >
+            Send
+          </button>
         </div>
       </div>
     </div>
