@@ -66,6 +66,14 @@ export default function SECONDARY_ChatLayout() {
     setActiveTab('chat');
   }, []);
 
+  // Handle when a chat is deleted
+  const handleChatDeleted = useCallback((deletedChatId) => {
+    if (currentChatId === deletedChatId) {
+      setCurrentChatId(null);
+      setActiveTab('chat');
+    }
+  }, [currentChatId]);
+
   // Trigger refresh of content when data is saved
   const handleDataSaved = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
@@ -124,6 +132,8 @@ export default function SECONDARY_ChatLayout() {
         collapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
         onSelectSpace={handleSelectSpace}
+        currentChatId={currentChatId}
+        onChatDeleted={handleChatDeleted}
       />
 
       {/* Main Content Area */}

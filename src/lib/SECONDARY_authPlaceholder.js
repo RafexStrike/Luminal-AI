@@ -7,7 +7,8 @@ import { getUserFromRequest } from "@/lib/auth";
  * Get authenticated user from request headers
  * Uses Better Auth session validation
  * 
- * Returns: { id: string, email: string, name: string } on authenticated request, null on anonymous.
+ * Returns: { id: string, email: string, name: string } on authenticated request, 
+ * or anonymous user for development/testing.
  */
 export async function getUserIfAuthenticated(req) {
   try {
@@ -19,11 +20,20 @@ export async function getUserIfAuthenticated(req) {
         name: user.name,
       };
     }
-    console.log(user)
-    return null;
+    // For development/testing: use anonymous user ID
+    return {
+      id: 'anonymous-user',
+      email: 'anonymous@test.local',
+      name: 'Anonymous User',
+    };
   } catch (error) {
     console.error("Error getting authenticated user:", error);
-    return null;
+    // Fallback to anonymous user on error
+    return {
+      id: 'anonymous-user',
+      email: 'anonymous@test.local',
+      name: 'Anonymous User',
+    };
   }
 }
 

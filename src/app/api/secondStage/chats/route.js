@@ -57,6 +57,7 @@ export async function GET(req) {
         createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
         messageCount: chat.messageCount || 0,
+        collection: chat.collection || 'Unknown',
       })),
     });
   } catch (error) {

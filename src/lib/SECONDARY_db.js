@@ -73,9 +73,8 @@ export async function getChat({ userId, chatId }) {
   const db = client.db();
   const collection = db.collection('stage2_chats');
 
-  const { ObjectId } = await import('mongodb');
   const result = await collection.findOne({
-    _id: new ObjectId(chatId),
+    _id: chatId,
     userId,
   });
 
@@ -362,11 +361,11 @@ export async function getMessageHistory({ userId, chatId }) {
 }
 
 /**
- * createNewChat({ userId, title })
+ * createNewChat({ userId, title, collection })
  * Creates a new chat session with a system message
- * Returns: { chatId, title, createdAt }
+ * Returns: { chatId, title, createdAt, collection }
  */
-export async function createNewChat({ userId, title = null }) {
+export async function createNewChat({ userId, title = null, collection = 'Unknown' }) {
   if (!userId) throw new Error('userId required');
 
   const client = await getMongoClient();
@@ -383,6 +382,7 @@ export async function createNewChat({ userId, title = null }) {
     _id: chatId,
     userId,
     title: title || 'New Chat',
+    collection: collection || 'Unknown',
     messageCount: 0, // Track message count for efficiency
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -402,7 +402,7 @@ export async function createNewChat({ userId, title = null }) {
 
   await messagesCollection.insertOne(systemMessage);
 
-  return { chatId, title: chatDoc.title, createdAt: chatDoc.createdAt };
+  return { chatId, title: chatDoc.title, collection: chatDoc.collection, createdAt: chatDoc.createdAt };
 }
 
 /**
@@ -431,9 +431,57 @@ export async function updateChatTitle({ userId, chatId, title }) {
 }
 
 /**
+ * updateChatCollection({ userId, chatId, collection })
+ * Updates the collection tag of a chat
+ */
+export async function updateChatCollection({ userId, chatId, collection }) {
+  if (!userId || !chatId || !collection) {
+    throw new Error('userId, chatId, and collection are required');
+  }
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collectionDb = db.collection('stage2_chats');
+
+  await collectionDb.updateOne(
+    { _id: chatId, userId },
+    {
+      $set: {
+        collection,
+        updatedAt: new Date(),
+      },
+    }
+  );
+}
+
+/**
+ * deleteChat({ userId, chatId })
+ * Soft deletes a chat by setting deletedAt timestamp
+ */
+export async function deleteChat({ userId, chatId }) {
+  if (!userId || !chatId) {
+    throw new Error('userId and chatId are required');
+  }
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_chats');
+
+  await collection.updateOne(
+    { _id: chatId, userId },
+    {
+      $set: {
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+      },
+    }
+  );
+}
+
+/**
  * getChatList({ userId })
  * Retrieves all chat sessions for a user (for sidebar)
- * Returns: array of { _id, title, createdAt, updatedAt, messageCount }
+ * Returns: array of { _id, title, createdAt, updatedAt, messageCount, collection }
  */
 export async function getChatList({ userId }) {
   if (!userId) throw new Error('userId required');
@@ -450,13 +498,14 @@ export async function getChatList({ userId }) {
 
   const chats = await collection
   .find(
-    { userId },
+    { userId, deletedAt: { $exists: false } },
     {
       projection: {
         title: 1,
         createdAt: 1,
         updatedAt: 1,
         messageCount: 1,
+        collection: 1,
       },
     }
   )
