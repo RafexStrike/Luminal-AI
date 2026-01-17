@@ -1,19 +1,17 @@
 // FILE: src/components/SECONDARY_ChatWindow.jsx
-// DESCRIPTION: Chat display and message composer; handles message selection, streaming, and summary generation
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import theme from '../design/theme.config';
 import chat from '../design/chat.config';
 
-/**
- * SECONDARY_ChatWindow
- *
- * - Keeps existing backend interactions intact
- * - Uses modern purple gradient theme matching page.jsx
- * - All logic remains unchanged
- */
+// --- IMPORTS for styling up the LLM response START ---
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+// --- NEW IMPORTS for styling up the LLM response END ---
+
 export default function SECONDARY_ChatWindow({
   chatId = null,
   onDataSaved = () => {},
@@ -28,12 +26,10 @@ export default function SECONDARY_ChatWindow({
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   const [showStreamingPlaceholder, setShowStreamingPlaceholder] = useState(false);
 
-  // Auto-scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Load chat history when chatId changes
   useEffect(() => {
     if (chatId) {
       const loadMessages = async () => {
@@ -48,7 +44,6 @@ export default function SECONDARY_ChatWindow({
           }
 
           const data = await response.json();
-          // Filter out system message and convert to component format
           const conversationMessages = (data.messages || [])
             .filter((msg) => msg.role !== 'system')
             .map((msg) => ({
@@ -63,7 +58,6 @@ export default function SECONDARY_ChatWindow({
           console.error('Error loading chat history:', error);
         }
       };
-
       loadMessages();
     }
   }, [chatId, refreshTrigger]);
@@ -138,25 +132,17 @@ export default function SECONDARY_ChatWindow({
 
   const handleGenerateSummary = async (mode = 'normal') => {
     if (selectedMessageIds.size === 0) return;
-
     setShowSummaryDialog(false);
     setIsLoading(true);
-
     try {
       const response = await fetch('/api/secondStage/summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId: chatId || 'anonymous', messageIds: Array.from(selectedMessageIds), mode }),
       });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
       const data = await response.json();
-      console.log('Summary generated:', data);
       onDataSaved();
-      // Navigate to summary tab
       onTabChange('summary');
     } catch (error) {
       console.error('Error generating summary:', error);
@@ -171,29 +157,19 @@ export default function SECONDARY_ChatWindow({
       alert('Please select at least one message');
       return;
     }
-
     setIsLoading(true);
-
     try {
       const response = await fetch('/api/secondStage/flashcards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chatId: chatId || 'anonymous',
-          messageIds: Array.from(selectedMessageIds),
-          provider: 'huggingface',
-        }),
+        body: JSON.stringify({ chatId: chatId || 'anonymous', messageIds: Array.from(selectedMessageIds), provider: 'huggingface' }),
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `API error: ${response.status}`);
       }
-
       const data = await response.json();
-      console.log('Flashcards generated:', data);
       onDataSaved();
-      // Navigate to flashcards tab
       onTabChange('flashcards');
       alert(`Generated ${data.cards?.length || 0} flashcards!`);
     } catch (error) {
@@ -209,30 +185,19 @@ export default function SECONDARY_ChatWindow({
       alert('Please select at least one message');
       return;
     }
-
     setIsLoading(true);
-
     try {
       const response = await fetch('/api/secondStage/quizzes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chatId: chatId || 'anonymous',
-          messageIds: Array.from(selectedMessageIds),
-          provider: 'huggingface',
-          questionCount: 5,
-        }),
+        body: JSON.stringify({ chatId: chatId || 'anonymous', messageIds: Array.from(selectedMessageIds), provider: 'huggingface', questionCount: 5 }),
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `API error: ${response.status}`);
       }
-
       const data = await response.json();
-      console.log('Quizzes generated:', data);
       onDataSaved();
-      // Navigate to quizzes tab
       onTabChange('quizzes');
       alert(`Generated ${data.questions?.length || 0} quiz questions!`);
     } catch (error) {
@@ -259,7 +224,6 @@ export default function SECONDARY_ChatWindow({
 
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} gap-3`}>
-            {/* Message Container */}
             <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg transition-all ${
               message.role === 'user' 
                 ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30' 
@@ -269,9 +233,51 @@ export default function SECONDARY_ChatWindow({
                 ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-950' 
                 : ''
             }`}>
-              {message.content}
+              
+              {/* --- MODIFIED SECTION START: Replace {message.content} with ReactMarkdown --- */}
+              <div className="markdown-container text-sm md:text-base leading-relaxed">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    // Style code blocks
+                    code({node, inline, className, children, ...props}) {
+                      const match = /language-(\w+)/.exec(className || '')
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={vscDarkPlus}
+                          language={match[1]}
+                          PreTag="div"
+                          className="rounded-md border border-gray-700/50 my-4"
+                          {...props}
+                        >
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={`${className} bg-black/30 rounded px-1.5 py-0.5 text-xs font-mono`} {...props}>
+                          {children}
+                        </code>
+                      )
+                    },
+                    // Style standard HTML elements
+                    h1: ({node, ...props}) => <h1 className="text-xl font-bold mb-3 mt-4" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2 mt-4" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2 mt-3" {...props} />,
+                    p: ({node, ...props}) => <p className="mb-3 last:mb-0" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                    li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                    a: ({node, ...props}) => <a className="text-purple-300 hover:text-purple-200 underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                    blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-purple-500/50 pl-4 py-1 italic bg-gray-900/50 rounded-r my-4" {...props} />,
+                    table: ({node, ...props}) => <div className="overflow-x-auto my-4"><table className="min-w-full divide-y divide-gray-700 border border-gray-700" {...props} /></div>,
+                    th: ({node, ...props}) => <th className="px-3 py-2 bg-gray-800 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" {...props} />,
+                    td: ({node, ...props}) => <td className="px-3 py-2 whitespace-nowrap border-t border-gray-700" {...props} />,
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              </div>
+              {/* --- MODIFIED SECTION END --- */}
 
-              {/* Selection Checkbox for Assistant Messages */}
               {message.role === 'assistant' && (
                 <button 
                   onClick={() => handleToggleMessageSelection(message.id)} 
@@ -299,11 +305,13 @@ export default function SECONDARY_ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Selection Info Bar */}
+      {/* ... Rest of your component (Selection Info Bar, Dialog, Composer) stays the same ... */}
+      {/* For brevity, assuming the bottom part of your file remains unchanged */}
       {getSelectedCount() > 0 && (
         <div className="bg-gradient-to-r from-purple-900/20 to-violet-900/20 border-t border-gray-700/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between gap-2">
-          <span className="text-sm text-gray-300 font-medium">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
-          <div className="flex gap-2">
+            {/* ... Buttons ... */}
+            <span className="text-sm text-gray-300 font-medium">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
+             <div className="flex gap-2">
             <button 
               onClick={() => setShowSummaryDialog(true)} 
               className="px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
@@ -325,11 +333,12 @@ export default function SECONDARY_ChatWindow({
           </div>
         </div>
       )}
-
-      {/* Summary Dialog */}
+      
+      {/* ... Summary Dialog ... */}
       {showSummaryDialog && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700/50 p-6 max-w-sm w-full mx-4">
+           {/* ... Dialog Content ... */}
+           <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700/50 p-6 max-w-sm w-full mx-4">
             <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">Generate Summary</h3>
             <div className="space-y-3 mb-6">
               <button 
@@ -368,9 +377,9 @@ export default function SECONDARY_ChatWindow({
         </div>
       )}
 
-      {/* Composer */}
+      {/* ... Composer ... */}
       <div className="border-t border-gray-800/50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 backdrop-blur-sm">
-        <div className="flex gap-3">
+         <div className="flex gap-3">
           <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-lg border border-gray-700/50 focus-within:border-purple-500/50 transition-colors">
             {/* Placeholder buttons */}
             <button 
