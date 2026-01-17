@@ -108,10 +108,10 @@ export default function SECONDARY_QuizzesPanel({
     <div className="p-6 space-y-6">
       {/* Score Header */}
       {checkedAnswers.size > 0 && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-          <div className="text-sm text-gray-700">
-            Score: <span className="font-bold text-lg text-blue-700">{score}</span> /{' '}
-            <span className="font-bold text-lg text-gray-700">{checkedAnswers.size}</span>
+        <div className="bg-gradient-to-r from-purple-900/40 to-violet-900/25 rounded-xl p-4 border border-gray-700 text-white">
+          <div className="text-sm text-gray-200">
+            Score: <span className="font-bold text-lg text-purple-300">{score}</span> /{' '}
+            <span className="font-bold text-lg text-gray-200">{checkedAnswers.size}</span>
           </div>
         </div>
       )}
@@ -120,7 +120,7 @@ export default function SECONDARY_QuizzesPanel({
       {quizzes.map((quiz, quizIndex) => (
         <div
           key={quizIndex}
-          className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
+          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700 p-6 shadow-sm text-white"
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quiz Set {quizIndex + 1} ({quiz.questions.length} questions)
@@ -138,10 +138,10 @@ export default function SECONDARY_QuizzesPanel({
               return (
                 <div
                   key={qIndex}
-                  className="border border-gray-300 rounded-lg p-4 bg-gray-50"
+                  className="border border-gray-700 rounded-lg p-4 bg-gradient-to-br from-gray-900/20 to-gray-900/10"
                 >
                   {/* Question Text */}
-                  <h4 className="font-semibold text-gray-900 mb-4">
+                  <h4 className="font-semibold text-white mb-4">
                     Q{qIndex + 1}. {question.question}
                   </h4>
 
@@ -161,12 +161,12 @@ export default function SECONDARY_QuizzesPanel({
                           disabled={isChecked}
                           className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
                             isCorrectAnswer
-                              ? 'border-green-500 bg-green-50'
+                              ? 'border-green-500 bg-green-900/30 text-green-200'
                               : isSelected && isChecked
-                              ? 'border-red-500 bg-red-50'
+                              ? 'border-red-500 bg-red-900/30 text-red-200'
                               : isSelected
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-300 bg-white hover:border-gray-400'
+                              ? 'border-purple-500 bg-purple-900/20 text-purple-200'
+                              : 'border-gray-700 bg-gray-900/10 hover:border-gray-600 text-gray-100'
                           } ${isChecked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                           <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ export default function SECONDARY_QuizzesPanel({
                                 </span>
                               )}
                             </div>
-                            <span className="text-gray-900">
+                            <span className="text-gray-100">
                               {String.fromCharCode(65 + optionIndex)}.{' '}
                               {option}
                             </span>
@@ -199,32 +199,32 @@ export default function SECONDARY_QuizzesPanel({
                   </div>
 
                   {/* Check/Reveal Feedback */}
-                  {!isChecked ? (
-                    <button
-                      onClick={() =>
-                        handleCheckAnswer(questionKey, { questions: quiz.questions })
-                      }
-                      disabled={selectedOption === undefined}
-                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Check Answer
-                    </button>
-                  ) : (
-                    <div
-                      className={`p-3 rounded-lg ${
-                        isCorrect
-                          ? 'bg-green-50 border border-green-200'
-                          : 'bg-red-50 border border-red-200'
-                      }`}
-                    >
-                      <div className="font-semibold mb-2">
-                        {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+                    {!isChecked ? (
+                      <button
+                        onClick={() =>
+                          handleCheckAnswer(questionKey, { questions: quiz.questions })
+                        }
+                        disabled={selectedOption === undefined}
+                        className="w-full px-4 py-2 bg-gradient-to-r from-purple-700 to-violet-600 text-white rounded-lg hover:opacity-95 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Check Answer
+                      </button>
+                    ) : (
+                      <div
+                        className={`p-3 rounded-lg ${
+                          isCorrect
+                            ? 'bg-green-900/30 border border-green-700 text-green-200'
+                            : 'bg-red-900/30 border border-red-700 text-red-200'
+                        }`}
+                      >
+                        <div className="font-semibold mb-2">
+                          {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+                        </div>
+                        <div className="text-sm text-gray-200 mb-2">
+                          <strong>Explanation:</strong> {question.explanation}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-700 mb-2">
-                        <strong>Explanation:</strong> {question.explanation}
-                      </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               );
             })}

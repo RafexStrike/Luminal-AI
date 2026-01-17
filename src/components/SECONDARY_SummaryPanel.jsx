@@ -208,11 +208,11 @@ export default function SECONDARY_SummaryPanel({
             {/* Key Points */}
             {(content.key_points || content.keyPoints) && (
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Key Points</h4>
+                <h4 className="font-semibold text-white mb-2">Key Points</h4>
                 <ul className="space-y-2">
                   {Array.isArray(content.key_points || content.keyPoints) ? (
                     (content.key_points || content.keyPoints).map((point, idx) => (
-                      <li key={idx} className="flex gap-2 text-gray-700">
+                      <li key={idx} className="flex gap-2 text-gray-200">
                         <span className="text-blue-600 font-bold">•</span>
                         <span>{point}</span>
                       </li>
@@ -227,11 +227,11 @@ export default function SECONDARY_SummaryPanel({
             {/* Examples */}
             {(content.examples || content.Examples) && (
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Examples</h4>
+                <h4 className="font-semibold text-white mb-2">Examples</h4>
                 <ul className="space-y-2">
                   {Array.isArray(content.examples || content.Examples) ? (
                     (content.examples || content.Examples).map((example, idx) => (
-                      <li key={idx} className="flex gap-2 text-gray-700">
+                        <li key={idx} className="flex gap-2 text-gray-200">
                         <span className="text-purple-600 font-bold">•</span>
                         <span>{example}</span>
                       </li>
@@ -246,11 +246,11 @@ export default function SECONDARY_SummaryPanel({
             {/* Questions */}
             {(content.questions || content.Questions) && (
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Questions</h4>
+                <h4 className="font-semibold text-white mb-2">Questions</h4>
                 <ul className="space-y-2">
                   {Array.isArray(content.questions || content.Questions) ? (
                     (content.questions || content.Questions).map((question, idx) => (
-                      <li key={idx} className="flex gap-2 text-gray-700">
+                        <li key={idx} className="flex gap-2 text-gray-200">
                         <span className="text-orange-600 font-bold">•</span>
                         <span>{question}</span>
                       </li>
@@ -267,18 +267,18 @@ export default function SECONDARY_SummaryPanel({
               if (!['key_points', 'keyPoints', 'examples', 'Examples', 'questions', 'Questions'].includes(key)) {
                 return (
                   <div key={key}>
-                    <h4 className="font-semibold text-gray-900 mb-2 capitalize">{key}</h4>
+                    <h4 className="font-semibold text-white mb-2 capitalize">{key}</h4>
                     {Array.isArray(value) ? (
                       <ul className="space-y-2">
                         {value.map((item, idx) => (
-                          <li key={idx} className="flex gap-2 text-gray-700">
+                          <li key={idx} className="flex gap-2 text-gray-200">
                             <span className="text-gray-600 font-bold">•</span>
                             <span>{item}</span>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-gray-700">{String(value)}</p>
+                      <p className="text-gray-200">{String(value)}</p>
                     )}
                   </div>
                 );
@@ -322,19 +322,19 @@ export default function SECONDARY_SummaryPanel({
       {summaries.map((summary, idx) => (
         <div
           key={idx}
-          className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700 p-6 shadow-sm hover:shadow-lg transition-shadow text-white"
         >
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-700 to-violet-600 text-white">
                   {summary.type === 'normal' ? 'Normal Summary' : 'Incremental Summary'}
                 </span>
-                <span className="text-xs text-gray-500">{formatDate(summary.createdAt)}</span>
+                <span className="text-xs text-gray-400">{formatDate(summary.createdAt)}</span>
               </div>
               {summary.messageCount && (
-                <p className="text-xs text-gray-500">{summary.messageCount} message(s)</p>
+                <p className="text-xs text-gray-400">{summary.messageCount} message(s)</p>
               )}
             </div>
             <button
@@ -348,7 +348,7 @@ export default function SECONDARY_SummaryPanel({
 
           {/* Summary content (always visible) */}
           <div className="mb-4">
-            <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-100 rounded-lg p-4 prose prose-sm max-w-none">
+            <div className="bg-gradient-to-br from-purple-900/40 to-gray-900/30 border border-gray-700 rounded-lg p-4 prose prose-sm max-w-none text-gray-100">
               <MarkdownRenderer content={getSummaryMarkdown(summary)} />
             </div>
           </div>
@@ -361,29 +361,29 @@ export default function SECONDARY_SummaryPanel({
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => handleCopySummary(summary)}
-              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              title="Copy to clipboard"
-            >
-              Copy
-            </button>
-            <button
-              onClick={() => handleExportJSON(summary)}
-              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              title="Export as JSON"
-            >
-              Export JSON
-            </button>
-            <button
-              onClick={() => handleExportMarkdown(summary)}
-              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              title="Export as Markdown"
-            >
-              Export MD
-            </button>
-          </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleCopySummary(summary)}
+                className="px-3 py-2 text-sm bg-gray-800 text-gray-200 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+                title="Copy to clipboard"
+              >
+                Copy
+              </button>
+              <button
+                onClick={() => handleExportJSON(summary)}
+                className="px-3 py-2 text-sm bg-gray-800 text-gray-200 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+                title="Export as JSON"
+              >
+                Export JSON
+              </button>
+              <button
+                onClick={() => handleExportMarkdown(summary)}
+                className="px-3 py-2 text-sm bg-gray-800 text-gray-200 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+                title="Export as Markdown"
+              >
+                Export MD
+              </button>
+            </div>
         </div>
       ))}
     </div>
