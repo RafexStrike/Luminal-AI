@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import MarkdownRenderer from './ui/MarkdownRenderer';
 
 /**
  * SECONDARY_SummaryPanel
@@ -135,6 +136,56 @@ export default function SECONDARY_SummaryPanel({
     if (!date) return 'Unknown date';
     const d = new Date(date);
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+  };
+
+  // Convert a summary object into a markdown string for consistent rendering
+  const getSummaryMarkdown = (summary) => {
+    if (!summary) return '';
+
+    // Normal summaries are already markdown strings
+    if (summary.type === 'normal') return summary.content || '';
+
+    // Incremental summaries are structured JSON - build a readable markdown representation
+    if (summary.type === 'incremental') {
+      try {
+        const content = typeof summary.content === 'string' ? JSON.parse(summary.content) : summary.content;
+        let md = '';
+
+        if (content.key_points) {
+          md += '## Key Points\n\n';
+          md += Array.isArray(content.key_points) ? content.key_points.map(p => `- ${p}`).join('\n') : content.key_points;
+          md += '\n\n';
+        }
+
+        if (content.examples) {
+          md += '## Examples\n\n';
+          md += Array.isArray(content.examples) ? content.examples.map(e => `- ${e}`).join('\n') : content.examples;
+          md += '\n\n';
+        }
+
+        if (content.questions) {
+          md += '## Questions\n\n';
+          md += Array.isArray(content.questions) ? content.questions.map(q => `- ${q}`).join('\n') : content.questions;
+          md += '\n\n';
+        }
+
+        Object.entries(content).forEach(([key, value]) => {
+          if (!['key_points', 'examples', 'questions'].includes(key)) {
+            md += `## ${key.replace(/_/g, ' ')}\n\n`;
+            if (Array.isArray(value)) md += value.map(v => `- ${v}`).join('\n') + '\n\n';
+            else md += `${value}\n\n`;
+          }
+        });
+
+        return md.trim();
+      } catch (err) {
+        // Fallback - show raw content
+        return typeof summary.content === 'string' ? summary.content : JSON.stringify(summary.content, null, 2);
+      }
+    }
+
+    // Generic fallback
+    return typeof summary.content === 'string' ? summary.content : JSON.stringify(summary.content, null, 2);
   };
 
   const renderSummaryContent = (summary) => {
@@ -293,6 +344,13 @@ export default function SECONDARY_SummaryPanel({
             >
               {expandedSummaryId === idx ? '−' : '+'}
             </button>
+          </div>
+
+          {/* Summary content (always visible) */}
+          <div className="mb-4">
+            <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-100 rounded-lg p-4 prose prose-sm max-w-none">
+              <MarkdownRenderer content={getSummaryMarkdown(summary)} />
+            </div>
           </div>
 
           {/* Content (expanded) */}
