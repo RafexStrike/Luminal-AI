@@ -29,7 +29,10 @@ export async function middleware(request) {
   }
 
   // Check for auth session cookie
-  const sessionCookie = request.cookies.get("better-auth.session_token" || "__Secure-better-auth.session_token");
+  // const sessionCookie = request.cookies.get("better-auth.session_token" || "__Secure-better-auth.session_token");
+  const sessionCookie =
+  request.cookies.get("__Secure-better-auth.session_token") ||
+  request.cookies.get("better-auth.session_token");
 
   if (!sessionCookie) {
     // No session found, redirect to login
