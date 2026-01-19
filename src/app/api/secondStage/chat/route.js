@@ -259,6 +259,9 @@ async function handleStreamingResponse(providerResponse, user, chatId) {
  * Query params: chatId
  * Returns: { messages: [...], chatId }
  */
+
+// i guess the following shit does not work and is being used anywhere.
+// stuff that is really being used to gather the user's chat history is this: src/app/api/secondStage/chats/route.js
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
