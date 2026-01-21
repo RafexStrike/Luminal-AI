@@ -10,8 +10,7 @@
 import { retrieveContext, retrieveBySource } from "./retriever.js";
 import { augmentPrompt, augmentSystemPrompt } from "./promptBuilder.js";
 import { embedText } from "./embedder.js";
-import { storeEmbedding, retrieveSimilar } from "./vectorStore.js";
-
+import { storeEmbedding, retrieveSimilar } from "./vectorStore.js";import { RAG_CONTENT_TYPES } from './content-types.js';
 /**
  * Process a message with optional RAG enhancement
  *
@@ -43,7 +42,7 @@ export async function processWithRAG({ userId, prompt, ragConfig = null }) {
 
   try {
     const {
-      sources = ["flashcard", "quiz", "note"],
+      sources = RAG_CONTENT_TYPES,
       topK = 5,
       threshold = 0.3,
     } = ragConfig;

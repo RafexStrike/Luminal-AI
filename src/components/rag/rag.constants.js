@@ -6,55 +6,21 @@
  * Available RAG context sources
  * Maps source type to display name and description
  */
-export const RAG_SOURCES = {
-  flashcard: {
-    label: 'Flashcards',
-    description: 'Search your flashcard decks',
-    icon: '🎴',
-    color: '#4f46e5',
-  },
-  quiz: {
-    label: 'Quizzes',
-    description: 'Find relevant quiz questions',
-    icon: '❓',
-    color: '#8b5cf6',
-  },
-  note: {
-    label: 'Notes',
-    description: 'Search your notes',
-    icon: '📝',
-    color: '#06b6d4',
-  },
-  video: {
-    label: 'Videos',
-    description: 'Search video transcripts',
-    icon: '🎥',
-    color: '#ec4899',
-  },
-};
+import { RAG_SOURCE_META, RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js';
+
+// Use the central RAG_SOURCE_META to allow easy extension (e.g., add 'video' later)
+export const RAG_SOURCES = RAG_SOURCE_META;
 
 /**
- * Slash commands for RAG
+ * Slash commands for RAG - generated from RAG_CONTENT_TYPES
  */
 export const RAG_SLASH_COMMANDS = [
-  {
-    command: '/context-flashcard',
-    label: 'Flashcards',
-    source: 'flashcard',
-    shortcut: 'C+F',
-  },
-  {
-    command: '/context-quiz',
-    label: 'Quizzes',
-    source: 'quiz',
-    shortcut: 'C+Q',
-  },
-  {
-    command: '/context-note',
-    label: 'Notes',
-    source: 'note',
-    shortcut: 'C+N',
-  },
+  ...RAG_CONTENT_TYPES.map((t) => ({
+    command: `/context-${t}`,
+    label: RAG_SOURCE_META[t]?.label || t,
+    source: t,
+    shortcut: `C+${(t[0] || '').toUpperCase()}`,
+  })),
   {
     command: '/context-all',
     label: 'All Sources',

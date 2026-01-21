@@ -202,7 +202,8 @@ const handleComposerTextChange = (text) => {
 const handleSelectSlashCommand = (command) => {
   if (command.source === null) {
     // '/context-all' - use all sources
-    setRagSources(['flashcard', 'quiz', 'note']);
+    // import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
+    setRagSources(RAG_CONTENT_TYPES);
   } else {
     // Single source
     setRagSources([command.source]);

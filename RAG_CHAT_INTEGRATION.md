@@ -153,7 +153,8 @@ const handleComposerKeyDown = (e) => {
 const handleSelectSlashCommand = (command) => {
   if (command.source === null) {
     // "/context-all" - use all sources
-    setRagSources(['flashcard', 'quiz', 'note']);
+    // import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
+    setRagSources(RAG_CONTENT_TYPES);
   } else {
     // Single source selected
     setRagSources([command.source]);
@@ -451,7 +452,8 @@ export default function SECONDARY_ChatWindow({
   // Handle slash command selection
   const handleSelectSlashCommand = (command) => {
     if (command.source === null) {
-      setRagSources(['flashcard', 'quiz', 'note']);
+      // import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
+      setRagSources(RAG_CONTENT_TYPES);
     } else {
       setRagSources([command.source]);
     }

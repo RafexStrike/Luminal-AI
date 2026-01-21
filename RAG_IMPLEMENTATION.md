@@ -346,8 +346,9 @@ await storeEmbedding({
 });
 
 // Retrieve
+// import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
 const similar = await retrieveSimilar({
-  userId, queryEmbedding, sourceTypes: ['flashcard'], topK: 5
+  userId, queryEmbedding, sourceTypes: RAG_CONTENT_TYPES, topK: 5
 });
 ```
 
@@ -356,10 +357,11 @@ const similar = await retrieveSimilar({
 High-level search orchestration
 
 ```javascript
+// import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
 const results = await retrieveContext({
   userId,
   query: "How does spaced repetition work?",
-  sourceTypes: ['flashcard', 'note'],
+  sourceTypes: RAG_CONTENT_TYPES,
   topK: 5,
 });
 // Returns: { query, embedding, results, totalRetrieved }
@@ -411,10 +413,11 @@ const result = await healthCheck();
 ```javascript
 import { retrieveContext } from '@/lib/rag/retriever.js';
 
+// import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
 const results = await retrieveContext({
   userId: 'test_user',
   query: 'What is spaced repetition?',
-  sourceTypes: ['flashcard'],
+  sourceTypes: RAG_CONTENT_TYPES,
   topK: 3,
 });
 

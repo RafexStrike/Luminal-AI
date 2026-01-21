@@ -49,7 +49,8 @@ if (ragMetadata) {
   const { augmentedPrompt } = await processWithRAG({
     userId: user.id,
     prompt: userMessage,
-    ragConfig: { sources: ['flashcard', 'note'] }
+    // import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
+ragConfig: { sources: RAG_CONTENT_TYPES }
   });
   // Use augmentedPrompt instead of original
 }
@@ -200,10 +201,11 @@ console.log(result); // { healthy: true/false, ... }
 
 // Manual retrieval
 import { retrieveContext } from '@/lib/rag/retriever.js';
+// import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js'
 const results = await retrieveContext({
   userId: 'test',
   query: 'What is X?',
-  sourceTypes: ['flashcard'],
+  sourceTypes: RAG_CONTENT_TYPES,
   topK: 5
 });
 console.log(results);

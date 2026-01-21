@@ -17,6 +17,7 @@ import RagSlashMenu from './rag/RagSlashMenu';
 import RagSourceSelector from './rag/RagSourceSelector';
 import RagContextPreview from './rag/RagContextPreview';
 import { detectSlashCommand, RAG_SLASH_COMMANDS } from './rag/rag.constants';
+import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js';
 import ChatComposer from './SECONDARY_ChatComposer';
 // --- RAG IMPORTS END ---
 
@@ -115,7 +116,7 @@ export default function SECONDARY_ChatWindow({
         if (command) {
           // Use the same logic as handleSelectSlashCommand
           if (command.source === null) {
-            setRagSources(['flashcard', 'quiz', 'note']);
+            setRagSources(RAG_CONTENT_TYPES);
           } else {
             setRagSources([command.source]);
           }
@@ -155,7 +156,7 @@ export default function SECONDARY_ChatWindow({
   const handleSelectSlashCommand = useCallback((command) => {
     if (command.source === null) {
       // '/context-all' - use all sources
-      setRagSources(['flashcard', 'quiz', 'note']);
+      setRagSources(RAG_CONTENT_TYPES);
     } else {
       // Single source
       setRagSources([command.source]);

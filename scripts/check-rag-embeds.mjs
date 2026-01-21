@@ -1,5 +1,6 @@
 import { listEmbeddings, retrieveSimilar } from '../src/lib/rag/vectorStore.js';
 import { embedText } from '../src/lib/rag/embedder.js';
+import { RAG_CONTENT_TYPES } from '../src/lib/rag/content-types.js';
 
 const testUser = process.env.TEST_USER_ID || '69609228c529a11c428ed508';
 const query = process.env.TEST_QUERY || 'Explain spaced repetition';
@@ -17,7 +18,7 @@ async function run() {
     const results = await retrieveSimilar({
       userId: testUser,
       queryEmbedding: qEmb,
-      sourceTypes: ['flashcard','quiz','note'],
+      sourceTypes: RAG_CONTENT_TYPES,
       topK: 5,
       threshold: 0.0,
     });

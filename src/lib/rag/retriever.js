@@ -9,6 +9,7 @@
 
 import { embedText } from './embedder.js';
 import { retrieveSimilar } from './vectorStore.js';
+import { RAG_CONTENT_TYPES } from './content-types.js';
 
 /**
  * Retrieve relevant documents for a user's query
@@ -25,7 +26,7 @@ import { retrieveSimilar } from './vectorStore.js';
 export async function retrieveContext({
   userId,
   query,
-  sourceTypes = ['flashcard', 'quiz', 'note'],
+  sourceTypes = RAG_CONTENT_TYPES,
   topK = 5,
   threshold = 0.3,
 }) {
@@ -151,7 +152,7 @@ export async function retrieveBySource({
 
   try {
     const queryEmbedding = await embedText(query);
-    const sources = ['flashcard', 'quiz', 'note'];
+    const sources = RAG_CONTENT_TYPES;
     const bySource = {};
 
     // Retrieve from each source separately
