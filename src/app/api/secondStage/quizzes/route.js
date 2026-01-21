@@ -163,6 +163,34 @@ export async function POST(req) {
           questions,
         });
         savedId = result._id?.toString();
+
+        // Background: add questions to vector store (non-blocking)
+        try {
+          const { addToVectorStore } = await import('@/lib/rag/index.js');
+          questions.forEach((q, idx) => {
+            const sourceId = `${savedId}:${idx}`;
+            const correct = Array.isArray(q.options) && typeof q.answerIndex === 'number' ? q.options[q.answerIndex] : '';
+            const text = `Q: ${q.question}\nA: ${correct}\nExplanation: ${q.explanation || ''}`;
+
+            addToVectorStore({
+              userId: user.id,
+              sourceType: 'quiz',
+              sourceId,
+              text,
+              metadata: { options: q.options || [] },
+            }).then((res) => {
+              if (!res.success) {
+                console.warn('addToVectorStore failed for quiz', sourceId, res.error);
+              } else {
+                console.log('addToVectorStore succeeded for quiz', sourceId);
+              }
+            }).catch((err) => {
+              console.warn('addToVectorStore error for quiz', sourceId, err?.message || err);
+            });
+          });
+        } catch (err) {
+          console.warn('Failed to enqueue quiz embeddings:', err?.message || err);
+        }
       } catch (dbError) {
         console.error('Error saving quizzes to DB:', dbError);
       }

@@ -1,6 +1,11 @@
 // FILE: src/app/api/secondStage/chat/route.js
 // DESCRIPTION: Context-aware chat endpoint using MongoDB for session history
 // HuggingFace Inference API provides stateless LLM responses
+// 
+// RAG INTEGRATION (NON-BREAKING):
+// This endpoint optionally supports RAG metadata to augment prompts.
+// If RAG metadata is not provided, behavior is identical to before.
+// See: src/lib/rag/README.md for detailed documentation
 
 import { callProvider } from '@/lib/SECONDARY_providers';
 import { getUserIfAuthenticated } from '@/lib/SECONDARY_authPlaceholder';
@@ -10,6 +15,7 @@ import {
   updateChatTitle,
   generateChatTitle,
 } from '@/lib/SECONDARY_db';
+import { processWithRAG } from '@/lib/rag/index.js';
 import { NextResponse } from 'next/server';
 
 /**
@@ -21,8 +27,17 @@ import { NextResponse } from 'next/server';
  *     prompt: string (the user's new message),
  *     provider: string (default: "huggingface"),
  *     stream: boolean (default: false),
- *     systemPrompt: string (optional, custom system instructions)
+ *     systemPrompt: string (optional, custom system instructions),
+ *     rag: object (optional, RAG configuration - see RAG section below)
  *   }
+ *
+ * RAG Configuration (optional):
+ *   {
+ *     rag: {
+ *       sources: string[] (e.g., ["flashcard", "note"])
+ *     }
+ *   }
+ *   If not provided or empty, RAG is skipped entirely (unchanged behavior)
  *
  * Flow:
  *   1. Load all messages for chatId from MongoDB (this is the context)
@@ -40,6 +55,25 @@ import { NextResponse } from 'next/server';
  *     provider: string
  *   }
  *
+ *
+ * Flow (WITH RAG):
+ *   1. Load message history
+ *   2. (NEW) If RAG metadata provided: retrieve context and augment prompt
+ *   3. Append user's (possibly augmented) message
+ *   4. Send full message array to LLM provider
+ *   5. Stream or buffer the response
+ *   6. Save assistant's response to MongoDB
+ *   7. If first user message, generate and save chat title
+ *
+ * Response (non-streaming):
+ *   {
+ *     content: string (assistant's response),
+ *     chatId: string,
+ *     messageCount: number,
+ *     provider: string,
+ *     rag: object (if RAG was used, includes contextRetrieved count)
+ *   }
+ *
  * Response (streaming):
  *   Server-Sent Events (SSE) with chunks
  */
@@ -54,6 +88,7 @@ export async function POST(req) {
       provider = 'huggingface',
       stream = false,
       systemPrompt = null,
+      rag = null,
     } = body;
 
     // Validate input
@@ -92,18 +127,48 @@ export async function POST(req) {
       }));
 
     // ============================================
-    // STEP 2: Append new user message
+    // STEP 2: (OPTIONAL) Process RAG if enabled
+    // ============================================
+    let ragResult = null;
+    let userPromptToSend = prompt.trim();
+
+    if (rag && rag.sources && rag.sources.length > 0) {
+      try {
+        ragResult = await processWithRAG({
+          userId: user.id,
+          prompt: prompt.trim(),
+          ragConfig: {
+            sources: rag.sources,
+            topK: rag.topK || 5,
+            threshold: rag.threshold || 0.3,
+          },
+        });
+
+        // Use augmented prompt if RAG succeeded
+        if (ragResult.ragEnabled && ragResult.augmentedPrompt) {
+          userPromptToSend = ragResult.augmentedPrompt;
+        }
+      } catch (error) {
+        // Log RAG error but don't fail the chat request
+        console.warn('RAG processing warning (non-fatal):', error.message);
+        // Continue with original prompt
+      }
+    }
+
+    // ============================================
+    // STEP 3: Append new user message
     // ============================================
     const userMessage = {
       role: 'user',
-      content: prompt.trim(),
+      content: userPromptToSend,
     };
 
     const messagesToSend = [...contextMessages, userMessage];
 
     // ============================================
-    // STEP 3: Save user message to DB
+    // STEP 4: Save user message to DB
     // ============================================
+    // NOTE: Save the ORIGINAL prompt (not augmented) for audit trail
     const userMsgDoc = await saveMessage({
       userId: user.id,
       chatId,
@@ -112,7 +177,7 @@ export async function POST(req) {
     });
 
     // ============================================
-    // STEP 4: Check if this is the first user message
+    // STEP 5: Check if this is the first user message
     // ============================================
     const isFirstMessage = messageHistory.length === 1; // Only system message exists
     if (isFirstMessage) {
@@ -125,7 +190,7 @@ export async function POST(req) {
     }
 
     // ============================================
-    // STEP 5: Call LLM provider
+    // STEP 6: Call LLM provider
     // ============================================
     const customSystemPrompt =
       systemPrompt ||
@@ -140,18 +205,18 @@ export async function POST(req) {
     });
 
     // ============================================
-    // STEP 6: Handle streaming vs non-streaming
+    // STEP 7: Handle streaming vs non-streaming
     // ============================================
     if (stream) {
       // For streaming, we return SSE format
-      return handleStreamingResponse(providerResponse, user, chatId);
+      return handleStreamingResponse(providerResponse, user, chatId, ragResult);
     }
 
     // Non-streaming: collect full response
     const assistantContent = providerResponse || '';
 
     // ============================================
-    // STEP 7: Save assistant response to DB
+    // STEP 8: Save assistant response to DB
     // ============================================
     await saveMessage({
       userId: user.id,
@@ -161,20 +226,30 @@ export async function POST(req) {
     });
 
     // ============================================
-    // STEP 8: Return response
+    // STEP 9: Return response
     // ============================================
     const finalMessageHistory = await getMessageHistory({
       userId: user.id,
       chatId,
     });
 
-    return NextResponse.json({
+    const response = {
       content: assistantContent,
       chatId,
       messageCount: finalMessageHistory.length,
       provider,
       streaming: false,
-    });
+    };
+
+    // Include RAG metadata if it was used
+    if (ragResult?.ragEnabled) {
+      response.rag = {
+        enabled: true,
+        contextRetrieved: ragResult.contextRetrieved || 0,
+      };
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Chat API error:', error);
     return NextResponse.json(
@@ -191,7 +266,7 @@ export async function POST(req) {
  * Handle streaming response from HuggingFace
  * Converts iterator chunks into SSE format
  */
-async function handleStreamingResponse(providerResponse, user, chatId) {
+async function handleStreamingResponse(providerResponse, user, chatId, ragResult) {
   if (!providerResponse?.stream || !providerResponse?.iterator) {
     return NextResponse.json(
       { error: 'Streaming not available from provider' },

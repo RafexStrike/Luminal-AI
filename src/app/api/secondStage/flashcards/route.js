@@ -153,6 +153,34 @@ export async function POST(req) {
           cards,
         });
         savedId = result._id?.toString();
+
+        // Background: add each card to the RAG vector store (non-blocking)
+        try {
+          const { addToVectorStore } = await import('@/lib/rag/index.js');
+          cards.forEach((card, idx) => {
+            const sourceId = `${savedId}:${idx}`;
+            const text = `Q: ${card.q}\nA: ${card.a}`;
+
+            // Fire and forget; log failures but do not affect response
+            addToVectorStore({
+              userId: user.id,
+              sourceType: 'flashcard',
+              sourceId,
+              text,
+              metadata: { difficulty: card.difficulty || 'unknown', tags: card.tags || [] },
+            }).then((res) => {
+              if (!res.success) {
+                console.warn('addToVectorStore failed for', sourceId, res.error);
+              } else {
+                console.log('addToVectorStore succeeded for', sourceId);
+              }
+            }).catch((err) => {
+              console.warn('addToVectorStore error for', sourceId, err?.message || err);
+            });
+          });
+        } catch (err) {
+          console.warn('Failed to enqueue embeddings for flashcards:', err?.message || err);
+        }
       } catch (dbError) {
         console.error('Error saving flashcards to DB:', dbError);
       }

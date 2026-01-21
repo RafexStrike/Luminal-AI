@@ -101,6 +101,32 @@ export async function POST(req) {
       chatId,
     });
 
+    // Background: add notes content to vector store (non-blocking)
+    try {
+      const { addToVectorStore } = await import('@/lib/rag/index.js');
+      // Strip basic HTML tags for embedding
+      const plain = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const sourceId = `notes:${user.id}:${chatId || 'global'}`;
+
+      addToVectorStore({
+        userId: user.id,
+        sourceType: 'note',
+        sourceId,
+        text: plain,
+        metadata: { chatId: chatId || null },
+      }).then((res) => {
+        if (!res.success) {
+          console.warn('addToVectorStore failed for notes', sourceId, res.error);
+        } else {
+          console.log('addToVectorStore succeeded for notes', sourceId);
+        }
+      }).catch((err) => {
+        console.warn('addToVectorStore error for notes', sourceId, err?.message || err);
+      });
+    } catch (err) {
+      console.warn('Failed to enqueue note embedding:', err?.message || err);
+    }
+
     return Response.json({
       success: true,
       updatedAt: new Date().toISOString(),

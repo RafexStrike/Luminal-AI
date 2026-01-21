@@ -1,7 +1,7 @@
 // FILE: src/components/SECONDARY_ChatWindow.jsx
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import theme from '../design/theme.config';
 import chat from '../design/chat.config';
 
@@ -12,6 +12,14 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 // --- NEW IMPORTS for styling up the LLM response END ---
 
+// --- RAG IMPORTS START ---
+import RagSlashMenu from './rag/RagSlashMenu';
+import RagSourceSelector from './rag/RagSourceSelector';
+import RagContextPreview from './rag/RagContextPreview';
+import { detectSlashCommand, RAG_SLASH_COMMANDS } from './rag/rag.constants';
+import ChatComposer from './SECONDARY_ChatComposer';
+// --- RAG IMPORTS END ---
+
 export default function SECONDARY_ChatWindow({
   chatId = null,
   onDataSaved = () => {},
@@ -19,12 +27,20 @@ export default function SECONDARY_ChatWindow({
   refreshTrigger = 0,
 }) {
   const messagesEndRef = useRef(null);
+  const composerInputRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [selectedMessageIds, setSelectedMessageIds] = useState(new Set());
   const [composerText, setComposerText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   const [showStreamingPlaceholder, setShowStreamingPlaceholder] = useState(false);
+
+  // --- RAG STATE START ---
+  const [ragSources, setRagSources] = useState([]);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
+  const [ragResults, setRagResults] = useState([]);
+  // --- RAG STATE END ---
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,7 +78,104 @@ export default function SECONDARY_ChatWindow({
     }
   }, [chatId, refreshTrigger]);
 
-  const handleSendMessage = async () => {
+  // --- RAG HANDLERS START ---
+  const handleComposerChange = useCallback((e) => {
+    const text = e.target.value;
+    setComposerText(text);
+
+    // Only check for slash if text length is small (early exit optimization)
+    // This prevents expensive operations during normal typing
+    if (text.length <= 50 && text.startsWith('/')) {
+      setShowSlashMenu(true);
+      setSelectedMenuIndex(0);
+    } else if (text.length > 0 && !text.startsWith('/')) {
+      // Close menu if slash was removed or text doesn't start with /
+      setShowSlashMenu(false);
+    }
+  }, []);
+
+  const handleComposerKeyDown = useCallback((e) => {
+    // Handle slash menu navigation
+    if (showSlashMenu) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedMenuIndex((prev) =>
+          Math.min(prev + 1, RAG_SLASH_COMMANDS.length - 1)
+        );
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedMenuIndex((prev) => Math.max(prev - 1, 0));
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const command = RAG_SLASH_COMMANDS[selectedMenuIndex];
+        if (command) {
+          // Use the same logic as handleSelectSlashCommand
+          if (command.source === null) {
+            setRagSources(['flashcard', 'quiz', 'note']);
+          } else {
+            setRagSources([command.source]);
+          }
+          setComposerText('');
+          setShowSlashMenu(false);
+          setSelectedMenuIndex(0);
+          composerInputRef.current?.focus();
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowSlashMenu(false);
+        return;
+      }
+    }
+
+    // Handle send message with Ctrl/Cmd+Enter or just Enter
+    if ((e.key === 'Enter' && !e.shiftKey) || (e.ctrlKey && e.key === 'Enter')) {
+      e.preventDefault();
+      // Inline the send logic instead of calling another function
+      if (composerText.trim() && !isLoading) {
+        handleSendMessage();
+      }
+    }
+  }, [showSlashMenu, selectedMenuIndex, composerText, isLoading]);
+
+  const toggleRagMenu = useCallback(() => {
+    setShowSlashMenu((prev) => !prev);
+    setSelectedMenuIndex(0);
+    // Defer focus to next frame to avoid conflicts
+    requestAnimationFrame(() => {
+      composerInputRef.current?.focus();
+    });
+  }, []);
+
+  const handleSelectSlashCommand = useCallback((command) => {
+    if (command.source === null) {
+      // '/context-all' - use all sources
+      setRagSources(['flashcard', 'quiz', 'note']);
+    } else {
+      // Single source
+      setRagSources([command.source]);
+    }
+
+    // Close slash menu
+    setShowSlashMenu(false);
+
+    // Remove the slash command from the message text
+    const messageWithoutSlash = composerText
+      .replace(/^\/[\w\-]+\s*/, '')
+      .trim();
+    setComposerText(messageWithoutSlash);
+
+    // Refocus input
+    composerInputRef.current?.focus();
+  }, [composerText]);
+  // --- RAG HANDLERS END ---
+
+  const handleSendMessage = useCallback(async () => {
     if (!composerText.trim() || !chatId) {
       if (!chatId) {
         alert('No chat selected. Please create or select a chat first.');
@@ -78,15 +191,28 @@ export default function SECONDARY_ChatWindow({
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const messageToSend = composerText; // Save for API call
     setComposerText('');
+    setRagSources([]); // Clear RAG selection
     setIsLoading(true);
     setShowStreamingPlaceholder(true);
 
     try {
+      // Build request body with optional RAG
+      const requestBody = {
+        chatId,
+        prompt: messageToSend,
+        stream: false,
+      };
+
+      if (ragSources.length > 0) {
+        requestBody.rag = { sources: ragSources };
+      }
+
       const response = await fetch('/api/secondStage/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId, prompt: composerText, stream: false }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -95,6 +221,12 @@ export default function SECONDARY_ChatWindow({
       }
 
       const data = await response.json();
+
+      // Extract RAG results if available
+      if (data.rag?.results) {
+        setRagResults(data.rag.results);
+      }
+
       const assistantMessage = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
@@ -116,7 +248,7 @@ export default function SECONDARY_ChatWindow({
       setIsLoading(false);
       setShowStreamingPlaceholder(false);
     }
-  };
+  }, [composerText, chatId, ragSources]);
 
   const handleToggleMessageSelection = (messageId) => {
     setSelectedMessageIds((prev) => {
@@ -379,58 +511,47 @@ export default function SECONDARY_ChatWindow({
 
       {/* ... Composer ... */}
       <div className="border-t border-gray-800/50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 backdrop-blur-sm">
-         <div className="flex gap-3">
-          <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-lg border border-gray-700/50 focus-within:border-purple-500/50 transition-colors">
-            {/* Placeholder buttons */}
-            <button 
-              className="p-2 text-gray-500 hover:text-purple-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded" 
-              title="Attach file" 
-              aria-label="Attach"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21.44 11.05L12.98 19.5a5 5 0 01-7.07-7.07l7.07-7.07a3 3 0 114.24 4.24L9.56 17.94" />
-              </svg>
-            </button>
-            <input 
-              type="text" 
-              placeholder="Type your message..." 
-              value={composerText} 
-              onChange={(e) => setComposerText(e.target.value)} 
-              onKeyDown={(e) => { 
-                if (e.key === 'Enter' && !e.shiftKey) { 
-                  e.preventDefault(); 
-                  handleSendMessage(); 
-                }
-              }} 
-              className="flex-1 outline-none bg-transparent text-white placeholder:text-gray-500 focus-visible:outline-none" 
+        {/* RAG Context Preview */}
+        {ragResults.length > 0 && (
+          <div className="mb-4">
+            <RagContextPreview
+              results={ragResults}
+              onDismiss={() => setRagResults([])}
             />
-            <button 
-              className="p-2 text-gray-500 hover:text-purple-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded" 
-              title="Voice input" 
-              aria-label="Voice"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 1v11" />
-              </svg>
-            </button>
-            <button 
-              className="p-2 text-gray-500 hover:text-purple-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded" 
-              title="Add context" 
-              aria-label="Context"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
-              </svg>
-            </button>
           </div>
-          <button 
-            onClick={handleSendMessage} 
-            disabled={!composerText.trim() || isLoading} 
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950" 
-            aria-label="Send message"
-          >
-            Send
-          </button>
+        )}
+
+        {/* RAG Source Selector */}
+        {ragSources.length > 0 && (
+          <div className="mb-3">
+            <RagSourceSelector
+              selectedSources={ragSources}
+              onSourcesChange={setRagSources}
+            />
+          </div>
+        )}
+
+         <div className="flex gap-3">
+          {/* RAG Slash Menu - positioned relative to input container */}
+          <div className="flex-1 relative">
+            <RagSlashMenu
+              isOpen={showSlashMenu}
+              selectedIndex={selectedMenuIndex}
+              onSelect={handleSelectSlashCommand}
+              onClose={() => setShowSlashMenu(false)}
+            />
+
+            <ChatComposer
+              ref={composerInputRef}
+              composerText={composerText}
+              onTextChange={handleComposerChange}
+              onKeyDown={handleComposerKeyDown}
+              isLoading={isLoading}
+              onSendClick={handleSendMessage}
+              showSlashMenu={showSlashMenu}
+              onToggleRagMenu={toggleRagMenu}
+            />
+          </div>
         </div>
       </div>
     </div>
