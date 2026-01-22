@@ -14,12 +14,15 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // --- RAG IMPORTS START ---
 import RagSlashMenu from './rag/RagSlashMenu';
-import RagSourceSelector from './rag/RagSourceSelector';
-import RagContextPreview from './rag/RagContextPreview';
+import { RagContextSidebar } from './rag/RagContextSidebar';
 import { detectSlashCommand, RAG_SLASH_COMMANDS } from './rag/rag.constants';
 import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js';
 import ChatComposer from './SECONDARY_ChatComposer';
 // --- RAG IMPORTS END ---
+
+// --- HOOKS IMPORTS START ---
+import { useRagSidebarState } from '@/hooks/useRagSidebarState';
+// --- HOOKS IMPORTS END ---
 
 export default function SECONDARY_ChatWindow({
   chatId = null,
@@ -41,6 +44,7 @@ export default function SECONDARY_ChatWindow({
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
   const [ragResults, setRagResults] = useState([]);
+  const ragSidebarState = useRagSidebarState();
   // --- RAG STATE END ---
 
   useEffect(() => {
@@ -194,7 +198,7 @@ export default function SECONDARY_ChatWindow({
     setMessages((prev) => [...prev, userMessage]);
     const messageToSend = composerText; // Save for API call
     setComposerText('');
-    setRagSources([]); // Clear RAG selection
+    // Keep RAG sources visible so sidebar persists
     setIsLoading(true);
     setShowStreamingPlaceholder(true);
 
@@ -345,8 +349,12 @@ export default function SECONDARY_ChatWindow({
 
   return (
     <div className="flex flex-col h-full bg-gray-950 text-white">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-auto p-6 space-y-4">
+      {/* Main content container with sidebar */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Messages Area - takes remaining space */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Scrollable messages area */}
+          <div className="flex-1 overflow-auto p-6 space-y-4">
         {messages.length === 0 && (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
@@ -436,10 +444,48 @@ export default function SECONDARY_ChatWindow({
         )}
 
         <div ref={messagesEndRef} />
+          </div>
+
+          {/* Composer at bottom of left area */}
+          <div className="border-t border-gray-800/50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 backdrop-blur-sm flex-shrink-0">
+            <div className="flex gap-3">
+              {/* RAG Slash Menu - positioned relative to input container */}
+              <div className="flex-1 relative">
+                <RagSlashMenu
+                  isOpen={showSlashMenu}
+                  selectedIndex={selectedMenuIndex}
+                  onSelect={handleSelectSlashCommand}
+                  onClose={() => setShowSlashMenu(false)}
+                />
+
+                <ChatComposer
+                  ref={composerInputRef}
+                  composerText={composerText}
+                  onTextChange={handleComposerChange}
+                  onKeyDown={handleComposerKeyDown}
+                  isLoading={isLoading}
+                  onSendClick={handleSendMessage}
+                  showSlashMenu={showSlashMenu}
+                  onToggleRagMenu={toggleRagMenu}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RAG Context Sidebar - right panel */}
+        <RagContextSidebar
+          ragSources={ragSources}
+          ragResults={ragResults}
+          isCollapsed={ragSidebarState.isCollapsed}
+          onToggleCollapse={ragSidebarState.toggleCollapse}
+          sidebarWidth={ragSidebarState.sidebarWidth}
+          onResizeStart={ragSidebarState.startResize}
+          isResizing={ragSidebarState.isResizing}
+        />
       </div>
 
-      {/* ... Rest of your component (Selection Info Bar, Dialog, Composer) stays the same ... */}
-      {/* For brevity, assuming the bottom part of your file remains unchanged */}
+      {/* Selection Info Bar */}
       {getSelectedCount() > 0 && (
         <div className="bg-gradient-to-r from-purple-900/20 to-violet-900/20 border-t border-gray-700/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between gap-2">
             {/* ... Buttons ... */}
@@ -509,52 +555,6 @@ export default function SECONDARY_ChatWindow({
           </div>
         </div>
       )}
-
-      {/* ... Composer ... */}
-      <div className="border-t border-gray-800/50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 backdrop-blur-sm">
-        {/* RAG Context Preview */}
-        {ragResults.length > 0 && (
-          <div className="mb-4">
-            <RagContextPreview
-              results={ragResults}
-              onDismiss={() => setRagResults([])}
-            />
-          </div>
-        )}
-
-        {/* RAG Source Selector */}
-        {ragSources.length > 0 && (
-          <div className="mb-3">
-            <RagSourceSelector
-              selectedSources={ragSources}
-              onSourcesChange={setRagSources}
-            />
-          </div>
-        )}
-
-         <div className="flex gap-3">
-          {/* RAG Slash Menu - positioned relative to input container */}
-          <div className="flex-1 relative">
-            <RagSlashMenu
-              isOpen={showSlashMenu}
-              selectedIndex={selectedMenuIndex}
-              onSelect={handleSelectSlashCommand}
-              onClose={() => setShowSlashMenu(false)}
-            />
-
-            <ChatComposer
-              ref={composerInputRef}
-              composerText={composerText}
-              onTextChange={handleComposerChange}
-              onKeyDown={handleComposerKeyDown}
-              isLoading={isLoading}
-              onSendClick={handleSendMessage}
-              showSlashMenu={showSlashMenu}
-              onToggleRagMenu={toggleRagMenu}
-            />
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

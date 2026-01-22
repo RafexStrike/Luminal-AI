@@ -241,11 +241,12 @@ export async function POST(req) {
       streaming: false,
     };
 
-    // Include RAG metadata if it was used
+    // Include RAG metadata and retrieved results if it was used
     if (ragResult?.ragEnabled) {
       response.rag = {
         enabled: true,
         contextRetrieved: ragResult.contextRetrieved || 0,
+        results: ragResult.retrievalResults?.results || [],
       };
     }
 
