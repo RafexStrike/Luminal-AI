@@ -1,9 +1,3 @@
-// FILE: src/components/SECONDARY_TiptapEditor.jsx
-// DESCRIPTION: Notion-like rich text editor with Tiptap, slash commands, and AI integration
-// PURPOSE: Provide a seamless writing experience with AI assistance
-
-'use client';
-
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -119,6 +113,7 @@ const SLASH_COMMANDS = [
     },
   },
 ];
+
 // Main editor component
 export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { } }) {
   const [showSlashMenu, setShowSlashMenu] = useState(false);
@@ -134,7 +129,16 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
   const [aiResponse, setAiResponse] = useState('');
   const [aiChatId, setAiChatId] = useState(null); // To maintain conversation context if needed
 
-  const editorRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Create refs to access state inside handleKeyDown without stale closures
+  const showSlashMenuRef = useRef(showSlashMenu);
+  const slashItemsRef = useRef(slashItems);
+  const selectedIndexRef = useRef(selectedIndex);
+
+  useEffect(() => { showSlashMenuRef.current = showSlashMenu; }, [showSlashMenu]);
+  useEffect(() => { slashItemsRef.current = slashItems; }, [slashItems]);
+  useEffect(() => { selectedIndexRef.current = selectedIndex; }, [selectedIndex]);
 
   // Memoized actions for commands
   const actions = {
@@ -151,7 +155,7 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
         horizontalRule: {},
       }),
       Placeholder.configure({
-        placeholder: "Type '/' for commands, or start typing...",
+        placeholder: "Type '/' for commands...",
       }),
       CharacterCount.configure({
         limit: null,
@@ -175,10 +179,10 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
         // Calculate position for the menu
         const coords = editor.view.coordsAtPos($from.pos);
         // Correct for editor container position
-        const editorRect = editorRef.current.getBoundingClientRect();
+        const editorRect = containerRef.current.getBoundingClientRect();
 
         setSlashMenuPosition({
-          top: coords.bottom - editorRect.top + editorRef.current.scrollTop + 10,
+          top: coords.bottom - editorRect.top + containerRef.current.scrollTop + 10,
           left: coords.left - editorRect.left,
         });
 
@@ -189,12 +193,52 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
     },
     editorProps: {
       attributes: {
-        class:
-          'tiptap outline-none focus:outline-none px-8 py-6 text-gray-900 min-h-[calc(100vh-200px)] font-sans',
+        class: 'tiptap outline-none focus:outline-none px-8 py-10 text-gray-100 min-h-[calc(100vh-200px)] font-sans max-w-4xl mx-auto selection:bg-purple-500/30',
+      },
+      handleKeyDown: (view, event) => {
+        if (!showSlashMenuRef.current) return false;
+
+        if (event.key === 'ArrowUp') {
+          setSelectedIndex((i) => (i > 0 ? i - 1 : slashItemsRef.current.length - 1));
+          return true;
+        }
+        if (event.key === 'ArrowDown') {
+          setSelectedIndex((i) => (i < slashItemsRef.current.length - 1 ? i + 1 : 0));
+          return true;
+        }
+        if (event.key === 'Enter') {
+          if (slashItemsRef.current.length > 0) {
+            selectCommand(slashItemsRef.current[selectedIndexRef.current]);
+            return true;
+          }
+        }
+        if (event.key === 'Escape') {
+          setShowSlashMenu(false);
+          return true;
+        }
+        return false;
       },
     },
-    immediatelyRender: true,
+    immediatelyRender: false,
   });
+
+  const selectCommand = useCallback((item) => {
+    if (!editor) return;
+
+    const { $from } = editor.state.selection;
+    // Calculate the range of the slash command text
+    // We need to find the "/" before the current position
+    const text = $from.parent.textBetween(Math.max(0, $from.parentOffset - 20), $from.parentOffset, null, '\ufffc');
+    const match = text.match(/\/([\w]*)$/);
+
+    if (match) {
+      const deletePos = $from.pos - match[0].length;
+      const range = { from: deletePos, to: $from.pos };
+      item.command({ editor, range, actions });
+    }
+
+    setShowSlashMenu(false);
+  }, [editor, actions]);
 
   // Update slash command suggestions
   useEffect(() => {
@@ -212,36 +256,7 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
     }
   }, [slashQuery, showSlashMenu]);
 
-  // Handle keyboard events for slash menu
-  useEffect(() => {
-    if (!editor || !showSlashMenu) return;
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setShowSlashMenu(false);
-        event.preventDefault();
-      } else if (event.key === 'ArrowUp') {
-        setSelectedIndex((i) => (i > 0 ? i - 1 : slashItems.length - 1));
-        event.preventDefault();
-      } else if (event.key === 'ArrowDown') {
-        setSelectedIndex((i) => (i < slashItems.length - 1 ? i + 1 : 0));
-        event.preventDefault();
-      } else if (event.key === 'Enter') {
-        if (slashItems.length > 0) {
-          selectCommand(slashItems[selectedIndex]);
-        }
-        event.preventDefault(); // Always prevent default Enter to avoid new line
-      }
-    };
-
-    // Attach to the editor's DOM element or document
-    // Document is safer to catch bubble events from editor
-    const view = editor.view.dom;
-    view.addEventListener('keydown', handleKeyDown);
-    return () => view.removeEventListener('keydown', handleKeyDown);
-  }, [showSlashMenu, slashItems, selectedIndex, editor]); // selectCommand dependnecy omitted intentionally to avoid cyclic dep issues or use stable ref
-
-  // Update editor content when value prop changes (e.g., when notes are loaded from server)
+  // Update editor content when value prop changes
   useEffect(() => {
     if (!editor) return;
 
@@ -251,35 +266,20 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
     }
   }, [editor, value]);
 
-  const selectCommand = useCallback((item) => {
-    if (!editor) return;
-
-    const { $from } = editor.state.selection;
-    const deletePos = $from.pos - (slashQuery.length + 1);
-    const range = { from: deletePos, to: $from.pos };
-
-    item.command({ editor, range, actions });
-
-    setShowSlashMenu(false);
-  }, [editor, slashQuery, actions]);
-
   // Handle AI Submission
   const handleAiSubmit = async () => {
     if (!aiPrompt.trim()) return;
 
     setIsAiLoading(true);
-    setAiResponse(''); // Clear previous response
+    setAiResponse('');
 
     try {
-      // 1. Generate a temporary chat ID if not exists
       const currentChatId = aiChatId || `editor-${Date.now()}`;
       setAiChatId(currentChatId);
 
-      // Get current editor content for context
       const editorContext = editor?.getText() || '';
       const contextAwarePrompt = `Context from current document:\n${editorContext.slice(0, 5000)}\n\nUser Request: ${aiPrompt}`;
 
-      // 2. Call the chat API
       const response = await fetch('/api/secondStage/chat', {
         method: 'POST',
         headers: {
@@ -288,7 +288,6 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
         body: JSON.stringify({
           chatId: currentChatId,
           prompt: contextAwarePrompt,
-          // Optional: passing context if we wanted to implement RAG here
         }),
       });
 
@@ -297,35 +296,25 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
       }
 
       const data = await response.json();
-      setAiResponse(data.content); // For non-streaming response
+      setAiResponse(data.content);
 
     } catch (error) {
       console.error('AI Error:', error);
       setAiResponse('Sorry, I encountered an error processing your request.');
     } finally {
       setIsAiLoading(false);
-      setAiPrompt(''); // Clear prompt input
+      setAiPrompt('');
     }
   };
 
   const insertAiResponse = (mode = 'append') => {
     if (!editor || !aiResponse) return;
 
-    // Convert markdown to HTML (simple conversion or use extensions)
-    // Tiptap handles markdown pasting usually, but let's just insert as HTML paragraphs for now
-    // Ideally we'd parse markdown here. For this demo, let's treat it as text.
-
-    // A better approach would be to parse the markdown into HTML nodes
-    // Since we don't have a markdown parser installed in this file, we'll rely on Tiptap's ability 
-    // to handle pasted content or insert text.
-
-    // Using a simple split for paragraphs to make it a bit nicer than one big block
     const htmlContent = aiResponse.split('\n\n').map(p => `<p>${p}</p>`).join('');
 
     if (mode === 'replace') {
       editor.chain().focus().setContent(htmlContent).run();
     } else {
-      // Insert at current cursor position
       editor.chain().focus().insertContent(htmlContent).run();
     }
 
@@ -336,9 +325,9 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
   if (!editor) return null;
 
   return (
-    <div ref={editorRef} className="relative w-full h-full flex flex-col bg-white">
-      {/* Minimal Toolbar (Floating or sticky, we'll keep it simple/sticky for now but cleaner) */}
-      <div className="border-b border-gray-100 bg-white/80 backdrop-blur-sm px-4 py-2 flex items-center gap-1 flex-wrap sticky top-0 z-40 transition-all duration-200">
+    <div ref={containerRef} className="relative w-full h-full flex flex-col bg-[#0a0a0f]">
+      {/* Minimal Toolbar */}
+      <div className="border-b border-white/5 bg-[#0a0a0f]/60 backdrop-blur-md px-6 py-2 flex items-center gap-1 flex-wrap sticky top-0 z-40 transition-all duration-300">
         <ToolbarButton
           icon={Bold}
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -357,7 +346,7 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
           active={editor.isActive('strike')}
           title="Strikethrough"
         />
-        <div className="w-px h-4 bg-gray-200 mx-2" />
+        <div className="w-px h-4 bg-white/10 mx-2" />
         <ToolbarButton
           icon={Heading1}
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -376,23 +365,23 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
           active={editor.isActive('bulletList')}
           title="Bullet List"
         />
-        <div className="w-px h-4 bg-gray-200 mx-2" />
+        <div className="w-px h-4 bg-white/10 mx-2" />
         <button
           onClick={() => setAiModalOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-purple-50 text-purple-600 hover:bg-purple-100 text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 text-sm font-semibold transition-all shadow-lg shadow-purple-600/20 group active:scale-95"
         >
-          <Sparkles size={14} />
+          <Sparkles size={14} className="group-hover:rotate-12 transition-transform" />
           Ask AI
         </button>
       </div>
 
-      {/* Editor Content - Infinite Canvas Style */}
-      <div className="flex-1 overflow-auto bg-white relative cursor-text" onClick={() => editor.chain().focus().run()}>
-        <div className="max-w-4xl mx-auto">
+      {/* Editor Content */}
+      <div className="flex-1 overflow-auto bg-[#0a0a0f] relative cursor-text scroll-smooth" onClick={() => editor.chain().focus().run()}>
+        <div className="py-10 max-w-4xl mx-auto">
           <EditorContent editor={editor} />
         </div>
 
-        {/* Custom Slash Command Menu - Manual Implementation */}
+        {/* Custom Slash Command Menu */}
         <Popover open={showSlashMenu} onOpenChange={setShowSlashMenu} modal={false}>
           <PopoverTrigger asChild>
             <div
@@ -407,36 +396,44 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
             />
           </PopoverTrigger>
           <PopoverContent
-            className="p-1 w-[240px] max-h-[300px] overflow-y-auto"
+            className="p-1 w-[260px] max-h-[320px] overflow-y-auto bg-gray-900 border-white/10 shadow-3xl rounded-xl border animate-in fade-in zoom-in-95 duration-200"
             align="start"
             side="bottom"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <div className="flex flex-col gap-1">
-              <div className="px-2 py-1.5 text-xs font-semibold text-gray-500">Suggestions</div>
+            <div className="flex flex-col gap-0.5">
+              <div className="px-3 py-2 text-[10px] font-bold tracking-wider uppercase text-gray-500">Commands</div>
               {slashItems.length > 0 ? (
                 slashItems.map((item, index) => {
                   const Icon = item.icon;
+                  const isActive = index === selectedIndex;
                   return (
                     <button
                       key={index}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => selectCommand(item)}
-                      className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm text-left transition-colors ${index === selectedIndex
-                        ? 'bg-blue-100 text-blue-900'
-                        : 'hover:bg-gray-100 text-gray-700'
+                      className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-left transition-all duration-200 group ${isActive
+                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                        : 'hover:bg-white/5 text-gray-300'
                         }`}
                     >
-                      <Icon className="h-4 w-4" />
-                      <div className="flex flex-col">
-                        <span className="font-medium">{item.title}</span>
-                        <span className="text-[10px] text-gray-400">{item.description}</span>
+                      <div className={`p-1.5 rounded-md transition-colors ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 group-hover:bg-white/10'}`}>
+                        <Icon className="h-4 w-4" />
                       </div>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="font-semibold leading-tight truncate">{item.title}</span>
+                        <span className={`text-[10px] truncate ${isActive ? 'text-purple-100' : 'text-gray-500'}`}>{item.description}</span>
+                      </div>
+                      {isActive && (
+                        <div className="text-[10px] font-mono text-purple-200 bg-white/10 px-1 rounded border border-white/20 animate-pulse">
+                          ↵
+                        </div>
+                      )}
                     </button>
                   );
                 })
               ) : (
-                <div className="px-2 py-2 text-sm text-gray-500 text-center">No results</div>
+                <div className="px-3 py-6 text-sm text-gray-500 text-center italic">No matching results</div>
               )}
             </div>
           </PopoverContent>
@@ -445,28 +442,27 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
 
       {/* Floating AI Modal */}
       <Dialog open={aiModalOpen} onOpenChange={setAiModalOpen}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-gray-900 border-gray-800 text-white shadow-2xl">
-          <div className="p-4 space-y-4">
-            <DialogTitle className="text-lg font-semibold flex items-center gap-2 text-purple-400">
-              <Sparkles size={18} />
-              AI Assistant
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden bg-gray-950 border-gray-800 text-white shadow-2xl rounded-2xl">
+          <div className="p-6 space-y-4">
+            <DialogTitle className="text-xl font-bold flex items-center gap-3 text-purple-400">
+              <div className="p-2 bg-purple-500/10 rounded-xl">
+                <Sparkles size={20} className="text-purple-500" />
+              </div>
+              AI Writing Assistant
             </DialogTitle>
 
-            {/* Chat History / Response Area */}
             {aiResponse && (
-              <div className="bg-gray-800/50 rounded-lg p-4 max-h-[300px] overflow-y-auto text-sm text-gray-200 prose prose-invert prose-sm">
-                {/* Using a simple whitespace preserver or markdown renderer would be better */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 max-h-[350px] overflow-y-auto text-sm text-gray-200 prose prose-invert prose-sm scrollbar-thin scrollbar-thumb-white/10">
                 <ReactMarkdown>{aiResponse}</ReactMarkdown>
               </div>
             )}
 
-            {/* Input Area - Reusing ChatComposer styles notionally */}
-            <div className="relative">
+            <div className="relative group">
               <textarea
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Tell AI what to write..."
-                className="w-full bg-gray-800 p-3 rounded-md text-white placeholder:text-gray-500 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none min-h-[80px]"
+                placeholder="Write an outline, rewrite this section, or expand on..."
+                className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white placeholder:text-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all resize-none min-h-[120px]"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -474,31 +470,31 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
                   }
                 }}
               />
-              <div className="absolute bottom-2 right-2 flex gap-2">
+              <div className="absolute bottom-3 right-3 flex gap-2">
                 <button
                   onClick={handleAiSubmit}
                   disabled={isAiLoading || !aiPrompt.trim()}
-                  className="p-1.5 bg-purple-600 rounded-md text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 bg-purple-600 rounded-lg text-white font-semibold hover:bg-purple-700 disabled:opacity-50 transition-all flex items-center gap-2 shadow-lg shadow-purple-600/20"
                 >
-                  {isAiLoading ? <Sparkles className="animate-pulse w-4 h-4" /> : <CornerDownLeft className="w-4 h-4" />}
+                  {isAiLoading ? 'Thinking...' : 'Generate'}
+                  {!isAiLoading && <CornerDownLeft size={14} />}
                 </button>
               </div>
             </div>
 
-            {/* Actions for Response */}
             {aiResponse && (
-              <div className="flex gap-2 justify-end pt-2 border-t border-gray-800">
+              <div className="flex gap-3 justify-end pt-4 border-t border-white/5">
                 <button
                   onClick={() => insertAiResponse('replace')}
-                  className="text-xs px-3 py-1.5 rounded bg-red-900/30 text-red-300 hover:bg-red-900/50 transition-colors"
+                  className="text-sm px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
                 >
-                  Replace Selection
+                  Replace
                 </button>
                 <button
                   onClick={() => insertAiResponse('append')}
-                  className="text-xs px-3 py-1.5 rounded bg-green-900/30 text-green-300 hover:bg-green-900/50 transition-colors"
+                  className="text-sm px-4 py-2 rounded-lg bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 transition-colors font-semibold"
                 >
-                  Insert Below
+                  Insert below
                 </button>
               </div>
             )}
@@ -507,9 +503,15 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
       </Dialog>
 
       {/* Footer */}
-      <div className="border-t border-gray-100 bg-white px-4 py-2 text-xs text-gray-400 flex justify-between items-center">
-        <span>Type "/" for commands</span>
-        <span>{editor.storage.characterCount?.characters() || 0} characters</span>
+      <div className="border-t border-white/5 bg-[#0a0a0f]/60 backdrop-blur-md px-6 py-2 text-[10px] font-medium text-gray-500 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1"><Type size={10} /> Type "/" for commands</span>
+          <span className="w-px h-2 bg-white/10" />
+          <span>{editor.storage.characterCount?.characters() || 0} characters</span>
+        </div>
+        <div className="flex items-center gap-1 text-purple-500/40 lowercase tracking-tighter">
+          Luminal AI Editor
+        </div>
       </div>
     </div>
   );
@@ -521,13 +523,12 @@ function ToolbarButton({ icon: Icon, onClick, active = false, title }) {
     <button
       onClick={onClick}
       title={title}
-      className={`p-1.5 rounded transition-colors ${active
-        ? 'bg-blue-50 text-blue-600'
-        : 'text-gray-400 hover:bg-gray-50 hover:text-gray-900'
+      className={`p-2 rounded-lg transition-all duration-200 group active:scale-90 ${active
+        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+        : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium'
         }`}
     >
-      <Icon size={16} />
+      <Icon size={18} className={active ? 'scale-110' : 'group-hover:scale-110 transition-transform'} />
     </button>
   );
 }
-

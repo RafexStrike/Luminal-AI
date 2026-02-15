@@ -46,7 +46,7 @@
 
 :root {
   --radius: 0.75rem;
-  
+
   /* Light mode - Modern grays with purple accents */
   --background: oklch(0.98 0 0);
   --foreground: oklch(0.15 0 0);
@@ -54,31 +54,31 @@
   --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0 0);
-  
+
   /* Purple gradient primary colors */
   --primary: oklch(0.55 0.18 280);
   --primary-foreground: oklch(0.99 0 0);
-  
+
   --secondary: oklch(0.96 0.01 280);
   --secondary-foreground: oklch(0.15 0 0);
   --muted: oklch(0.96 0.01 280);
   --muted-foreground: oklch(0.50 0 0);
-  
+
   --accent: oklch(0.55 0.18 280);
   --accent-foreground: oklch(0.99 0 0);
-  
+
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.90 0.01 280);
   --input: oklch(0.90 0.01 280);
   --ring: oklch(0.55 0.18 280);
-  
+
   /* Chart colors - Purple/Violet spectrum */
   --chart-1: oklch(0.55 0.18 280);
   --chart-2: oklch(0.60 0.15 290);
   --chart-3: oklch(0.65 0.12 270);
   --chart-4: oklch(0.70 0.10 285);
   --chart-5: oklch(0.50 0.20 275);
-  
+
   /* Sidebar - Light theme */
   --sidebar: oklch(0.99 0 0);
   --sidebar-foreground: oklch(0.15 0 0);
@@ -94,37 +94,37 @@
   /* Dark mode - Deep grays inspired by page.jsx (gray-950, gray-900, gray-800) */
   --background: oklch(0.12 0 0);
   --foreground: oklch(0.98 0 0);
-  
+
   /* Cards with gradient effect */
   --card: oklch(0.18 0 0);
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.18 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  
+
   /* Purple gradient primary */
   --primary: oklch(0.70 0.15 280);
   --primary-foreground: oklch(0.15 0 0);
-  
+
   --secondary: oklch(0.22 0 0);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.22 0 0);
   --muted-foreground: oklch(0.65 0 0);
-  
+
   --accent: oklch(0.70 0.15 280);
   --accent-foreground: oklch(0.98 0 0);
-  
+
   --destructive: oklch(0.65 0.20 27);
   --border: oklch(0.25 0 0);
   --input: oklch(0.25 0 0);
   --ring: oklch(0.55 0.18 280);
-  
+
   /* Chart colors - Vibrant purples/violets for dark mode */
   --chart-1: oklch(0.65 0.20 275);
   --chart-2: oklch(0.70 0.17 285);
   --chart-3: oklch(0.60 0.18 265);
   --chart-4: oklch(0.75 0.15 290);
   --chart-5: oklch(0.55 0.22 270);
-  
+
   /* Sidebar - Dark theme matching page.jsx */
   --sidebar: oklch(0.18 0 0);
   --sidebar-foreground: oklch(0.98 0 0);
@@ -140,26 +140,58 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
   }
+}
+
+/* Calm Editor Focus */
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap {
+  @apply transition-all duration-300;
 }
 
 /* Enhanced animations matching page.jsx aesthetic */
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes glow-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .animate-float {
@@ -202,7 +234,7 @@
 }
 
 .editor-content h1 {
-  @apply text-4xl font-bold my-6 ;
+  @apply text-4xl font-bold my-6;
 }
 
 .editor-content h2 {
@@ -325,37 +357,53 @@
 .glass-dark {
   @apply backdrop-blur-xl bg-black/20 border border-white/5;
 }
+
 @layer components {
-  /* Custom Tiptap Editor Styles */
+
+  /* Custom Tiptap Editor Styles - Dark Purple Theme */
   .tiptap h1 {
-    @apply text-4xl font-bold mt-6 mb-2;
+    @apply text-5xl font-extrabold mt-12 mb-6 text-white;
   }
 
   .tiptap h2 {
-    @apply text-3xl font-bold mt-5 mb-2;
+    @apply text-3xl font-bold mt-10 mb-5 text-gray-100;
   }
 
   .tiptap h3 {
-    @apply text-2xl font-bold mt-4 mb-2;
+    @apply text-2xl font-bold mt-8 mb-4 text-gray-200;
   }
 
   .tiptap ul {
-    @apply list-disc list-inside my-2 pl-4;
+    @apply list-disc list-outside my-6 pl-8 space-y-2;
   }
 
   .tiptap ol {
-    @apply list-decimal list-inside my-2 pl-4;
+    @apply list-decimal list-outside my-6 pl-8 space-y-2;
+  }
+
+  /* Fix for text alignment in lists */
+  .tiptap li p {
+    @apply m-0 inline;
+  }
+
+  .tiptap li {
+    @apply text-gray-300 leading-relaxed;
   }
 
   .tiptap blockquote {
-    @apply border-l-4 border-gray-300 pl-4 py-1 my-4 italic text-gray-600;
+    @apply border-l-4 border-purple-500/50 bg-purple-500/5 pl-6 py-4 my-8 italic text-gray-300 rounded-r-lg;
   }
 
   .tiptap pre {
-    @apply bg-gray-100 p-4 rounded-lg my-4 overflow-x-auto font-mono text-sm;
+    @apply bg-white/5 border border-white/10 p-6 rounded-xl my-8 overflow-x-auto font-mono text-sm text-gray-200 shadow-2xl;
   }
 
   .tiptap p {
-    @apply my-2 leading-relaxed;
+    @apply my-4 leading-relaxed text-gray-300 text-lg font-light;
+  }
+
+  /* Modern Selection */
+  .tiptap *::selection {
+    @apply bg-purple-500/30 text-white;
   }
 }
