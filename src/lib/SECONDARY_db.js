@@ -23,7 +23,7 @@ let mongoClient = null;
 async function getMongoClient() {
   // TODO: Replace with real connection string from env
   const uri = process.env.SECONDARY_MONGODB_URI;
-  
+
   if (!uri) {
     throw new Error('SECONDARY_MONGODB_URI environment variable not set');
   }
@@ -250,7 +250,7 @@ export async function saveNotes({ userId, content, chatId = null }) {
   const collection = db.collection('stage2_notes');
 
   // Build query filter - use chatId if provided, otherwise update global notes
-  const filter = chatId 
+  const filter = chatId
     ? { userId, chatId }
     : { userId, chatId: null };
 
@@ -285,7 +285,7 @@ export async function getNotes({ userId, chatId = null }) {
   const collection = db.collection('stage2_notes');
 
   // Build query filter - use chatId if provided, otherwise get global notes
-  const filter = chatId 
+  const filter = chatId
     ? { userId, chatId }
     : { userId, chatId: null };
 
@@ -497,22 +497,22 @@ export async function getChatList({ userId }) {
   //   .toArray();
 
   const chats = await collection
-  .find(
-    { userId, deletedAt: { $exists: false } },
-    {
-      projection: {
-        title: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        messageCount: 1,
-        collection: 1,
-      },
-    }
-  )
-  .sort({ updatedAt: -1 })
-  .toArray();
+    .find(
+      { userId, deletedAt: { $exists: false } },
+      {
+        projection: {
+          title: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          messageCount: 1,
+          collection: 1,
+        },
+      }
+    )
+    .sort({ updatedAt: -1 })
+    .toArray();
 
-  
+
   return chats;
 }
 
@@ -524,4 +524,96 @@ export async function getChatList({ userId }) {
 export function generateChatTitle(userMessage) {
   const words = userMessage.trim().split(/\s+/).slice(0, 7).join(' ');
   return words || 'New Chat';
+}
+
+/**
+ * getAutoSummarySettings({ userId, chatId })
+ * Retrieves auto-summary settings for a specific chat or global defaults
+ */
+export async function getAutoSummarySettings({ userId, chatId = null }) {
+  if (!userId) throw new Error('userId required');
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_auto_summary_settings');
+
+  // Search for chat-specific settings, fallback to global (chatId: null)
+  let settings = await collection.findOne({ userId, chatId });
+
+  if (!settings && chatId !== null) {
+    settings = await collection.findOne({ userId, chatId: null });
+  }
+
+  // Default values if no settings found
+  return settings || {
+    userId,
+    chatId: chatId || null,
+    enabled: false,
+    messageThreshold: 10,
+    mode: 'incremental',
+    lastProcessedSequence: 0
+  };
+}
+
+/**
+ * saveAutoSummarySettings({ userId, chatId, enabled, messageThreshold, mode })
+ * Saves or updates auto-summary settings
+ */
+export async function saveAutoSummarySettings({
+  userId,
+  chatId = null,
+  enabled,
+  messageThreshold,
+  mode
+}) {
+  if (!userId) throw new Error('userId required');
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_auto_summary_settings');
+
+  const update = {
+    $set: {
+      enabled: enabled ?? false,
+      messageThreshold: messageThreshold ?? 10,
+      mode: mode || 'incremental',
+      updatedAt: new Date()
+    },
+    $setOnInsert: {
+      userId,
+      chatId: chatId || null,
+      lastProcessedSequence: 0,
+      createdAt: new Date()
+    }
+  };
+
+  const result = await collection.findOneAndUpdate(
+    { userId, chatId: chatId || null },
+    update,
+    { upsert: true, returnDocument: 'after' }
+  );
+
+  return result;
+}
+
+/**
+ * updateLastProcessedSequence({ userId, chatId, sequenceNumber })
+ * Updates the progression tracker for auto-summaries
+ */
+export async function updateLastProcessedSequence({ userId, chatId, sequenceNumber }) {
+  if (!userId || !chatId) throw new Error('userId and chatId required');
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_auto_summary_settings');
+
+  await collection.updateOne(
+    { userId, chatId },
+    {
+      $set: {
+        lastProcessedSequence: sequenceNumber,
+        updatedAt: new Date()
+      }
+    }
+  );
 }

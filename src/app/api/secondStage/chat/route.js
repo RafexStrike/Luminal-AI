@@ -215,15 +215,26 @@ export async function POST(req) {
     // Non-streaming: collect full response
     const assistantContent = providerResponse || '';
 
-    // ============================================
-    // STEP 8: Save assistant response to DB
-    // ============================================
-    await saveMessage({
+    const assistantMsgDoc = await saveMessage({
       userId: user.id,
       chatId,
       role: 'assistant',
       content: assistantContent,
     });
+
+    // ============================================
+    // STEP 8.5: Trigger Auto-Summary Check
+    // ============================================
+    try {
+      const { checkAndGenerateAutoSummary } = await import('@/lib/autoSummaryWatcher');
+      await checkAndGenerateAutoSummary({
+        userId: user.id,
+        chatId,
+        currentSequenceNumber: assistantMsgDoc.sequenceNumber
+      });
+    } catch (err) {
+      console.error('Auto-summary check failed:', err);
+    }
 
     // ============================================
     // STEP 9: Return response
@@ -296,12 +307,24 @@ async function handleStreamingResponse(providerResponse, user, chatId, ragResult
         }
 
         // After streaming is complete, save to DB
-        await saveMessage({
+        const assistantMsgDoc = await saveMessage({
           userId: user.id,
           chatId,
           role: 'assistant',
           content: fullContent,
         });
+
+        // Trigger Auto-Summary Check
+        try {
+          const { checkAndGenerateAutoSummary } = await import('@/lib/autoSummaryWatcher');
+          await checkAndGenerateAutoSummary({
+            userId: user.id,
+            chatId,
+            currentSequenceNumber: assistantMsgDoc.sequenceNumber
+          });
+        } catch (err) {
+          console.error('Auto-summary check failed:', err);
+        }
 
         // Send completion message
         const doneMessage = `data: ${JSON.stringify({ done: true })}\n\n`;
