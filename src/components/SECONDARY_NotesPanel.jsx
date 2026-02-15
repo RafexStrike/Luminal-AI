@@ -33,7 +33,7 @@ import SECONDARY_TiptapEditor from './SECONDARY_TiptapEditor';
  */
 export default function SECONDARY_NotesPanel({
   chatId = null,
-  onDataSaved = () => {},
+  onDataSaved = () => { },
   refreshTrigger = 0,
 }) {
   const [content, setContent] = useState('');
@@ -47,7 +47,7 @@ export default function SECONDARY_NotesPanel({
       console.log('NotesPanel loadNotes triggered, chatId:', chatId);
       try {
         // Fetch notes for current chat from server
-        const url = chatId 
+        const url = chatId
           ? `/api/secondStage/notes?chatId=${chatId}`
           : '/api/secondStage/notes';
         console.log('Fetching from:', url);
@@ -88,7 +88,7 @@ export default function SECONDARY_NotesPanel({
         }
       }
     };
-    
+
     // Only load if we have a chatId (don't load for anonymous users)
     if (chatId) {
       loadNotes();
@@ -112,7 +112,7 @@ export default function SECONDARY_NotesPanel({
       const response = await fetch('/api/secondStage/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           content,
           chatId,
         }),
@@ -151,7 +151,7 @@ export default function SECONDARY_NotesPanel({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="border-b border-gray-200 p-4 bg-gray-50">
+      {/* <div className="border-b border-gray-200 p-4 bg-gray-50">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-gray-900">Notes</h3>
@@ -180,6 +180,50 @@ export default function SECONDARY_NotesPanel({
               className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {isSaving ? '💾 Saving...' : '💾 Save to Server'}
+            </button>
+          </div>
+        </div>
+      </div> */}
+      {/* Header with Dark Purple Shader Look */}
+      <div className="border-b border-purple-900/20 p-4 bg-gradient-to-r from-slate-900 via-purple-950 to-indigo-950 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-white tracking-tight flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+              Notes
+            </h3>
+            {lastSaved && (
+              <div className="text-[10px] uppercase tracking-widest text-purple-300/70 mt-1">
+                Last synced: {lastSaved.toLocaleTimeString()}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {saveStatus && (
+              <div className="text-xs px-2 py-1 bg-white/10 text-purple-200 backdrop-blur-md border border-white/10 rounded-lg animate-fade-in">
+                {saveStatus}
+              </div>
+            )}
+            <button
+              onClick={handleExportNotes}
+              className="px-3 py-2 text-sm bg-white/5 border border-white/10 text-purple-100 rounded-lg hover:bg-white/10 transition-all active:scale-95 flex items-center gap-2 backdrop-blur-sm"
+              title="Download notes as text file"
+            >
+              <span className="hidden sm:inline">Export</span>
+            </button>
+            <button
+              onClick={handleSaveToServer}
+              disabled={isSaving}
+              className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save to Server'
+              )}
             </button>
           </div>
         </div>
