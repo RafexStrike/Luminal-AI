@@ -92,7 +92,7 @@ export async function POST(req) {
         );
         messageContent = selectedMessages.map((msg) => msg.content).join('\n\n');
       }
-      
+
       // Fallback if no messages found
       if (!messageContent) {
         messageContent = 'No message content available';
@@ -167,6 +167,19 @@ export async function POST(req) {
         // Background: add questions to vector store (non-blocking)
         try {
           const { addToVectorStore } = await import('@/lib/rag/index.js');
+          const { getChat } = await import('@/lib/SECONDARY_db');
+
+          // Determine category (collection)
+          let category = 'unknown';
+          try {
+            const chat = await getChat({ userId: user.id, chatId });
+            if (chat && chat.collection) {
+              category = chat.collection;
+            }
+          } catch (err) {
+            // ignore
+          }
+
           questions.forEach((q, idx) => {
             const sourceId = `${savedId}:${idx}`;
             const correct = Array.isArray(q.options) && typeof q.answerIndex === 'number' ? q.options[q.answerIndex] : '';
@@ -177,12 +190,15 @@ export async function POST(req) {
               sourceType: 'quiz',
               sourceId,
               text,
-              metadata: { options: q.options || [] },
+              metadata: {
+                options: q.options || [],
+                category: category
+              },
             }).then((res) => {
               if (!res.success) {
                 console.warn('addToVectorStore failed for quiz', sourceId, res.error);
               } else {
-                console.log('addToVectorStore succeeded for quiz', sourceId);
+                console.log('addToVectorStore succeeded for quiz', sourceId, 'category', category);
               }
             }).catch((err) => {
               console.warn('addToVectorStore error for quiz', sourceId, err?.message || err);

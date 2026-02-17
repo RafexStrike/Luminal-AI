@@ -10,6 +10,7 @@ import SECONDARY_FlashcardsPanel from './SECONDARY_FlashcardsPanel';
 import SECONDARY_QuizzesPanel from './SECONDARY_QuizzesPanel';
 import SECONDARY_SummaryPanel from './SECONDARY_SummaryPanel';
 import SECONDARY_NotesPanel from './SECONDARY_NotesPanel';
+import SECONDARY_RevisePanel from './SECONDARY_RevisePanel';
 // import SECONDARY_TopHero from './SECONDARY_TopHero';
 
 const TABS = [
@@ -18,6 +19,7 @@ const TABS = [
   { id: 'flashcards', label: 'Flashcards' },
   { id: 'quizzes', label: 'Quizzes' },
   { id: 'notes', label: 'Notes' },
+  { id: 'revise', label: 'Revise' },
 ];
 
 /**
@@ -120,6 +122,13 @@ export default function SECONDARY_ChatLayout() {
             refreshTrigger={refreshTrigger}
           />
         );
+      case 'revise':
+        return (
+          <SECONDARY_RevisePanel
+            userId={null}
+            initialCategoryId=""
+          />
+        );
       default:
         return null;
     }
@@ -149,11 +158,10 @@ export default function SECONDARY_ChatLayout() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${
-                  active
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${active
                     ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-                }`}
+                  }`}
                 aria-pressed={active}
               >
                 {tab.label}

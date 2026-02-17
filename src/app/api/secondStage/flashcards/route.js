@@ -85,7 +85,7 @@ export async function POST(req) {
         );
         messageContent = selectedMessages.map((msg) => msg.content).join('\n\n');
       }
-      
+
       // Fallback if no messages found
       if (!messageContent) {
         messageContent = 'No message content available';
@@ -157,6 +157,19 @@ export async function POST(req) {
         // Background: add each card to the RAG vector store (non-blocking)
         try {
           const { addToVectorStore } = await import('@/lib/rag/index.js');
+          const { getChat } = await import('@/lib/SECONDARY_db');
+
+          // Determine category (collection)
+          let category = 'unknown';
+          try {
+            const chat = await getChat({ userId: user.id, chatId });
+            if (chat && chat.collection) {
+              category = chat.collection;
+            }
+          } catch (err) {
+            // ignore
+          }
+
           cards.forEach((card, idx) => {
             const sourceId = `${savedId}:${idx}`;
             const text = `Q: ${card.q}\nA: ${card.a}`;
@@ -167,12 +180,16 @@ export async function POST(req) {
               sourceType: 'flashcard',
               sourceId,
               text,
-              metadata: { difficulty: card.difficulty || 'unknown', tags: card.tags || [] },
+              metadata: {
+                difficulty: card.difficulty || 'unknown',
+                tags: card.tags || [],
+                category: category
+              },
             }).then((res) => {
               if (!res.success) {
                 console.warn('addToVectorStore failed for', sourceId, res.error);
               } else {
-                console.log('addToVectorStore succeeded for', sourceId);
+                console.log('addToVectorStore succeeded for', sourceId, 'category', category);
               }
             }).catch((err) => {
               console.warn('addToVectorStore error for', sourceId, err?.message || err);

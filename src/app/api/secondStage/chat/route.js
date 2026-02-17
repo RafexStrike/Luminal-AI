@@ -176,6 +176,44 @@ export async function POST(req) {
       content: prompt.trim(),
     });
 
+    // Background: add user message to vector store (non-blocking)
+    try {
+      const { addToVectorStore } = await import('@/lib/rag/index.js');
+      const { getChat } = await import('@/lib/SECONDARY_db'); // Need to fetch chat to get collection/category
+
+      // Determine category (collection)
+      let category = 'unknown';
+      try {
+        const chat = await getChat({ userId: user.id, chatId });
+        if (chat && chat.collection) {
+          category = chat.collection;
+        }
+      } catch (err) {
+        // ignore
+      }
+
+      const sourceId = userMsgDoc._id?.toString() || `${chatId}:${Date.now()}`;
+
+      addToVectorStore({
+        userId: user.id, // Store raw userId
+        sourceType: 'chat',
+        sourceId,
+        text: prompt.trim(),
+        metadata: {
+          chatId,
+          category: category
+        },
+      }).then((res) => {
+        if (!res.success) {
+          console.warn('addToVectorStore failed for chat message', sourceId, res.error);
+        }
+      }).catch((err) => {
+        console.warn('addToVectorStore error for chat message', sourceId, err?.message || err);
+      });
+    } catch (err) {
+      console.warn('Failed to enqueue chat embedding:', err?.message || err);
+    }
+
     // ============================================
     // STEP 5: Check if this is the first user message
     // ============================================
