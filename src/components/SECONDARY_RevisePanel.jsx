@@ -24,6 +24,8 @@ export default function SECONDARY_RevisePanel() {
     const [composerText, setComposerText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingCats, setIsLoadingCats] = useState(false);
+    const [topK, setTopK] = useState(6);
+    const [showAdvanced, setShowAdvanced] = useState(false);
 
     const messagesEndRef = useRef(null);
     const composerRef = useRef(null);
@@ -161,6 +163,7 @@ export default function SECONDARY_RevisePanel() {
                     body: JSON.stringify({
                         categoryId,
                         query: queryToSend,
+                        topK,
                     }),
                 }
             );
@@ -193,7 +196,7 @@ export default function SECONDARY_RevisePanel() {
         } finally {
             setIsLoading(false);
         }
-    }, [composerText, sessionId, categoryId, isLoading]);
+    }, [composerText, sessionId, categoryId, isLoading, topK]);
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -273,17 +276,47 @@ export default function SECONDARY_RevisePanel() {
             {/* ── Main Area ── */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header bar */}
-                <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-800/50 bg-gradient-to-r from-gray-900 to-gray-950 backdrop-blur-sm">
-                    <span className="text-sm font-medium text-gray-300">📚 Revise From Context</span>
-                    {categoryId && (
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-purple-600/20 border border-purple-500/30 text-purple-300">
-                            {categoryId}
-                        </span>
-                    )}
+                <div className="flex items-center justify-between px-6 py-3 border-b border-gray-800/50 bg-gradient-to-r from-gray-900 to-gray-950 backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-300">📚 Revise From Context</span>
+                        {categoryId && (
+                            <span className="px-2 py-0.5 text-xs rounded-full bg-purple-600/20 border border-purple-500/30 text-purple-300">
+                                {categoryId}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Advanced settings toggle */}
+                    <button
+                        onClick={() => setShowAdvanced(!showAdvanced)}
+                        className={`text-xs px-2 py-1 rounded border transition-colors ${showAdvanced
+                            ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                            : 'text-gray-500 border-gray-700 hover:text-gray-300'}`}
+                    >
+                        ⚙ Advanced
+                    </button>
                 </div>
 
+                {/* Advanced settings panel */}
+                {showAdvanced && (
+                    <div className="px-6 py-3 border-b border-gray-800/50 bg-gray-900/50 flex items-center gap-6 flex-wrap">
+                        <div className="flex items-center gap-2">
+                            <label className="text-xs text-gray-400">Context Chunks (Top-K):</label>
+                            <input
+                                type="range"
+                                min={1}
+                                max={15}
+                                value={topK}
+                                onChange={(e) => setTopK(Number(e.target.value))}
+                                className="w-24 accent-purple-500"
+                            />
+                            <span className="text-xs text-gray-300 w-4">{topK}</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Chat messages area */}
-                <div className="flex-1 overflow-auto p-6 space-y-4">
+                <div className="flex-1 overflow-auto p-6 space-y-6">
                     {!sessionId && (
                         <div className="h-full flex items-center justify-center">
                             <div className="text-center">
@@ -306,36 +339,42 @@ export default function SECONDARY_RevisePanel() {
                         </div>
                     )}
 
-                    {messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} gap-3`}
-                        >
+                    {messages.map((msg) => {
+                        const isUser = msg.sender === 'user';
+                        return (
                             <div
-                                className={`max-w-[75%] p-4 rounded-lg transition-all ${msg.sender === 'user'
-                                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
-                                    : 'bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 border border-gray-700/50'
-                                    }`}
+                                key={msg.id}
+                                className={`flex w-full ${isUser ? 'justify-end' : 'justify-center'}`}
                             >
-                                <div className="text-sm leading-relaxed prose prose-invert prose-sm max-w-none">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {msg.text}
-                                    </ReactMarkdown>
+                                <div
+                                    className={`
+                                        rounded-lg p-4 transition-all
+                                        ${isUser
+                                            ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30 max-w-[75%]'
+                                            : 'bg-transparent text-gray-100 w-full max-w-[80%]'
+                                        }
+                                    `}
+                                >
+                                    <div className={`text-sm leading-relaxed prose prose-invert prose-sm max-w-none ${!isUser ? 'prose-headings:text-purple-300 prose-a:text-purple-400' : ''}`}>
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {msg.text}
+                                        </ReactMarkdown>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {/* Loading indicator */}
                     {isLoading && (
-                        <div className="flex justify-start gap-3">
-                            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-lg p-4 max-w-md border border-gray-700/50">
+                        <div className="flex justify-center w-full">
+                            <div className="w-full max-w-[80%] pt-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
                                     <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
                                     <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                                    <span className="text-xs text-gray-500 ml-2">Reading study materials...</span>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-2">Searching your study materials...</p>
                             </div>
                         </div>
                     )}
@@ -346,7 +385,7 @@ export default function SECONDARY_RevisePanel() {
                 {/* Composer */}
                 {sessionId && (
                     <div className="border-t border-gray-800/50 bg-gradient-to-br from-gray-900 to-gray-800 p-4 backdrop-blur-sm flex-shrink-0">
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 max-w-4xl mx-auto w-full">
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-lg border border-gray-700/50 focus-within:border-purple-500/50 transition-colors">
                                     <textarea

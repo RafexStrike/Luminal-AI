@@ -22,7 +22,7 @@ export async function POST(req, { params }) {
         const { id: sessionId } = await params;
         const body = await req.json();
 
-        const { categoryId, query } = body;
+        const { categoryId, query, topK } = body;
 
         if (!sessionId || !categoryId || !query) {
             return NextResponse.json(
@@ -36,6 +36,7 @@ export async function POST(req, { params }) {
             userId: user.id,
             categoryId,
             query,
+            topK,
         });
 
         return NextResponse.json(result);

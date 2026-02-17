@@ -16,16 +16,17 @@ import { callProvider } from '@/lib/SECONDARY_providers';
  * @param {string} params.userId
  * @param {string} params.categoryId
  * @param {string} params.query
+ * @param {number} [params.topK]
  * @returns {Promise<{ answer: string }>}
  */
-export async function handleReviseGeneration({ userId, categoryId, query }) {
+export async function handleReviseGeneration({ userId, categoryId, query, topK }) {
     // ── Validate inputs ──
     if (!userId || !categoryId || !query) {
         throw new Error('Missing required fields: userId, categoryId, query');
     }
 
     // ── Step 1: Retrieve context ──
-    const chunks = await retrieve(userId, categoryId, query);
+    const chunks = await retrieve(userId, categoryId, query, topK);
 
     if (chunks.length === 0) {
         return {
@@ -117,7 +118,7 @@ export async function getSessionHistory({ sessionId }) {
 /**
  * Post a user message, generate agent reply, persist both.
  */
-export async function handleSessionMessage({ sessionId, userId, categoryId, query }) {
+export async function handleSessionMessage({ sessionId, userId, categoryId, query, topK }) {
     if (!sessionId || !userId || !categoryId || !query) {
         throw new Error('sessionId, userId, categoryId, and query are required');
     }
@@ -135,7 +136,7 @@ export async function handleSessionMessage({ sessionId, userId, categoryId, quer
     await historyCollection.insertOne(userMsg);
 
     // 2. Generate agent reply
-    const agentReply = await handleReviseGeneration({ userId, categoryId, query });
+    const agentReply = await handleReviseGeneration({ userId, categoryId, query, topK });
 
     // 3. Persist agent reply
     const agentMsg = {
