@@ -24,10 +24,16 @@ import ChatComposer from './SECONDARY_ChatComposer';
 import { useRagSidebarState } from '@/hooks/useRagSidebarState';
 // --- HOOKS IMPORTS END ---
 
+// --- INTERACTIVE IMPORTS START ---
+import { INTERACTIVE_useInteractiveMode } from '@/hooks/INTERACTIVE_useInteractiveMode';
+import { INTERACTIVE_ChatResultCard } from '@/components/interactive/INTERACTIVE_ChatResultCard';
+import { INTERACTIVE_InteractiveExplainer } from '@/components/interactive/INTERACTIVE_InteractiveExplainer';
+// --- INTERACTIVE IMPORTS END ---
+
 export default function SECONDARY_ChatWindow({
   chatId = null,
-  onDataSaved = () => {},
-  onTabChange = () => {},
+  onDataSaved = () => { },
+  onTabChange = () => { },
   refreshTrigger = 0,
 }) {
   const messagesEndRef = useRef(null);
@@ -46,6 +52,39 @@ export default function SECONDARY_ChatWindow({
   const [ragResults, setRagResults] = useState([]);
   const ragSidebarState = useRagSidebarState();
   // --- RAG STATE END ---
+
+  // --- INTERACTIVE STATE START ---
+  const { isInteractiveQuery, status: interactiveStatus, result: interactiveResult, generate: generateInteractive, reset: resetInteractive } = INTERACTIVE_useInteractiveMode(composerText);
+  // openSpec holds the spec payload currently shown in the full-screen modal
+  const [openSpec, setOpenSpec] = useState(null);
+  // Ref to track the message ID of the most recently inserted interactive card
+  const activeInteractiveCardIdRef = useRef(null);
+  // --- INTERACTIVE STATE END ---
+
+  // Reactively patch the most recent interactive card when hook state changes
+  useEffect(() => {
+    const cardId = activeInteractiveCardIdRef.current;
+    if (!cardId) return;
+    if (interactiveStatus === 'idle') return; // nothing to patch yet
+
+    console.log('INTERACTIVE: patching card', { cardId, interactiveStatus });
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === cardId
+          ? {
+            ...m,
+            interactiveStatus,
+            interactiveSpec: interactiveResult?.payload ?? m.interactiveSpec,
+          }
+          : m
+      )
+    );
+
+    // Clear ref once we've reached a terminal state
+    if (interactiveStatus === 'success' || interactiveStatus === 'error') {
+      activeInteractiveCardIdRef.current = null;
+    }
+  }, [interactiveStatus, interactiveResult]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -188,6 +227,46 @@ export default function SECONDARY_ChatWindow({
       return;
     }
 
+    // --- INTERACTIVE INTERCEPT START ---
+    // If the composer contains @interactive, hand off to the interactive generator
+    // instead of sending a regular chat message.
+    if (isInteractiveQuery) {
+      const rawQuery = composerText.trim();
+      // Derive a clean title: strip @interactive token and truncate
+      const titleRaw = rawQuery.replace(/@interactive\s*/i, '').trim();
+      const title = titleRaw.slice(0, 80) || 'Interactive Explainer';
+
+      // Add the user message to the thread as usual
+      const userMsg = {
+        id: `msg_${Date.now()}`,
+        role: 'user',
+        content: rawQuery,
+        selected: false,
+      };
+      setMessages((prev) => [...prev, userMsg]);
+      setComposerText('');
+
+      // Add a pending ChatResultCard message to the thread
+      const interactiveCardId = `interactive_${Date.now()}`;
+      const pendingCard = {
+        id: interactiveCardId,
+        role: 'interactive',
+        interactiveStatus: 'pending',
+        interactiveTitle: title,
+        interactiveSpec: null,
+      };
+      setMessages((prev) => [...prev, pendingCard]);
+
+      // Store card ID so the useEffect can patch it when hook state changes
+      activeInteractiveCardIdRef.current = interactiveCardId;
+
+      // Kick off generation — useEffect handles state patching
+      generateInteractive({ query: rawQuery, title, mode: 'spec' });
+
+      return;
+    }
+    // --- INTERACTIVE INTERCEPT END ---
+
     const userMessage = {
       id: `msg_${Date.now()}`,
       role: 'user',
@@ -196,14 +275,12 @@ export default function SECONDARY_ChatWindow({
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    const messageToSend = composerText; // Save for API call
+    const messageToSend = composerText;
     setComposerText('');
-    // Keep RAG sources visible so sidebar persists
     setIsLoading(true);
     setShowStreamingPlaceholder(true);
 
     try {
-      // Build request body with optional RAG
       const requestBody = {
         chatId,
         prompt: messageToSend,
@@ -227,7 +304,6 @@ export default function SECONDARY_ChatWindow({
 
       const data = await response.json();
 
-      // Extract RAG results if available
       if (data.rag?.results) {
         setRagResults(data.rag.results);
       }
@@ -253,7 +329,7 @@ export default function SECONDARY_ChatWindow({
       setIsLoading(false);
       setShowStreamingPlaceholder(false);
     }
-  }, [composerText, chatId, ragSources]);
+  }, [composerText, chatId, ragSources, isInteractiveQuery, generateInteractive, interactiveStatus, interactiveResult]);
 
   const handleToggleMessageSelection = (messageId) => {
     setSelectedMessageIds((prev) => {
@@ -355,95 +431,125 @@ export default function SECONDARY_ChatWindow({
         <div className="flex-1 flex flex-col min-w-0">
           {/* Scrollable messages area */}
           <div className="flex-1 overflow-auto p-6 space-y-4">
-        {messages.length === 0 && (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-gray-400">Start a conversation to begin learning</p>
-            </div>
-          </div>
-        )}
-
-        {messages.map((message) => (
-          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} gap-3`}>
-            <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg transition-all ${
-              message.role === 'user' 
-                ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30' 
-                : 'bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 border border-gray-700/50'
-            } ${
-              selectedMessageIds.has(message.id) 
-                ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-950' 
-                : ''
-            }`}>
-              
-              {/* --- MODIFIED SECTION START: Replace {message.content} with ReactMarkdown --- */}
-              <div className="markdown-container text-sm md:text-base leading-relaxed">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    // Style code blocks
-                    code({node, inline, className, children, ...props}) {
-                      const match = /language-(\w+)/.exec(className || '')
-                      return !inline && match ? (
-                        <SyntaxHighlighter
-                          style={vscDarkPlus}
-                          language={match[1]}
-                          PreTag="div"
-                          className="rounded-md border border-gray-700/50 my-4"
-                          {...props}
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code className={`${className} bg-black/30 rounded px-1.5 py-0.5 text-xs font-mono`} {...props}>
-                          {children}
-                        </code>
-                      )
-                    },
-                    // Style standard HTML elements
-                    h1: ({node, ...props}) => <h1 className="text-xl font-bold mb-3 mt-4" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2 mt-4" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2 mt-3" {...props} />,
-                    p: ({node, ...props}) => <p className="mb-3 last:mb-0" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
-                    li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                    a: ({node, ...props}) => <a className="text-purple-300 hover:text-purple-200 underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                    blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-purple-500/50 pl-4 py-1 italic bg-gray-900/50 rounded-r my-4" {...props} />,
-                    table: ({node, ...props}) => <div className="overflow-x-auto my-4"><table className="min-w-full divide-y divide-gray-700 border border-gray-700" {...props} /></div>,
-                    th: ({node, ...props}) => <th className="px-3 py-2 bg-gray-800 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" {...props} />,
-                    td: ({node, ...props}) => <td className="px-3 py-2 whitespace-nowrap border-t border-gray-700" {...props} />,
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
+            {messages.length === 0 && (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-gray-400">Start a conversation to begin learning</p>
+                </div>
               </div>
-              {/* --- MODIFIED SECTION END --- */}
+            )}
 
-              {message.role === 'assistant' && (
-                <button 
-                  onClick={() => handleToggleMessageSelection(message.id)} 
-                  className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 bg-gray-800/50 backdrop-blur-sm" 
-                  aria-label="Select message for summary" 
-                  title="Select for summary"
-                >
-                  {selectedMessageIds.has(message.id) && <span className="text-purple-400 text-sm font-bold">✓</span>}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+            {messages.map((message) => {
+              // --- INTERACTIVE CARD RENDER START ---
+              if (message.role === 'interactive') {
+                return (
+                  <div key={message.id} className="flex justify-start px-2">
+                    <INTERACTIVE_ChatResultCard
+                      status={message.interactiveStatus}
+                      title={message.interactiveTitle}
+                      summary={message.interactiveSpec?.summary}
+                      errorMessage={message.interactiveStatus === 'error' ? 'Generation failed. Try rephrasing your @interactive query.' : undefined}
+                      onOpen={() => {
+                        if (message.interactiveSpec) {
+                          setOpenSpec(message.interactiveSpec);
+                        }
+                      }}
+                      onRetry={() => {
+                        resetInteractive();
+                        // Re-trigger from the same title
+                        const titleRaw = (message.interactiveTitle || 'Explainer');
+                        generateInteractive({ query: `@interactive ${titleRaw}`, title: titleRaw, mode: 'spec' });
+                        setMessages((prev) =>
+                          prev.map((m) =>
+                            m.id === message.id
+                              ? { ...m, interactiveStatus: 'pending', interactiveSpec: null }
+                              : m
+                          )
+                        );
+                      }}
+                    />
+                  </div>
+                );
+              }
+              // --- INTERACTIVE CARD RENDER END ---
 
-        {/* Streaming Placeholder */}
-        {showStreamingPlaceholder && (
-          <div className="flex justify-start gap-3">
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-lg p-4 max-w-md border border-gray-700/50">
-              <div className="h-2 bg-purple-500/20 rounded animate-pulse" />
-              <p className="text-xs text-gray-500 mt-2">Waiting for response</p>
-            </div>
-          </div>
-        )}
+              return (
+                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} gap-3`}>
+                  <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg transition-all ${message.role === 'user'
+                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
+                    : 'bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 border border-gray-700/50'
+                    } ${selectedMessageIds.has(message.id)
+                      ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-950'
+                      : ''
+                    }`}>
 
-        <div ref={messagesEndRef} />
+                    {/* ReactMarkdown content */}
+                    <div className="markdown-container text-sm md:text-base leading-relaxed">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          code({ node, inline, className, children, ...props }) {
+                            const match = /language-(\w+)/.exec(className || '')
+                            return !inline && match ? (
+                              <SyntaxHighlighter
+                                style={vscDarkPlus}
+                                language={match[1]}
+                                PreTag="div"
+                                className="rounded-md border border-gray-700/50 my-4"
+                                {...props}
+                              >
+                                {String(children).replace(/\n$/, '')}
+                              </SyntaxHighlighter>
+                            ) : (
+                              <code className={`${className} bg-black/30 rounded px-1.5 py-0.5 text-xs font-mono`} {...props}>
+                                {children}
+                              </code>
+                            )
+                          },
+                          h1: ({ node, ...props }) => <h1 className="text-xl font-bold mb-3 mt-4" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="text-lg font-bold mb-2 mt-4" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="text-base font-bold mb-2 mt-3" {...props} />,
+                          p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                          li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                          a: ({ node, ...props }) => <a className="text-purple-300 hover:text-purple-200 underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                          blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-purple-500/50 pl-4 py-1 italic bg-gray-900/50 rounded-r my-4" {...props} />,
+                          table: ({ node, ...props }) => <div className="overflow-x-auto my-4"><table className="min-w-full divide-y divide-gray-700 border border-gray-700" {...props} /></div>,
+                          th: ({ node, ...props }) => <th className="px-3 py-2 bg-gray-800 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" {...props} />,
+                          td: ({ node, ...props }) => <td className="px-3 py-2 whitespace-nowrap border-t border-gray-700" {...props} />,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+
+                    {message.role === 'assistant' && (
+                      <button
+                        onClick={() => handleToggleMessageSelection(message.id)}
+                        className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-purple-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 bg-gray-800/50 backdrop-blur-sm"
+                        aria-label="Select message for summary"
+                        title="Select for summary"
+                      >
+                        {selectedMessageIds.has(message.id) && <span className="text-purple-400 text-sm font-bold">✓</span>}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Streaming Placeholder */}
+            {showStreamingPlaceholder && (
+              <div className="flex justify-start gap-3">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-lg p-4 max-w-md border border-gray-700/50">
+                  <div className="h-2 bg-purple-500/20 rounded animate-pulse" />
+                  <p className="text-xs text-gray-500 mt-2">Waiting for response</p>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Composer at bottom of left area */}
@@ -488,23 +594,23 @@ export default function SECONDARY_ChatWindow({
       {/* Selection Info Bar */}
       {getSelectedCount() > 0 && (
         <div className="bg-gradient-to-r from-purple-900/20 to-violet-900/20 border-t border-gray-700/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between gap-2">
-            {/* ... Buttons ... */}
-            <span className="text-sm text-gray-300 font-medium">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
-             <div className="flex gap-2">
-            <button 
-              onClick={() => setShowSummaryDialog(true)} 
+          {/* ... Buttons ... */}
+          <span className="text-sm text-gray-300 font-medium">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowSummaryDialog(true)}
               className="px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
             >
               Generate Summary
             </button>
-            <button 
-              onClick={() => handleGenerateFlashcards()} 
+            <button
+              onClick={() => handleGenerateFlashcards()}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
             >
               Generate Flashcards
             </button>
-            <button 
-              onClick={() => handleGenerateQuizzes()} 
+            <button
+              onClick={() => handleGenerateQuizzes()}
               className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-lg shadow-violet-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
             >
               Generate Quizzes
@@ -512,25 +618,25 @@ export default function SECONDARY_ChatWindow({
           </div>
         </div>
       )}
-      
+
       {/* ... Summary Dialog ... */}
       {showSummaryDialog && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-           {/* ... Dialog Content ... */}
-           <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700/50 p-6 max-w-sm w-full mx-4">
+          {/* ... Dialog Content ... */}
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700/50 p-6 max-w-sm w-full mx-4">
             <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">Generate Summary</h3>
             <div className="space-y-3 mb-6">
-              <button 
-                onClick={() => handleGenerateSummary('normal')} 
-                disabled={isLoading} 
+              <button
+                onClick={() => handleGenerateSummary('normal')}
+                disabled={isLoading}
                 className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-purple-500/50 hover:bg-purple-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 group"
               >
                 <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Regular Summary</div>
                 <div className="text-xs text-gray-400">Markdown format (150-300 words)</div>
               </button>
-              <button 
-                onClick={() => handleGenerateSummary('incremental')} 
-                disabled={isLoading} 
+              <button
+                onClick={() => handleGenerateSummary('incremental')}
+                disabled={isLoading}
                 className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-purple-500/50 hover:bg-purple-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 group"
               >
                 <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Incremental JSON</div>
@@ -545,13 +651,35 @@ export default function SECONDARY_ChatWindow({
                 <p className="text-sm text-gray-400 mt-2">Generating summary...</p>
               </div>
             )}
-            <button 
-              onClick={() => setShowSummaryDialog(false)} 
-              disabled={isLoading} 
+            <button
+              onClick={() => setShowSummaryDialog(false)}
+              disabled={isLoading}
               className="w-full px-4 py-2 text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── INTERACTIVE EXPLAINER MODAL OVERLAY ─────────────────────────── */}
+      {openSpec && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          role="presentation"
+          onClick={(e) => {
+            // Close when clicking the backdrop (not the dialog itself)
+            if (e.target === e.currentTarget) setOpenSpec(null);
+          }}
+        >
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <INTERACTIVE_InteractiveExplainer
+              spec={openSpec}
+              onClose={() => {
+                console.log('INTERACTIVE: modal closed');
+                setOpenSpec(null);
+              }}
+            />
           </div>
         </div>
       )}
