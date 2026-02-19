@@ -39,7 +39,7 @@ export async function generateNormalSummary(messagesContent) {
     let output = '';
 
     const stream = hf.chatCompletionStream({
-      model: 'NousResearch/Hermes-3-Llama-3.1-8B',
+      model: 'deepseek-ai/DeepSeek-V3.2',
       messages: llmMessages,
       max_tokens: 500,
       temperature: 0.7,

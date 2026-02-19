@@ -403,7 +403,7 @@ async function completeChatFlow(req) {
  * 3. Check HF API:
  *    - Make sure HF_TOKEN is set
  *    - Test with curl:
- *      curl -X POST https://api-inference.huggingface.co/models/NousResearch/Hermes-3-Llama-3.1-8B/v1/chat/completions \
+ *      curl -X POST https://api-inference.huggingface.co/models/deepseek-ai/DeepSeek-V3.2/v1/chat/completions \
  *        -H "Authorization: Bearer $HF_TOKEN" \
  *        -H "Content-Type: application/json" \
  *        -d '{"messages": [{"role": "user", "content": "Hello"}]}'

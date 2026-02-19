@@ -72,7 +72,7 @@ async function callOpenAI({ apiKey, messages, stream, systemPrompt }) {
 /**
  * HuggingFace adapter using InferenceClient
  * Uses: @huggingface/inference client for streaming support
- * Model: NousResearch/Hermes-3-Llama-3.1-8B
+ * Model: deepseek-ai/DeepSeek-V3.2
  * 
  * IMPORTANT: HuggingFace API is STATELESS.
  * Context is ONLY derived from the messages array passed in each request.
@@ -83,7 +83,7 @@ async function callHuggingFace({ apiKey, messages, stream, systemPrompt }) {
   if (!apiKeyToUse) throw new Error('HuggingFace API key not provided');
 
   // Use the specified Hermes model
-  const model = 'NousResearch/Hermes-3-Llama-3.1-8B';
+  const model = 'deepseek-ai/DeepSeek-V3.2';
 
   try {
     // Import InferenceClient dynamically
