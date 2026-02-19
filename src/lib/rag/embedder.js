@@ -116,7 +116,7 @@ export async function embedText(text) {
     throw new Error('Text must be a non-empty string');
   }
 
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  const apiKey = process.env.HF_TOKEN;
   if (!apiKey) {
     console.warn('[Embedder] No HuggingFace API key, using local embedding');
   }
@@ -148,7 +148,7 @@ export async function embedTexts(texts) {
     throw new Error('Texts must be a non-empty array');
   }
 
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  const apiKey = process.env.HF_TOKEN;
 
   // Try API first
   if (apiKey) {
@@ -183,9 +183,9 @@ export async function embedTexts(texts) {
         if (error?.httpResponse) {
           const status = error.httpResponse.status || error.httpResponse?.statusCode || 'unknown';
           const body = error.httpResponse.data || error.httpResponse.body || error.httpResponse;
-          msg = `HTTP ${status} - ${JSON.stringify(body).slice(0,200)}`;
+          msg = `HTTP ${status} - ${JSON.stringify(body).slice(0, 200)}`;
         }
-      } catch (e) {}
+      } catch (e) { }
       console.warn('[Embedder] Batch API failed:', msg);
     }
   }

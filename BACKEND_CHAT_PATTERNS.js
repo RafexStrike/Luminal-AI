@@ -157,7 +157,7 @@ import { callProvider } from '@/lib/SECONDARY_providers';
 async function callHFWithContext(messagePayload, customSystemPrompt) {
   const response = await callProvider({
     provider: 'huggingface',
-    apiKey: null, // Uses env var: HUGGINGFACE_API_KEY
+    apiKey: null, // Uses env var: HF_TOKEN
     messages: messagePayload, // FULL CONVERSATION HISTORY
     stream: false, // Or true for streaming
     systemPrompt: customSystemPrompt || 'You are a helpful tutor...',
@@ -381,7 +381,7 @@ async function completeChatFlow(req) {
 /**
  * Set these in .env.local:
  *
- * HUGGINGFACE_API_KEY=hf_xxxxxxxxxxxxxxxxxxxxx
+ * HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxx
  * SECONDARY_MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/dbname?retryWrites=true&w=majority
  */
 
@@ -401,10 +401,10 @@ async function completeChatFlow(req) {
  *    - Should show all messages ordered by sequenceNumber
  *
  * 3. Check HF API:
- *    - Make sure HUGGINGFACE_API_KEY is set
+ *    - Make sure HF_TOKEN is set
  *    - Test with curl:
  *      curl -X POST https://api-inference.huggingface.co/models/NousResearch/Hermes-3-Llama-3.1-8B/v1/chat/completions \
- *        -H "Authorization: Bearer $HUGGINGFACE_API_KEY" \
+ *        -H "Authorization: Bearer $HF_TOKEN" \
  *        -H "Content-Type: application/json" \
  *        -d '{"messages": [{"role": "user", "content": "Hello"}]}'
  *

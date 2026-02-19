@@ -14,7 +14,7 @@
 
 export async function callProvider({ provider, apiKey, messages, stream = false, systemPrompt = '' }) {
   // TODO: Validate provider and apiKey before making requests
-  
+
   switch (provider) {
     case 'openai':
       return await callOpenAI({ apiKey, messages, stream, systemPrompt });
@@ -79,12 +79,12 @@ async function callOpenAI({ apiKey, messages, stream, systemPrompt }) {
  * The adapter sends the FULL conversation history to get context-aware responses.
  */
 async function callHuggingFace({ apiKey, messages, stream, systemPrompt }) {
-  const apiKeyToUse = apiKey || process.env.HUGGINGFACE_API_KEY;
+  const apiKeyToUse = apiKey || process.env.HF_TOKEN;
   if (!apiKeyToUse) throw new Error('HuggingFace API key not provided');
 
   // Use the specified Hermes model
   const model = 'NousResearch/Hermes-3-Llama-3.1-8B';
-  
+
   try {
     // Import InferenceClient dynamically
     const { InferenceClient } = await import('@huggingface/inference');

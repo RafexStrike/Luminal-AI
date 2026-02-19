@@ -328,7 +328,7 @@ To completely disable RAG:
 Required for RAG:
 
 ```
-HUGGINGFACE_API_KEY=<your_hf_token>
+HF_TOKEN=<your_hf_token>
 SECONDARY_MONGODB_URI=<your_mongodb_connection>
 ```
 
