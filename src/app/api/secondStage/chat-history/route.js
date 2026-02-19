@@ -71,6 +71,10 @@ export async function GET(req) {
       content: msg.content,
       createdAt: msg.createdAt,
       sequenceNumber: msg.sequenceNumber,
+      // Include interactive fields
+      interactiveStatus: msg.interactiveStatus,
+      interactiveTitle: msg.interactiveTitle,
+      interactiveSpec: msg.interactiveSpec,
     }));
 
     return NextResponse.json({

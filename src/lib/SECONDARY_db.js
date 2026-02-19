@@ -304,12 +304,20 @@ export async function getNotes({ userId, chatId = null }) {
  */
 
 /**
- * saveMessage({ userId, chatId, role, content })
+ * saveMessage({ userId, chatId, role, content, interactiveStatus, interactiveTitle, interactiveSpec })
  * Saves a single message to the database
  * Returns: { _id, ...document }
  */
-export async function saveMessage({ userId, chatId, role, content }) {
-  if (!userId || !chatId || !role || !content) {
+export async function saveMessage({
+  userId,
+  chatId,
+  role,
+  content,
+  interactiveStatus = null,
+  interactiveTitle = null,
+  interactiveSpec = null
+}) {
+  if (!userId || !chatId || !role || content === undefined) {
     throw new Error('userId, chatId, role, and content are required');
   }
 
@@ -329,11 +337,18 @@ export async function saveMessage({ userId, chatId, role, content }) {
   const doc = {
     userId,
     chatId,
-    role, // 'system' | 'user' | 'assistant'
+    role, // 'system' | 'user' | 'assistant' | 'interactive'
     content,
     sequenceNumber,
     createdAt: new Date(),
   };
+
+  // Add interactive fields if present
+  if (role === 'interactive' || interactiveStatus) {
+    doc.interactiveStatus = interactiveStatus;
+    doc.interactiveTitle = interactiveTitle;
+    doc.interactiveSpec = interactiveSpec;
+  }
 
   const result = await collection.insertOne(doc);
   return { _id: result.insertedId, ...doc };
@@ -616,4 +631,32 @@ export async function updateLastProcessedSequence({ userId, chatId, sequenceNumb
       }
     }
   );
+}
+
+/**
+ * updateMessage({ userId, messageId, updates })
+ * Updates specific fields on an existing message.
+ * Primarily used for patching interactive spec results.
+ */
+export async function updateMessage({ userId, messageId, updates }) {
+  if (!userId || !messageId || !updates) {
+    throw new Error('userId, messageId, and updates required');
+  }
+
+  const client = await getMongoClient();
+  const db = client.db();
+  const collection = db.collection('stage2_messages');
+
+  const { ObjectId } = await import('mongodb');
+  const result = await collection.updateOne(
+    { _id: new ObjectId(messageId), userId },
+    {
+      $set: {
+        ...updates,
+        updatedAt: new Date(),
+      },
+    }
+  );
+
+  return result;
 }

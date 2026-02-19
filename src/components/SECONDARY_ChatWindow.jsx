@@ -80,8 +80,19 @@ export default function SECONDARY_ChatWindow({
       )
     );
 
-    // Clear ref once we've reached a terminal state
+    // Sync to DB when terminal state is reached
     if (interactiveStatus === 'success' || interactiveStatus === 'error') {
+      const updates = {
+        interactiveStatus,
+        interactiveSpec: interactiveResult?.payload || null
+      };
+
+      fetch('/api/secondStage/message/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId: cardId, updates }),
+      }).catch(err => console.error('INTERACTIVE: Failed to sync terminal state to DB', err));
+
       activeInteractiveCardIdRef.current = null;
     }
   }, [interactiveStatus, interactiveResult]);
@@ -111,6 +122,10 @@ export default function SECONDARY_ChatWindow({
               role: msg.role,
               content: msg.content,
               selected: false,
+              // Restore interactive fields from DB
+              interactiveStatus: msg.interactiveStatus,
+              interactiveTitle: msg.interactiveTitle,
+              interactiveSpec: msg.interactiveSpec,
             }));
 
           setMessages(conversationMessages);
@@ -228,40 +243,73 @@ export default function SECONDARY_ChatWindow({
     }
 
     // --- INTERACTIVE INTERCEPT START ---
-    // If the composer contains @interactive, hand off to the interactive generator
-    // instead of sending a regular chat message.
     if (isInteractiveQuery) {
       const rawQuery = composerText.trim();
-      // Derive a clean title: strip @interactive token and truncate
       const titleRaw = rawQuery.replace(/@interactive\s*/i, '').trim();
       const title = titleRaw.slice(0, 80) || 'Interactive Explainer';
 
-      // Add the user message to the thread as usual
-      const userMsg = {
-        id: `msg_${Date.now()}`,
-        role: 'user',
-        content: rawQuery,
-        selected: false,
-      };
-      setMessages((prev) => [...prev, userMsg]);
       setComposerText('');
 
-      // Add a pending ChatResultCard message to the thread
-      const interactiveCardId = `interactive_${Date.now()}`;
-      const pendingCard = {
-        id: interactiveCardId,
-        role: 'interactive',
-        interactiveStatus: 'pending',
-        interactiveTitle: title,
-        interactiveSpec: null,
-      };
-      setMessages((prev) => [...prev, pendingCard]);
+      try {
+        // 1. Save USER message to DB
+        const userRes = await fetch('/api/secondStage/message/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatId, role: 'user', content: rawQuery }),
+        });
+        const userData = await userRes.json();
 
-      // Store card ID so the useEffect can patch it when hook state changes
-      activeInteractiveCardIdRef.current = interactiveCardId;
+        const userMsg = {
+          id: userData.messageId || `msg_${Date.now()}`,
+          role: 'user',
+          content: rawQuery,
+          selected: false,
+        };
+        setMessages((prev) => [...prev, userMsg]);
 
-      // Kick off generation — useEffect handles state patching
-      generateInteractive({ query: rawQuery, title, mode: 'spec' });
+        // 2. Save PENDING interactive message to DB
+        const interactiveRes = await fetch('/api/secondStage/message/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chatId,
+            role: 'interactive',
+            content: `Interactive session: ${title}`,
+            interactiveStatus: 'pending',
+            interactiveTitle: title
+          }),
+        });
+        const interactiveData = await interactiveRes.json();
+        const interactiveCardId = interactiveData.messageId;
+
+        const pendingCard = {
+          id: interactiveCardId || `interactive_${Date.now()}`,
+          role: 'interactive',
+          interactiveStatus: 'pending',
+          interactiveTitle: title,
+          interactiveSpec: null,
+        };
+        setMessages((prev) => [...prev, pendingCard]);
+
+        // Store official DB ID for the patching hook
+        activeInteractiveCardIdRef.current = interactiveCardId;
+
+        // 3. Kick off generation
+        generateInteractive({ query: rawQuery, title, mode: 'spec' });
+      } catch (err) {
+        console.error('INTERACTIVE: Failed to initiate persisted session', err);
+        // Fallback to local-only if API fails (better than nothing)
+        const localId = `interactive_${Date.now()}`;
+        setMessages((prev) => [...prev, {
+          id: localId,
+          role: 'interactive',
+          interactiveStatus: 'pending',
+          interactiveTitle: title,
+          interactiveSpec: null
+        }]);
+        activeInteractiveCardIdRef.current = localId;
+        generateInteractive({ query: rawQuery, title, mode: 'spec' });
+      }
 
       return;
     }
@@ -456,9 +504,13 @@ export default function SECONDARY_ChatWindow({
                       }}
                       onRetry={() => {
                         resetInteractive();
-                        // Re-trigger from the same title
                         const titleRaw = (message.interactiveTitle || 'Explainer');
-                        generateInteractive({ query: `@interactive ${titleRaw}`, title: titleRaw, mode: 'spec' });
+                        const query = `@interactive ${titleRaw}`;
+
+                        // Set tracking ref so the patching useEffect knows which card to update
+                        activeInteractiveCardIdRef.current = message.id;
+
+                        generateInteractive({ query, title: titleRaw, mode: 'spec' });
                         setMessages((prev) =>
                           prev.map((m) =>
                             m.id === message.id
