@@ -30,12 +30,15 @@ import { INTERACTIVE_ChatResultCard } from '@/components/interactive/INTERACTIVE
 import { INTERACTIVE_InteractiveExplainer } from '@/components/interactive/INTERACTIVE_InteractiveExplainer';
 // --- INTERACTIVE IMPORTS END ---
 
+import { useRouter } from 'next/navigation';
+
 export default function SECONDARY_ChatWindow({
   chatId = null,
   onDataSaved = () => { },
   onTabChange = () => { },
   refreshTrigger = 0,
 }) {
+  const router = useRouter();
   const messagesEndRef = useRef(null);
   const composerInputRef = useRef(null);
   const [messages, setMessages] = useState([]);
@@ -235,11 +238,34 @@ export default function SECONDARY_ChatWindow({
   // --- RAG HANDLERS END ---
 
   const handleSendMessage = useCallback(async () => {
-    if (!composerText.trim() || !chatId) {
-      if (!chatId) {
-        alert('No chat selected. Please create or select a chat first.');
+    if (!composerText.trim()) return;
+
+    let activeChatId = chatId;
+
+    // Auto-create chat if none selected
+    if (!activeChatId) {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/secondStage/new-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: composerText.trim().substring(0, 40) }),
+        });
+        if (!res.ok) throw new Error('Failed to auto-create chat');
+        const data = await res.json();
+        activeChatId = data.chatId;
+
+        // Notify parent layout (like Sidebar) that data changed
+        onDataSaved();
+
+        // Update the URL to reflect the new chat without full refresh
+        router.replace(`/secondStage/${activeChatId}`);
+      } catch (err) {
+        console.error('Auto-create error:', err);
+        alert('Failed to create a new chat session. Please try again.');
+        setIsLoading(false);
+        return;
       }
-      return;
     }
 
     // --- INTERACTIVE INTERCEPT START ---
@@ -255,7 +281,7 @@ export default function SECONDARY_ChatWindow({
         const userRes = await fetch('/api/secondStage/message/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chatId, role: 'user', content: rawQuery }),
+          body: JSON.stringify({ chatId: activeChatId, role: 'user', content: rawQuery }),
         });
         const userData = await userRes.json();
 
@@ -272,7 +298,7 @@ export default function SECONDARY_ChatWindow({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            chatId,
+            chatId: activeChatId,
             role: 'interactive',
             content: `Interactive session: ${title}`,
             interactiveStatus: 'pending',
@@ -310,7 +336,7 @@ export default function SECONDARY_ChatWindow({
         activeInteractiveCardIdRef.current = localId;
         generateInteractive({ query: rawQuery, title, mode: 'spec' });
       }
-
+      setIsLoading(false);
       return;
     }
     // --- INTERACTIVE INTERCEPT END ---
@@ -330,7 +356,7 @@ export default function SECONDARY_ChatWindow({
 
     try {
       const requestBody = {
-        chatId,
+        chatId: activeChatId,
         prompt: messageToSend,
         stream: false,
       };

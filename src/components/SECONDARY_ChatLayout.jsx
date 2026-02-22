@@ -45,10 +45,14 @@ const TABS = [
  */
 import theme from '../design/theme.config';
 
+import { useRouter, useParams } from 'next/navigation';
+
 export default function SECONDARY_ChatLayout() {
+  const router = useRouter();
+  const params = useParams();
+  const chatId = params?.chatId || null;
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('chat');
-  const [currentChatId, setCurrentChatId] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Load sidebar state from localStorage on mount
@@ -64,17 +68,17 @@ export default function SECONDARY_ChatLayout() {
   }, [sidebarCollapsed]);
 
   const handleSelectSpace = useCallback((spaceId) => {
-    setCurrentChatId(spaceId);
+    router.push(`/secondStage/${spaceId}`);
     setActiveTab('chat');
-  }, []);
+  }, [router]);
 
   // Handle when a chat is deleted
   const handleChatDeleted = useCallback((deletedChatId) => {
-    if (currentChatId === deletedChatId) {
-      setCurrentChatId(null);
+    if (chatId === deletedChatId) {
+      router.push('/secondStage');
       setActiveTab('chat');
     }
-  }, [currentChatId]);
+  }, [chatId, router]);
 
   // Trigger refresh of content when data is saved
   const handleDataSaved = useCallback(() => {
@@ -87,7 +91,7 @@ export default function SECONDARY_ChatLayout() {
       case 'chat':
         return (
           <SECONDARY_ChatWindow
-            chatId={currentChatId}
+            chatId={chatId}
             onDataSaved={handleDataSaved}
             onTabChange={setActiveTab}
             refreshTrigger={refreshTrigger}
@@ -96,28 +100,28 @@ export default function SECONDARY_ChatLayout() {
       case 'summary':
         return (
           <SECONDARY_SummaryPanel
-            chatId={currentChatId}
+            chatId={chatId}
             refreshTrigger={refreshTrigger}
           />
         );
       case 'flashcards':
         return (
           <SECONDARY_FlashcardsPanel
-            chatId={currentChatId}
+            chatId={chatId}
             refreshTrigger={refreshTrigger}
           />
         );
       case 'quizzes':
         return (
           <SECONDARY_QuizzesPanel
-            chatId={currentChatId}
+            chatId={chatId}
             refreshTrigger={refreshTrigger}
           />
         );
       case 'notes':
         return (
           <SECONDARY_NotesPanel
-            chatId={currentChatId}
+            chatId={chatId}
             onDataSaved={handleDataSaved}
             refreshTrigger={refreshTrigger}
           />
@@ -141,7 +145,7 @@ export default function SECONDARY_ChatLayout() {
         collapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
         onSelectSpace={handleSelectSpace}
-        currentChatId={currentChatId}
+        currentChatId={chatId}
         onChatDeleted={handleChatDeleted}
       />
 
@@ -159,8 +163,8 @@ export default function SECONDARY_ChatLayout() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 ${active
-                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                  ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
                   }`}
                 aria-pressed={active}
               >
