@@ -517,43 +517,45 @@ export default function SECONDARY_ChatWindow({
               // --- INTERACTIVE CARD RENDER START ---
               if (message.role === 'interactive') {
                 return (
-                  <div key={message.id} className="flex justify-start px-2">
-                    <INTERACTIVE_ChatResultCard
-                      status={message.interactiveStatus}
-                      title={message.interactiveTitle}
-                      summary={message.interactiveSpec?.summary}
-                      errorMessage={message.interactiveStatus === 'error' ? 'Generation failed. Try rephrasing your @interactive query.' : undefined}
-                      onOpen={() => {
-                        if (message.interactiveSpec) {
-                          setOpenSpec(message.interactiveSpec);
-                        }
-                      }}
-                      onRetry={() => {
-                        resetInteractive();
-                        const titleRaw = (message.interactiveTitle || 'Explainer');
-                        const query = `@interactive ${titleRaw}`;
+                  <div key={message.id} className="flex justify-center px-2 w-full my-4">
+                    <div className="w-[95%] md:w-[85%] lg:w-[80%] max-w-5xl">
+                      <INTERACTIVE_ChatResultCard
+                        status={message.interactiveStatus}
+                        title={message.interactiveTitle}
+                        summary={message.interactiveSpec?.summary}
+                        errorMessage={message.interactiveStatus === 'error' ? 'Generation failed. Try rephrasing your @interactive query.' : undefined}
+                        onOpen={() => {
+                          if (message.interactiveSpec) {
+                            setOpenSpec(message.interactiveSpec);
+                          }
+                        }}
+                        onRetry={() => {
+                          resetInteractive();
+                          const titleRaw = (message.interactiveTitle || 'Explainer');
+                          const query = `@interactive ${titleRaw}`;
 
-                        // Set tracking ref so the patching useEffect knows which card to update
-                        activeInteractiveCardIdRef.current = message.id;
+                          // Set tracking ref so the patching useEffect knows which card to update
+                          activeInteractiveCardIdRef.current = message.id;
 
-                        generateInteractive({ query, title: titleRaw, mode: 'spec' });
-                        setMessages((prev) =>
-                          prev.map((m) =>
-                            m.id === message.id
-                              ? { ...m, interactiveStatus: 'pending', interactiveSpec: null }
-                              : m
-                          )
-                        );
-                      }}
-                    />
+                          generateInteractive({ query, title: titleRaw, mode: 'spec' });
+                          setMessages((prev) =>
+                            prev.map((m) =>
+                              m.id === message.id
+                                ? { ...m, interactiveStatus: 'pending', interactiveSpec: null }
+                                : m
+                            )
+                          );
+                        }}
+                      />
+                    </div>
                   </div>
                 );
               }
               // --- INTERACTIVE CARD RENDER END ---
 
               return (
-                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} gap-3`}>
-                  <div className={`${chat.messageMaxWidth} p-4 relative rounded-lg transition-all ${message.role === 'user'
+                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-center'} gap-3 w-full my-4`}>
+                  <div className={`${message.role === 'user' ? 'max-w-2xl p-5' : 'w-[95%] md:w-[85%] lg:w-[80%] max-w-5xl md:px-8 px-5 py-6'} relative rounded-2xl transition-all ${message.role === 'user'
                     ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
                     : 'bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 border border-gray-700/50'
                     } ${selectedMessageIds.has(message.id)
@@ -584,12 +586,12 @@ export default function SECONDARY_ChatWindow({
                               </code>
                             )
                           },
-                          h1: ({ node, ...props }) => <h1 className="text-xl font-bold mb-3 mt-4" {...props} />,
-                          h2: ({ node, ...props }) => <h2 className="text-lg font-bold mb-2 mt-4" {...props} />,
-                          h3: ({ node, ...props }) => <h3 className="text-base font-bold mb-2 mt-3" {...props} />,
-                          p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
-                          ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
-                          ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                          h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-purple-50" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 text-purple-100" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="text-lg font-bold mb-2 mt-4 text-purple-200" {...props} />,
+                          p: ({ node, ...props }) => <p className="mb-4 last:mb-0 leading-relaxed text-gray-200" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-gray-200" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-gray-200" {...props} />,
                           li: ({ node, ...props }) => <li className="pl-1" {...props} />,
                           a: ({ node, ...props }) => <a className="text-purple-300 hover:text-purple-200 underline" target="_blank" rel="noopener noreferrer" {...props} />,
                           blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-purple-500/50 pl-4 py-1 italic bg-gray-900/50 rounded-r my-4" {...props} />,
@@ -619,10 +621,10 @@ export default function SECONDARY_ChatWindow({
 
             {/* Streaming Placeholder */}
             {showStreamingPlaceholder && (
-              <div className="flex justify-start gap-3">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-lg p-4 max-w-md border border-gray-700/50">
-                  <div className="h-2 bg-purple-500/20 rounded animate-pulse" />
-                  <p className="text-xs text-gray-500 mt-2">Waiting for response</p>
+              <div className="flex justify-center gap-3 w-full my-4">
+                <div className="w-[95%] md:w-[85%] lg:w-[80%] max-w-5xl bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-2xl p-6 border border-gray-700/50">
+                  <div className="h-2 w-24 bg-purple-500/20 rounded animate-pulse" />
+                  <p className="text-xs text-gray-500 mt-2">Waiting for response...</p>
                 </div>
               </div>
             )}
