@@ -51,7 +51,7 @@ export default function FlashcardsLayout({ chatId = null, onGenerateFlashcards =
   useEffect(() => {
     const loaded = loadCollections();
     setCollections(loaded);
-    
+
     // Load all cards
     const cardMap = {};
     loaded.forEach(collection => {
@@ -131,10 +131,19 @@ export default function FlashcardsLayout({ chatId = null, onGenerateFlashcards =
     }
   }, [activeCollection, activeCollectionCards]);
 
-  // Handle review complete
+  // Handle individual card reviewed — update in-memory state immediately
+  // so the dashboard due-count reflects the review right away
+  const handleCardReviewed = useCallback((updatedCard) => {
+    setAllCards(prev => ({
+      ...prev,
+      [updatedCard.id]: updatedCard,
+    }));
+  }, []);
+
+  // Handle review session complete
   const handleReviewComplete = useCallback(() => {
     setCurrentView(VIEWS.COLLECTION);
-    // Reload cards to reflect updates
+    // Re-read from localStorage to ensure full consistency
     if (activeCollection) {
       const updated = loadCollectionCards(activeCollection.id);
       const newCardMap = { ...allCards };
@@ -342,6 +351,7 @@ export default function FlashcardsLayout({ chatId = null, onGenerateFlashcards =
               collectionId={activeCollection.id}
               targetRetention={activeCollection.settings?.targetRetention || 0.9}
               onQueueEmpty={handleReviewComplete}
+              onCardReviewed={handleCardReviewed}
             />
           )}
         </div>

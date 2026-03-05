@@ -52,28 +52,28 @@ export function estimateR(daysSince, stability) {
  */
 export function applyReviewUpdate(card, quality, now, targetRetention = 0.9) {
   const timestamp = new Date(now);
-  
+
   // Get previous stability or use default
   let stability = card.stability || 3;
   let difficulty = card.difficulty || 5;
   let lapses = card.lapses || 0;
-  
+
   // Calculate days since last review
   const lastReviewedAt = card.lastReviewedAt ? new Date(card.lastReviewedAt) : null;
   let daysSince = 0;
   if (lastReviewedAt && lastReviewedAt < timestamp) {
     daysSince = (timestamp - lastReviewedAt) / (1000 * 60 * 60 * 24);
   }
-  
+
   // Constants (tunable)
   const BASE_GAIN = 0.18;
   const MIN_INTERVAL = 1;
   const MAX_INTERVAL = 3650; // 10 years
-  
+
   let stabilityNew = stability;
   let difficultyNew = difficulty;
   let lapsesNew = lapses;
-  
+
   if (quality <= 2) {
     // Forgotten card
     stabilityNew = Math.max(0.5, stability * 0.5);
@@ -84,30 +84,30 @@ export function applyReviewUpdate(card, quality, now, targetRetention = 0.9) {
     const R = estimateR(daysSince, stability);
     const qualityFn = (quality - 2) / 3; // Hard(3)→1/3, Good(4)→2/3, Easy(5)→1
     const gain = BASE_GAIN * qualityFn * (1 + (1 - R));
-    
+
     stabilityNew = stability * (1 + gain);
     difficultyNew = Math.max(1, Math.min(10, difficulty - 0.05 * (quality - 3)));
   }
-  
+
   // Clamp difficulty
   difficultyNew = Math.max(1, Math.min(10, difficultyNew));
-  
+
   // Schedule next review: solve exp(-t / S) = targetRetention
   // => t = -S * ln(targetRetention)
   let intervalDays = -stabilityNew * Math.log(targetRetention);
   intervalDays = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, intervalDays));
-  
+
   // Calculate next review date
   const nextReviewAt = new Date(timestamp);
   nextReviewAt.setDate(nextReviewAt.getDate() + intervalDays);
-  
+
   // Build history record
   const historyEntry = {
     ts: timestamp.toISOString(),
     quality,
     interval: daysSince, // interval that just ended
   };
-  
+
   // Update card
   const updatedCard = {
     ...card,
@@ -118,7 +118,7 @@ export function applyReviewUpdate(card, quality, now, targetRetention = 0.9) {
     nextReviewAt: nextReviewAt.toISOString(),
     history: [...(card.history || []), historyEntry],
   };
-  
+
   return updatedCard;
 }
 
@@ -129,12 +129,13 @@ export function applyReviewUpdate(card, quality, now, targetRetention = 0.9) {
  * @param {Date|string} today - reference date (default today)
  * @returns {Array} cards due for review, sorted by nextReviewAt
  */
-export function getDueCards(cards, today = new Date()) {
-  const refDate = new Date(today);
-  refDate.setHours(0, 0, 0, 0);
-  
+export function getDueCards(cards, now = new Date()) {
+  // Use current moment: cards are due when nextReviewAt <= now
+  // This ensures reviewed cards (rescheduled into the future) disappear immediately
+  const refDate = new Date(now);
+
   return cards.filter(card => {
-    if (!card.nextReviewAt) return true; // Never reviewed
+    if (!card.nextReviewAt) return true; // Never reviewed → always due
     const nextReview = new Date(card.nextReviewAt);
     return nextReview <= refDate;
   }).sort((a, b) => {
@@ -155,10 +156,10 @@ export function getDueCards(cards, today = new Date()) {
 export function getUpcomingCards(cards, daysAhead = 7, fromDate = new Date()) {
   const refDate = new Date(fromDate);
   refDate.setHours(0, 0, 0, 0);
-  
+
   const endDate = new Date(refDate);
   endDate.setDate(endDate.getDate() + daysAhead);
-  
+
   return cards.filter(card => {
     if (!card.nextReviewAt) return false;
     const nextReview = new Date(card.nextReviewAt);
@@ -180,17 +181,17 @@ export function getUpcomingCards(cards, daysAhead = 7, fromDate = new Date()) {
  */
 export function estimateCollectionRetention(cards, today = new Date()) {
   if (!cards || cards.length === 0) return 0;
-  
+
   const refDate = new Date(today);
-  
+
   const retrievabilities = cards.map(card => {
     const lastReview = card.lastReviewedAt ? new Date(card.lastReviewedAt) : null;
     if (!lastReview || !card.stability) return 1; // Never reviewed, assume stable
-    
+
     const daysSince = (refDate - lastReview) / (1000 * 60 * 60 * 24);
     return estimateR(daysSince, card.stability);
   });
-  
+
   const avg = retrievabilities.reduce((a, b) => a + b, 0) / retrievabilities.length;
   return Math.round(avg * 10000) / 10000;
 }
@@ -224,7 +225,7 @@ export function getLowStabilityCards(cards, limit = 5) {
  */
 export function migrateCard(card, defaultStability = 3, defaultDifficulty = 5) {
   const migrated = { ...card };
-  
+
   // Ensure all fields exist
   if (!migrated.id) migrated.id = `card_${Date.now()}_${Math.random()}`;
   if (!migrated.front) migrated.front = '';
@@ -232,7 +233,7 @@ export function migrateCard(card, defaultStability = 3, defaultDifficulty = 5) {
   if (!migrated.tags) migrated.tags = [];
   if (!migrated.history) migrated.history = [];
   if (!migrated.lapses) migrated.lapses = 0;
-  
+
   // Estimate or set stability
   if (!migrated.stability || migrated.stability <= 0) {
     if (migrated.history && migrated.history.length > 1) {
@@ -250,22 +251,22 @@ export function migrateCard(card, defaultStability = 3, defaultDifficulty = 5) {
       migrated.stability = defaultStability;
     }
   }
-  
+
   // Set difficulty
   if (!migrated.difficulty || migrated.difficulty < 1 || migrated.difficulty > 10) {
     migrated.difficulty = defaultDifficulty;
   }
-  
+
   // Set review timestamps if missing
   if (!migrated.lastReviewedAt && migrated.history && migrated.history.length > 0) {
     migrated.lastReviewedAt = migrated.history[migrated.history.length - 1].ts;
   }
-  
+
   if (!migrated.nextReviewAt) {
     // If no next review scheduled, assume due now
     migrated.nextReviewAt = new Date(0).toISOString();
   }
-  
+
   return migrated;
 }
 
@@ -288,16 +289,16 @@ export function simulateExample() {
     lastReviewedAt: null,
     nextReviewAt: new Date().toISOString(),
   };
-  
+
   // First review: user rates "Good" (quality 4)
   const review1Date = new Date();
   const afterReview1 = applyReviewUpdate(initialCard, 4, review1Date, 0.9);
-  
+
   // Second review: 7 days later, user rates "Easy" (quality 5)
   const review2Date = new Date(review1Date);
   review2Date.setDate(review2Date.getDate() + 7);
   const afterReview2 = applyReviewUpdate(afterReview1, 5, review2Date, 0.9);
-  
+
   return {
     initial: initialCard,
     review1: {
@@ -328,31 +329,31 @@ export function getDailyStats(cards, today = new Date()) {
   if (!cards || cards.length === 0) {
     return { dueTodayCount: 0, upcomingCount: 0, reviewedTodayCount: 0, totalCards: 0 };
   }
-  
+
   const refDate = new Date(today);
   refDate.setHours(0, 0, 0, 0);
-  
+
   const endOfToday = new Date(refDate);
   endOfToday.setHours(23, 59, 59, 999);
-  
+
   const dueTodayCount = cards.filter(card => {
     if (!card.nextReviewAt) return true;
     const nextReview = new Date(card.nextReviewAt);
     return nextReview <= endOfToday;
   }).length;
-  
+
   const upcomingCount = cards.filter(card => {
     if (!card.nextReviewAt) return false;
     const nextReview = new Date(card.nextReviewAt);
     return nextReview > endOfToday && nextReview <= new Date(refDate.getTime() + 7 * 24 * 60 * 60 * 1000);
   }).length;
-  
+
   const reviewedTodayCount = cards.filter(card => {
     if (!card.lastReviewedAt) return false;
     const lastReview = new Date(card.lastReviewedAt);
     return lastReview >= refDate && lastReview <= endOfToday;
   }).length;
-  
+
   return {
     dueTodayCount,
     upcomingCount,
@@ -390,7 +391,7 @@ export function exportToAnkiCSV(cards, deckName = 'Exported Deck') {
     const tags = (card.tags || []).join(' ');
     return `"${front}"	"${back}"	${tags}`;
   });
-  
+
   return [...headers, ...rows].join('\n');
 }
 
