@@ -16,23 +16,22 @@ import { INTERACTIVE_VIZ_TYPES } from './INTERACTIVE_schema.js';
  * @returns {{ systemPrompt: string, userPrompt: string }}
  */
 export function buildInteractivePrompt({ query, title, audience = 'curious learner', kbSnippets }) {
-    console.log('INTERACTIVE: prompt built', {
-        queryLength: query?.length,
-        titleLength: title?.length,
-        kbSnippetsLength: kbSnippets?.length,
-        audience,
-    });
+  console.log('INTERACTIVE: prompt built', {
+    queryLength: query?.length,
+    titleLength: title?.length,
+    kbSnippetsLength: kbSnippets?.length,
+    audience,
+  });
 
-    const vizList = INTERACTIVE_VIZ_TYPES.join(', ');
+  const vizList = INTERACTIVE_VIZ_TYPES.join(', ');
 
-    const systemPrompt = `You are a Socratic teaching assistant who guides learners to discover knowledge themselves through progressive questioning. You output ONLY a single JSON object — no prose, no markdown, no explanation.
+  const systemPrompt = `You are a Socratic teaching assistant who guides learners to discover knowledge themselves through progressive questioning. You output ONLY a single JSON object — no prose, no markdown, no explanation.
 
 TEACHING PHILOSOPHY:
 - Start with the simplest possible first-principles question the learner can answer from lived experience
-- Each subsequent question builds on the previous answer, revealing deeper understanding
 - Never directly explain — always ask a question that makes the learner DERIVE the concept themselves
 - Questions should feel curious and inviting, not like a test
-- 3-5 turns builds from concrete intuition to abstract principle
+- This is the first turn in a longer adaptive dialogue
 
 ANIMATION TYPES (pick the one that best illustrates what the learner is discovering):
 - nodes_forming: neurons/nodes appearing and linking (use for: networks, relationships, graphs)
@@ -62,12 +61,12 @@ OUTPUT SCHEMA (output EXACTLY this structure, nothing else):
 
 RULES:
 - Output EXACTLY one JSON object, double-quoted strings, no trailing commas
-- 3 to 5 turns only
+- Exactly 1 turn in the "turns" array
 - Questions 10-400 characters; hints 1-250 characters
 - intro must NOT answer the query — welcome the learner into discovery
 - viz_type MUST be exactly one of: ${vizList}`;
 
-    const userPrompt = `Create a Socratic teaching session for the following topic.
+  const userPrompt = `Create a Socratic teaching session for the following topic.
 
 Query: "${query}"
 Topic: "${title}"
@@ -76,5 +75,5 @@ KB context (use to inform questions, do not quote directly): ${kbSnippets || 'No
 
 Output a single JSON object. Output only JSON — nothing else.`;
 
-    return { systemPrompt, userPrompt };
+  return { systemPrompt, userPrompt };
 }

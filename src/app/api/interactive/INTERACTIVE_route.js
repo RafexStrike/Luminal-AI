@@ -5,6 +5,8 @@
 import { NextResponse } from 'next/server';
 import { getUserIfAuthenticated } from '@/lib/SECONDARY_authPlaceholder';
 import { generateInteractive } from '@/lib/interactive/INTERACTIVE_generator';
+import { createSession } from '@/lib/tutoring/sessionManager';
+import { initialMastery } from '@/lib/tutoring/bkt';
 
 /**
  * POST /api/interactive/generate
@@ -109,5 +111,24 @@ export async function POST(req) {
     }
 
     console.log('INTERACTIVE: returning valid spec', { kind: result.kind });
-    return NextResponse.json(result, { status: 200 });
+
+    // ── Create Tutoring Session ──────────────────────────────────────────────
+    // We create an ephemeral in-memory session for the adaptive loop.
+    // The topic is taken from the generated spec.
+    const session = createSession({
+        topic: result.payload.topic || title,
+        userId: user.id
+    });
+
+    // Attach sessionId and initial metadata to payload
+    const finalResult = {
+        ...result,
+        payload: {
+            ...result.payload,
+            sessionId: session.sessionId,
+            initialMastery: initialMastery(),
+        }
+    };
+
+    return NextResponse.json(finalResult, { status: 200 });
 }

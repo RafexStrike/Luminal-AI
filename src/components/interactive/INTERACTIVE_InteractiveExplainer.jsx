@@ -13,8 +13,8 @@ function ProgressDots({ total, current }) {
         <div className="flex items-center gap-2 justify-center" aria-label={`Turn ${current + 1} of ${total}`}>
             {Array.from({ length: total }, (_, i) => (
                 <div key={i} className={`rounded-full transition-all duration-400 ${i < current ? 'w-2 h-2 bg-purple-500' :
-                        i === current ? 'w-3 h-3 bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.7)]' :
-                            'w-2 h-2 bg-gray-700'
+                    i === current ? 'w-3 h-3 bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.7)]' :
+                        'w-2 h-2 bg-gray-700'
                     }`} />
             ))}
         </div>
@@ -123,14 +123,16 @@ function CompletionScreen({ topic, turns, responses, onClose, onRestart }) {
  * @param {Function} props.onClose — Callback to close the modal
  */
 export function INTERACTIVE_InteractiveExplainer({ spec, onClose }) {
+    const [turns, setTurns] = useState(spec?.turns || []);
     const [turnIdx, setTurnIdx] = useState(0);
     const [input, setInput] = useState('');
     const [responses, setResponses] = useState([]);
     const [done, setDone] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [mastery, setMastery] = useState(spec?.initialMastery || 0.2);
     const [animKey, setAnimKey] = useState(0); // remount viz on turn change
     const inputRef = useRef(null);
 
-    const turns = spec?.turns || [];
     const currentTurn = turns[turnIdx];
 
     // Focus input when turn changes
@@ -146,21 +148,65 @@ export function INTERACTIVE_InteractiveExplainer({ spec, onClose }) {
         return () => window.removeEventListener('keydown', handler);
     }, [onClose]);
 
-    const handleSubmit = useCallback(() => {
-        if (!input.trim()) return;
-        const next = [...responses, input.trim()];
-        setResponses(next);
+    const handleSubmit = useCallback(async () => {
+        if (!input.trim() || loading || !spec?.sessionId) return;
+
+        const studentAnswer = input.trim();
+        const nextResponses = [...responses, studentAnswer];
+        setResponses(nextResponses);
         setInput('');
-        if (turnIdx >= turns.length - 1) {
-            setDone(true);
-        } else {
+        setLoading(true);
+
+        try {
+            const res = await fetch('/api/interactive/nextStep', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: spec.sessionId,
+                    studentAnswer,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.terminated) {
+                setDone(true);
+                if (data.updatedMastery) setMastery(data.updatedMastery);
+                return;
+            }
+
+            // Append new turn to local state
+            const newTurn = {
+                id: `t-${Date.now()}`,
+                question: data.nextQuestion,
+                hint: data.hint,
+                concepts: data.concepts || [spec.topic],
+                viz_type: data.viz_type || 'process_steps',
+                viz_config: {},
+            };
+
+            setTurns(prev => [...prev.slice(0, turnIdx + 1), newTurn]);
             setTurnIdx(t => t + 1);
+            if (data.updatedMastery) setMastery(data.updatedMastery);
+
+        } catch (err) {
+            console.error('INTERACTIVE ERROR: failed to fetch next step', err);
+            // Fallback for UI if API fails – just advance to next pre-generated turn if exists
+            if (turnIdx < turns.length - 1) {
+                setTurnIdx(t => t + 1);
+            } else {
+                setDone(true);
+            }
+        } finally {
+            setLoading(false);
         }
-    }, [input, responses, turnIdx, turns.length]);
+    }, [input, responses, turnIdx, turns, spec, loading]);
 
     const handleRestart = () => {
         setTurnIdx(0);
+        setTurns(spec?.turns || []);
         setResponses([]);
+        setMastery(spec?.initialMastery || 0.2);
         setInput('');
         setDone(false);
         setAnimKey(k => k + 1);
@@ -248,26 +294,31 @@ export function INTERACTIVE_InteractiveExplainer({ spec, onClose }) {
                         )}
 
                         {/* User input */}
-                        <div className="flex gap-2 mt-1">
+                        <div className="flex gap-2 mt-1 relative">
                             <textarea
                                 ref={inputRef}
                                 value={input}
+                                disabled={loading}
                                 onChange={e => setInput(e.target.value)}
                                 onKeyDown={e => {
                                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); }
                                 }}
-                                placeholder="Share your thinking… (Enter to continue)"
+                                placeholder={loading ? "Thinking..." : "Share your thinking… (Enter to continue)"}
                                 rows={2}
-                                className="flex-1 bg-gray-900/70 border border-gray-700/60 focus:border-purple-500/70 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-600 resize-none outline-none transition-colors focus:bg-gray-900"
+                                className={`flex-1 bg-gray-900/70 border border-gray-700/60 focus:border-purple-500/70 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-600 resize-none outline-none transition-colors focus:bg-gray-900 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 aria-label="Your response"
                             />
                             <button
                                 onClick={handleSubmit}
-                                disabled={!input.trim()}
-                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 self-end"
-                                aria-label={turnIdx >= turns.length - 1 ? 'Complete session' : 'Next question'}
+                                disabled={!input.trim() || loading}
+                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 self-end h-[46px] flex items-center justify-center min-w-[80px]"
+                                aria-label="Next question"
                             >
-                                {turnIdx >= turns.length - 1 ? 'Finish →' : 'Next →'}
+                                {loading ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    'Next →'
+                                )}
                             </button>
                         </div>
 
