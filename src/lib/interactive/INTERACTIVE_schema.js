@@ -7,7 +7,7 @@
 //   version      — semver string e.g. "1.0"
 //   topic        — the topic being explored
 //   intro        — one welcoming sentence to open the session
-//   turns[]      — array of dialogue turns (2–6):
+//   turns[]      — array of dialogue turns (1–6):
 //     id          — unique turn id
 //     question    — Socratic question to ask the learner
 //     hint        — gentle nudge if they're stuck
@@ -60,7 +60,7 @@ export const INTERACTIVE_SCHEMA = {
         intro: { type: 'string', minLength: 1, maxLength: 400 },
         turns: {
             type: 'array',
-            minItems: 2,
+            minItems: 1,
             maxItems: 6,
             items: {
                 type: 'object',
