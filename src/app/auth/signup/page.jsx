@@ -82,7 +82,7 @@ function SignupContent() {
         <div className="bg-[#241744]/60 backdrop-blur-xl rounded-2xl shadow-[0_0_40px_rgba(99,39,192,0.15)] border border-purple-500/20 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Join YouLearn</h1>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Join Luminal</h1>
             <p className="text-purple-200/80">Create your account to start learning</p>
           </div>
 

@@ -63,7 +63,7 @@ export default function SECONDARY_NotesPanel({
           console.log('Response not ok, trying localStorage fallback');
           // If fetch fails, try localStorage fallback
           try {
-            const savedNotes = localStorage.getItem('youlearn_stage2_notes');
+            const savedNotes = localStorage.getItem('Luminal_stage2_notes');
             if (savedNotes) {
               const parsed = JSON.parse(savedNotes);
               // Support both old format (plain text) and new format (JSON with content)
@@ -78,7 +78,7 @@ export default function SECONDARY_NotesPanel({
         console.error('Error loading notes:', error);
         // Try localStorage fallback
         try {
-          const savedNotes = localStorage.getItem('youlearn_stage2_notes');
+          const savedNotes = localStorage.getItem('Luminal_stage2_notes');
           if (savedNotes) {
             const parsed = JSON.parse(savedNotes);
             setContent(parsed.content || savedNotes);
@@ -98,7 +98,7 @@ export default function SECONDARY_NotesPanel({
   // Auto-save to localStorage every 2 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
-      localStorage.setItem('youlearn_stage2_notes', JSON.stringify({ content, updatedAt: new Date().toISOString() }));
+      localStorage.setItem('Luminal_stage2_notes', JSON.stringify({ content, updatedAt: new Date().toISOString() }));
     }, 2000);
 
     return () => clearTimeout(timer);

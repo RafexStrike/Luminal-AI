@@ -47,19 +47,39 @@ const betterAuthInstance = betterAuth({
     },
   },
 
-  // Hooks to capture user data on signup
+  // User configuration to include custom fields in session
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        default: "user",
+      },
+    },
+  },
+
+  // Hooks to capture user data and include role in session
   hooks: {
-    async onSuccess({ user }) {
+    after: async ({ user, session }) => {
+      // Ensure role is included in the session user object
+      if (session && user) {
+        session.user = {
+          ...session.user,
+          role: user.role || "user",
+        };
+      }
+      return { user, session };
+    },
+    onSuccess({ user, session }) {
       // User is automatically saved to MongoDB with all fields:
-      // - id, email, name, image, createdAt, updatedAt
+      // - id, email, name, image, role, createdAt, updatedAt
       // Additional logging for debugging
       console.log("✓ User created/logged in:", {
         id: user.id,
         email: user.email,
         name: user.name,
-        image: user.image,
+        role: user.role,
       });
-      return { user };
+      return { user, session };
     },
   },
 

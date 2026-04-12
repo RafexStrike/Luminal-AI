@@ -57,14 +57,14 @@ export default function SECONDARY_ChatLayout() {
 
   // Load sidebar state from localStorage on mount
   useState(() => {
-    const saved = localStorage.getItem('youlearn_stage2_sidebar_collapsed');
+    const saved = localStorage.getItem('Luminal_stage2_sidebar_collapsed');
     if (saved) setSidebarCollapsed(JSON.parse(saved));
   }, []);
 
   const handleToggleSidebar = useCallback(() => {
     const newState = !sidebarCollapsed;
     setSidebarCollapsed(newState);
-    localStorage.setItem('youlearn_stage2_sidebar_collapsed', JSON.stringify(newState));
+    localStorage.setItem('Luminal_stage2_sidebar_collapsed', JSON.stringify(newState));
   }, [sidebarCollapsed]);
 
   const handleSelectSpace = useCallback((spaceId) => {

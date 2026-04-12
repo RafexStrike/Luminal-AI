@@ -117,7 +117,7 @@ function LoginContent() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Welcome Back</h1>
-            <p className="text-purple-200/80">Log in to your YouLearn account</p>
+            <p className="text-purple-200/80">Log in to your Luminal account</p>
           </div>
 
           {/* Error Message */}

@@ -1,3 +1,5 @@
+// src/app/navbar/page.jsx
+// Note: ***THIS FILE IS NOT BEING USED IN THIS PROJECT. But I did not delete it because of fear.***
 "use client";
 
 import Link from "next/link";
@@ -15,6 +17,7 @@ import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 const routes = [
   { href: "/", label: "Home" },
@@ -30,6 +33,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useAuth();
+  const { isAdmin } = useAdminRole();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -81,6 +85,17 @@ export default function Navbar() {
             </Button>
           )}
 
+          {/* Admin Dashboard Button - Prominent in marked area */}
+          {mounted && isAdmin && (
+            <Button
+              onClick={() => router.push("/admin/dashboard")}
+              className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg"
+            >
+              <span className="text-lg mr-2">🛡️</span>
+              Admin Dashboard
+            </Button>
+          )}
+
           {/* Auth Section */}
           {mounted && (
             <>
@@ -107,7 +122,7 @@ export default function Navbar() {
                     <DropdownMenuItem>{session.user.name || session.user.email}</DropdownMenuItem>
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
-                    {session.user.role === "admin" && (
+                    {isAdmin && (
                       <>
                         <div className="px-2 py-1.5 text-xs text-purple-400 font-semibold uppercase">Admin</div>
                         <DropdownMenuItem onClick={() => router.push("/admin/dashboard")}>

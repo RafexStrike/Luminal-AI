@@ -2,11 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth, signOut } from '@/lib/auth-client';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import SECONDARY_ChatLayout from '@/components/SECONDARY_ChatLayout';
 
 export default function SecondStageLayout({ children }) {
     const router = useRouter();
     const { data: session, isPending } = useAuth();
+    const { isAdmin } = useAdminRole();
 
     // Loading state
     if (isPending) {
@@ -16,7 +18,9 @@ export default function SecondStageLayout({ children }) {
                     <div className="absolute animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
                     <div className="h-10 w-10 rounded-full bg-purple-200 animate-pulse"></div>
                 </div>
-                <p className="text-purple-600 font-medium tracking-widest animate-pulse">LOADING SYSTEM...</p>
+                <p className="text-purple-600 font-medium tracking-widest animate-pulse">
+                    LOADING SYSTEM...
+                </p>
             </div>
         );
     }
@@ -27,7 +31,9 @@ export default function SecondStageLayout({ children }) {
             <div className="w-full h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-4xl mb-4">🔒</div>
-                    <p className="text-gray-600 mb-6">Please log in to access this page</p>
+                    <p className="text-gray-600 mb-6">
+                        Please log in to access this page
+                    </p>
                     <button
                         onClick={() => router.push('/auth/login')}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -43,10 +49,31 @@ export default function SecondStageLayout({ children }) {
         <div className="w-full h-screen bg-white">
             {/* Top Right User Menu */}
             <div className="absolute top-4 right-4 flex items-center gap-3 z-40">
+
+                {/* User Info */}
                 <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
-                    <p className="text-xs text-gray-600">{session.user.email}</p>
+                    <p className="text-sm font-medium text-white-800">
+                        {session.user.name}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                        {session.user.email}
+                    </p>
                 </div>
+
+                {/* Admin Button */}
+                {isAdmin && (
+                    <button
+                        onClick={() => router.push('/admin/dashboard')}
+                        className="px-4 py-2 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 
+                                   hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 
+                                   text-white font-semibold rounded-lg shadow-lg flex items-center gap-2"
+                    >
+                        <span>🛡️</span>
+                        Admin
+                    </button>
+                )}
+
+                {/* Actions */}
                 <div className="flex gap-2">
                     <button
                         onClick={() => router.push('/auth/profile')}
@@ -55,6 +82,7 @@ export default function SecondStageLayout({ children }) {
                     >
                         👤
                     </button>
+
                     <button
                         onClick={async () => {
                             await signOut();
@@ -67,6 +95,7 @@ export default function SecondStageLayout({ children }) {
                 </div>
             </div>
 
+            {/* Main Layout */}
             <SECONDARY_ChatLayout />
             <div className="hidden">{children}</div>
         </div>
