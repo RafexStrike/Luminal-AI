@@ -113,68 +113,68 @@ function UserSessionTable() {
 }
 
 // Management Actions Section
-function ManagementActions() {
-  const [actionLoading, setActionLoading] = useState(null);
-  const [actionMessage, setActionMessage] = useState("");
+// function ManagementActions() {
+//   const [actionLoading, setActionLoading] = useState(null);
+//   const [actionMessage, setActionMessage] = useState("");
 
-  const handleBackfill = async () => {
-    setActionLoading("backfill");
-    setActionMessage("Starting backfill process...");
-    // Simulate API call
-    setTimeout(() => {
-      setActionMessage("✓ Backfill completed successfully");
-      setActionLoading(null);
-      setTimeout(() => setActionMessage(""), 3000);
-    }, 2000);
-  };
+//   const handleBackfill = async () => {
+//     setActionLoading("backfill");
+//     setActionMessage("Starting backfill process...");
+//     // Simulate API call
+//     setTimeout(() => {
+//       setActionMessage("✓ Backfill completed successfully");
+//       setActionLoading(null);
+//       setTimeout(() => setActionMessage(""), 3000);
+//     }, 2000);
+//   };
 
-  const handleClearRAG = async () => {
-    setActionLoading("clear");
-    setActionMessage("Clearing RAG stubs...");
-    // Simulate API call
-    setTimeout(() => {
-      setActionMessage("✓ RAG stubs cleared");
-      setActionLoading(null);
-      setTimeout(() => setActionMessage(""), 3000);
-    }, 1500);
-  };
+//   const handleClearRAG = async () => {
+//     setActionLoading("clear");
+//     setActionMessage("Clearing RAG stubs...");
+//     // Simulate API call
+//     setTimeout(() => {
+//       setActionMessage("✓ RAG stubs cleared");
+//       setActionLoading(null);
+//       setTimeout(() => setActionMessage(""), 3000);
+//     }, 1500);
+//   };
 
-  return (
-    <div className="bg-[#130b24] border border-purple-500/20 rounded-xl p-6">
-      <h3 className="text-lg font-semibold text-white mb-4">Management Actions</h3>
+//   return (
+//     <div className="bg-[#130b24] border border-purple-500/20 rounded-xl p-6">
+//       <h3 className="text-lg font-semibold text-white mb-4">Management Actions</h3>
       
-      {actionMessage && (
-        <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${
-          actionMessage.startsWith("✓") 
-            ? "bg-green-500/10 border border-green-500/30 text-green-300"
-            : "bg-blue-500/10 border border-blue-500/30 text-blue-300"
-        }`}>
-          {actionMessage}
-        </div>
-      )}
+//       {actionMessage && (
+//         <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${
+//           actionMessage.startsWith("✓") 
+//             ? "bg-green-500/10 border border-green-500/30 text-green-300"
+//             : "bg-blue-500/10 border border-blue-500/30 text-blue-300"
+//         }`}>
+//           {actionMessage}
+//         </div>
+//       )}
 
-      <div className="space-y-3">
-        <button
-          onClick={handleBackfill}
-          disabled={actionLoading === "backfill"}
-          className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          {actionLoading === "backfill" ? "Processing..." : "Run Backfill Embeddings"}
-        </button>
+//       <div className="space-y-3">
+//         <button
+//           onClick={handleBackfill}
+//           disabled={actionLoading === "backfill"}
+//           className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+//         >
+//           <RefreshCw className="h-4 w-4" />
+//           {actionLoading === "backfill" ? "Processing..." : "Run Backfill Embeddings"}
+//         </button>
 
-        <button
-          onClick={handleClearRAG}
-          disabled={actionLoading === "clear"}
-          className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          {actionLoading === "clear" ? "Processing..." : "Clear RAG Stubs"}
-        </button>
-      </div>
-    </div>
-  );
-}
+//         <button
+//           onClick={handleClearRAG}
+//           disabled={actionLoading === "clear"}
+//           className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+//         >
+//           <Trash2 className="h-4 w-4" />
+//           {actionLoading === "clear" ? "Processing..." : "Clear RAG Stubs"}
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -328,13 +328,13 @@ export default function AdminDashboard() {
         </section>
 
         {/* Management Actions */}
-        <section className="mb-12">
+        {/* <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
             <AlertTriangle className="h-6 w-6 text-purple-400" />
             System Management
           </h2>
           <ManagementActions />
-        </section>
+        </section> */}
 
         {/* Footer Info */}
         <div className="mt-12 pt-8 border-t border-purple-500/20 text-center text-purple-200/60 text-sm">

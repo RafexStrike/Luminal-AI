@@ -60,16 +60,18 @@ export default function SecondStageLayout({ children }) {
                     </p>
                 </div>
 
-                {/* Admin Button */}
+                {/* Admin Dashboard Button */}
                 {isAdmin && (
                     <button
                         onClick={() => router.push('/admin/dashboard')}
                         className="px-4 py-2 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 
                                    hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 
-                                   text-white font-semibold rounded-lg shadow-lg flex items-center gap-2"
+                                   text-white font-semibold rounded-lg shadow-lg flex items-center gap-2
+                                   transition-all duration-300 transform hover:scale-105 
+                                   animate-pulse hover:animate-none"
                     >
-                        <span>🛡️</span>
-                        Admin
+                        <span className="text-lg animate-bounce" style={{ animationDelay: '0s' }}>🛡️</span>
+                        Admin Dashboard
                     </button>
                 )}
 
