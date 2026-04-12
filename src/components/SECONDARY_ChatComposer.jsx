@@ -63,7 +63,7 @@ const ChatComposer = memo(
          <div className="flex-1 relative flex items-center bg-gray-900/60 rounded-xl border border-gray-700/50 focus-within:border-indigo-500/80 focus-within:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all">
           <textarea
             ref={internalTextareaRef}
-            placeholder="Type / for context options... or just start typing (shift+enter for new line)"
+            placeholder="Type / for context options... Type @interactive to activate Socratic Learning"
             value={composerText}
             onChange={onTextChange}
             onKeyDown={onKeyDown}

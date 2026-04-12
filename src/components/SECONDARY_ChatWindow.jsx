@@ -542,16 +542,16 @@ export default function SECONDARY_ChatWindow({
 
   const getSelectedCount = () => selectedMessageIds.size;
 
-    return (
-      <div className="flex flex-col h-full bg-gray-950 text-white relative">
-        {isInitialLoading && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/60 backdrop-blur-sm animate-in fade-in duration-300">
-             <LoadingSpinner size="xl" className="text-indigo-500" />
-            <p className="text-gray-400 mt-4 font-medium animate-pulse">Loading session...</p>
-          </div>
-        )}
-        {/* Main content container with sidebar */}
-        <div className="flex flex-1 overflow-hidden">
+  return (
+    <div className="flex flex-col h-full bg-gray-950 text-white relative">
+      {isInitialLoading && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <LoadingSpinner size="xl" className="text-indigo-500" />
+          <p className="text-gray-400 mt-4 font-medium animate-pulse">Loading session...</p>
+        </div>
+      )}
+      {/* Main content container with sidebar */}
+      <div className="flex flex-1 overflow-hidden">
 
         {/* Messages Area - takes remaining space */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -564,7 +564,7 @@ export default function SECONDARY_ChatWindow({
                     <Skeleton className="h-16 w-64 bg-gray-800/50 rounded-2xl rounded-bl-none" />
                   </div>
                   <div className="flex justify-end">
-                     <Skeleton className="h-12 w-48 bg-indigo-900/30 rounded-2xl rounded-br-none" />
+                    <Skeleton className="h-12 w-48 bg-indigo-900/30 rounded-2xl rounded-br-none" />
                   </div>
                   <div className="flex justify-start">
                     <Skeleton className="h-20 w-96 bg-gray-800/50 rounded-2xl rounded-bl-none" />
@@ -619,7 +619,14 @@ export default function SECONDARY_ChatWindow({
               return (
                 <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-center'} gap-3 w-full my-4`}>
                   <div className={`${message.role === 'user' ? 'max-w-2xl p-5' : 'w-[95%] md:w-[85%] lg:w-[80%] max-w-5xl md:px-8 px-5 py-6'} relative rounded-2xl transition-all ${message.role === 'user'
-                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30'
+                    ?`
+bg-gradient-to-br 
+from-slate-950 
+via-violet-950 
+to-indigo-950 
+text-slate-300 
+border border-violet-900/20
+          `
                     : 'bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 border border-gray-700/50'
                     } ${selectedMessageIds.has(message.id)
                       ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-950'
@@ -649,15 +656,15 @@ export default function SECONDARY_ChatWindow({
                               </code>
                             )
                           },
-                           h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-indigo-50" {...props} />,
-                           h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 text-indigo-100" {...props} />,
-                           h3: ({ node, ...props }) => <h3 className="text-lg font-bold mb-2 mt-4 text-indigo-200" {...props} />,
+                          h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-indigo-50" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 text-indigo-100" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="text-lg font-bold mb-2 mt-4 text-indigo-200" {...props} />,
                           p: ({ node, ...props }) => <p className="mb-4 last:mb-0 leading-relaxed text-gray-200" {...props} />,
                           ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-gray-200" {...props} />,
                           ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-gray-200" {...props} />,
                           li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-                           a: ({ node, ...props }) => <a className="text-indigo-300 hover:text-indigo-200 underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                           blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-indigo-500/50 pl-4 py-1 italic bg-gray-900/50 rounded-r my-4" {...props} />,
+                          a: ({ node, ...props }) => <a className="text-indigo-300 hover:text-indigo-200 underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                          blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-indigo-500/50 pl-4 py-1 italic bg-gray-900/50 rounded-r my-4" {...props} />,
                           table: ({ node, ...props }) => <div className="overflow-x-auto my-4"><table className="min-w-full divide-y divide-gray-700 border border-gray-700" {...props} /></div>,
                           th: ({ node, ...props }) => <th className="px-3 py-2 bg-gray-800 text-left text-xs font-medium text-gray-300 uppercase tracking-wider" {...props} />,
                           td: ({ node, ...props }) => <td className="px-3 py-2 whitespace-nowrap border-t border-gray-700" {...props} />,
@@ -668,14 +675,14 @@ export default function SECONDARY_ChatWindow({
                     </div>
 
                     {message.role === 'assistant' && (
-                         <button
-                           onClick={() => handleToggleMessageSelection(message.id)}
-                           className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-indigo-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 bg-gray-800/50 backdrop-blur-sm"
-                           aria-label="Select message for summary"
-                           title="Select for summary"
-                         >
-                           {selectedMessageIds.has(message.id) && <span className="text-indigo-400 text-sm font-bold">✓</span>}
-                         </button>
+                      <button
+                        onClick={() => handleToggleMessageSelection(message.id)}
+                        className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-indigo-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 bg-gray-800/50 backdrop-blur-sm"
+                        aria-label="Select message for summary"
+                        title="Select for summary"
+                      >
+                        {selectedMessageIds.has(message.id) && <span className="text-indigo-400 text-sm font-bold">✓</span>}
+                      </button>
                     )}
                   </div>
                 </div>
@@ -686,10 +693,10 @@ export default function SECONDARY_ChatWindow({
             {showStreamingPlaceholder && (
               <div className="flex justify-center gap-3 w-full my-4 animate-in fade-in duration-500">
                 <div className="w-[95%] md:w-[85%] lg:w-[80%] max-w-5xl bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-2xl p-6 border border-gray-700/50">
-                   <div className="flex gap-3 items-center">
-                     <LoadingSpinner size="sm" className="text-indigo-500" />
-                     <Skeleton className="h-4 w-48 bg-gray-700/50" />
-                   </div>
+                  <div className="flex gap-3 items-center">
+                    <LoadingSpinner size="sm" className="text-indigo-500" />
+                    <Skeleton className="h-4 w-48 bg-gray-700/50" />
+                  </div>
                 </div>
               </div>
             )}
@@ -725,45 +732,45 @@ export default function SECONDARY_ChatWindow({
         </div>
 
         {/* RAG Context Sidebar - right panel */}
-         <RagContextSidebar
-           ragSources={ragSources}
-           ragResults={ragResults}
-           isCollapsed={ragSidebarState.isCollapsed}
-           onToggleCollapse={ragSidebarState.toggleCollapse}
-           sidebarWidth={ragSidebarState.sidebarWidth}
-           onResizeStart={ragSidebarState.startResize}
-           isResizing={ragSidebarState.isResizing}
-           isLoading={isLoading}
-         />
+        <RagContextSidebar
+          ragSources={ragSources}
+          ragResults={ragResults}
+          isCollapsed={ragSidebarState.isCollapsed}
+          onToggleCollapse={ragSidebarState.toggleCollapse}
+          sidebarWidth={ragSidebarState.sidebarWidth}
+          onResizeStart={ragSidebarState.startResize}
+          isResizing={ragSidebarState.isResizing}
+          isLoading={isLoading}
+        />
 
       </div>
 
       {/* Selection Info Bar */}
       {getSelectedCount() > 0 && (
-         <div className="bg-gradient-to-r from-indigo-900/20 to-blue-900/20 border-t border-gray-700/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between gap-2">
+        <div className="bg-gradient-to-r from-indigo-900/20 to-blue-900/20 border-t border-gray-700/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between gap-2">
           {/* ... Buttons ... */}
           <span className="text-sm text-gray-300 font-medium">{getSelectedCount()} message{getSelectedCount() > 1 ? 's' : ''} selected</span>
           <div className="flex gap-2">
-               <button
-                 onClick={() => handleGenerateSummary('normal')}
-                 className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
-               >
-                 Generate Summary
-               </button>
-               <button
-                 onClick={() => handleGenerateFlashcards()}
-                 disabled={isLoading}
-                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed"
-               >
-                 Generate Flashcards
-               </button>
-               <button
-                 onClick={() => handleGenerateQuizzes()}
-                 disabled={isLoading}
-                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed"
-               >
-                 Generate Quizzes
-               </button>
+            <button
+              onClick={() => handleGenerateSummary('normal')}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
+            >
+              Generate Summary
+            </button>
+            <button
+              onClick={() => handleGenerateFlashcards()}
+              disabled={isLoading}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Generate Flashcards
+            </button>
+            <button
+              onClick={() => handleGenerateQuizzes()}
+              disabled={isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Generate Quizzes
+            </button>
 
           </div>
         </div>
@@ -774,39 +781,39 @@ export default function SECONDARY_ChatWindow({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           {/* ... Dialog Content ... */}
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700/50 p-6 max-w-sm w-full mx-4">
-             <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Generate Summary</h3>
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Generate Summary</h3>
             <div className="space-y-3 mb-6">
-                 <button
-                   onClick={() => handleGenerateSummary('normal')}
-                   disabled={isLoading}
-                   className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-indigo-500/50 hover:bg-indigo-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 group"
-                 >
-                   <div className="font-semibold text-white group-hover:text-indigo-300 transition-colors">Regular Summary</div>
+              <button
+                onClick={() => handleGenerateSummary('normal')}
+                disabled={isLoading}
+                className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-indigo-500/50 hover:bg-indigo-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 group"
+              >
+                <div className="font-semibold text-white group-hover:text-indigo-300 transition-colors">Regular Summary</div>
                 <div className="text-xs text-gray-400">Normally generated summary by the LLM</div>
               </button>
-                 <button
-                   onClick={() => handleGenerateSummary('incremental')}
-                   disabled={isLoading}
-                   className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-indigo-500/50 hover:bg-indigo-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 group"
-                 >
-                   <div className="font-semibold text-white group-hover:text-indigo-300 transition-colors">Incremental Summary</div>
+              <button
+                onClick={() => handleGenerateSummary('incremental')}
+                disabled={isLoading}
+                className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-indigo-500/50 hover:bg-indigo-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 group"
+              >
+                <div className="font-semibold text-white group-hover:text-indigo-300 transition-colors">Incremental Summary</div>
                 <div className="text-xs text-gray-400">Created based on a research paper by Google Deepming</div>
               </button>
             </div>
-               {isLoading && (
-                 <div className="text-center py-4 animate-in fade-in duration-300">
-                   <LoadingSpinner size="md" className="mx-auto text-indigo-500" />
-                   <p className="text-sm text-gray-400 mt-2">Generating summary...</p>
-                 </div>
-               )}
+            {isLoading && (
+              <div className="text-center py-4 animate-in fade-in duration-300">
+                <LoadingSpinner size="md" className="mx-auto text-indigo-500" />
+                <p className="text-sm text-gray-400 mt-2">Generating summary...</p>
+              </div>
+            )}
 
-               <button
-                 onClick={() => setShowSummaryDialog(false)}
-                 disabled={isLoading}
-                 className="w-full px-4 py-2 text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-               >
-                 Cancel
-               </button>
+            <button
+              onClick={() => setShowSummaryDialog(false)}
+              disabled={isLoading}
+              className="w-full px-4 py-2 text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
