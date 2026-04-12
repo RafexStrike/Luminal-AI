@@ -388,31 +388,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      {/* Navbar */}
-      <nav className="relative z-50 flex items-center justify-between p-6 max-w-7xl mx-auto border-b border-gray-800/50 backdrop-blur-sm">
-        <div className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
-          Luminal AI
-        </div>
-        <div className="flex gap-4">
-          <Link href="/auth/login">
-            <Button variant="ghost" className="text-gray-300 hover:text-white">Log In</Button>
-          </Link>
-          <Link href="/auth/signup">
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-500/30">
-              Sign Up
-            </Button>
-          </Link>
-        </div>
-      </nav>
-
-      {/* Content */}
+       {/* Background Effects */}
+       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+         <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-600/10 rounded-full blur-3xl animate-pulse"></div>
+         <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+       </div>
+ 
+       {/* Content */}
       <div className="relative z-10">
         <Hero />
         <RagShowcase />

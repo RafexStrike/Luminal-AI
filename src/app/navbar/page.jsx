@@ -20,13 +20,13 @@ import { useRouter } from "next/navigation";
 import { useAdminRole } from "@/hooks/useAdminRole";
 
 const routes = [
-  { href: "/", label: "Home" },
-  { href: "/chat", label: "Chat" },
-  { href: "/upload", label: "Upload" },
-  { href: "/flashcard", label: "Flashcard" },
-  { href: "/takeNotes", label: "Take Notes" },
-  { href: "/chatWithSummarization", label: "Summarization Chat" },
-
+  // { href: "/", label: "Home" },
+  // { href: "/chat", label: "Chat" },
+  // { href: "/upload", label: "Upload" },
+  // { href: "/flashcard", label: "Flashcard" },
+  // { href: "/takeNotes", label: "Take Notes" },
+  // { href: "/chatWithSummarization", label: "Summarization Chat" },
+  { href: "/how-it-works", label: "How It's Built", landingOnly: true },
 ];
 
 export default function Navbar() {
@@ -50,21 +50,24 @@ export default function Navbar() {
         </Link>
 
         {/* Center - Nav Links */}
-        <nav className="hidden md:flex gap-6">
-          {routes.map((route) => (
-            <Link
-              key={route.href}
-              href={route.href}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === route.href
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {route.label}
-            </Link>
-          ))}
-        </nav>
+         <nav className="hidden md:flex gap-6">
+           {routes.map((route) => {
+             if (route.landingOnly && pathname !== "/") return null;
+             return (
+               <Link
+                 key={route.href}
+                 href={route.href}
+                 className={`text-sm font-medium transition-colors hover:text-primary ${
+                   pathname === route.href
+                     ? "text-primary"
+                     : "text-muted-foreground"
+                 }`}
+               >
+                 {route.label}
+               </Link>
+             );
+           })}
+         </nav>
 
         {/* Right - Search + Actions */}
         <div className="flex items-center gap-3">

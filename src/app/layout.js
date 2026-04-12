@@ -1,7 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/ui/theme-provider"
-import Navbar from "./navbar/page"
+import NavbarWrapper from "./NavbarWrapper"
+import ContentWrapper from "./ContentWrapper"
 import { Toaster } from "@/components/ui/sonner"
 import Footer from "./footer/page"
 
@@ -25,16 +26,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {/* <Navbar/> */}
-          {/* <Toaster /> */}
-          {children}
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <NavbarWrapper />
+            {/* <Toaster /> */}
+            <ContentWrapper>
+              {children}
+            </ContentWrapper>
+          </ThemeProvider>
 
         {/* <Footer></Footer> */}
       </body>
