@@ -677,7 +677,7 @@ border border-violet-900/20
                     {message.role === 'assistant' && (
                       <button
                         onClick={() => handleToggleMessageSelection(message.id)}
-                        className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-indigo-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 bg-gray-800/50 backdrop-blur-sm"
+                     className="absolute top-2 right-2 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center hover:border-indigo-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 bg-gray-800/50 backdrop-blur-sm animate-glow-strong"
                         aria-label="Select message for summary"
                         title="Select for summary"
                       >
