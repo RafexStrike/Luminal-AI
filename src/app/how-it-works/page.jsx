@@ -51,14 +51,14 @@ export default function HowItWorks() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30">
       {/* Hero Section */}
-       <div className="relative pb-20 px-6 overflow-hidden">
+      <div className="relative pb-20 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]"></div>
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-6"
@@ -90,11 +90,11 @@ export default function HowItWorks() {
                 <h2 className="text-3xl font-bold text-white">Incremental Summarization</h2>
               </div>
               <p className="text-slate-400 mb-6 leading-relaxed">
-                Traditional summarization is lossy and computationally expensive. Luminal uses a three-stage 
-                <span className="text-indigo-300"> Text → JSON → Merged JSON → Text </span> 
+                Traditional summarization is lossy and computationally expensive. Luminal uses a three-stage
+                <span className="text-indigo-300"> Text → JSON → Merged JSON → Text </span>
                 cycle to preserve 95%+ of semantic information while reducing LLM calls by 60-75%.
               </p>
-              
+
               <div className="space-y-4">
                 {[
                   { title: "Stage 1: Structured Extraction", desc: "Converts raw prose into a machine-readable JSON schema capturing concepts, examples, and misconceptions." },
@@ -113,10 +113,10 @@ export default function HowItWorks() {
                 ))}
               </div>
             </div>
-            
+
             <div className="relative">
-              <INTERACTIVE_AnimatedViz 
-                vizType="summarization_pipeline" 
+              <INTERACTIVE_AnimatedViz
+                vizType="summarization_pipeline"
                 vizConfig={{
                   nodes: ["Text", "JSON", "Merged JSON", "Summary"],
                   connections: ["Text -> JSON", "JSON -> Merged JSON", "Merged JSON -> Summary"]
@@ -139,28 +139,28 @@ export default function HowItWorks() {
               <h2 className="text-3xl font-bold text-white">Socratic Tutoring Logic</h2>
             </div>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              Using Bayesian Knowledge Tracing (BKT) and Item Response Theory (IRT), 
+              Using Bayesian Knowledge Tracing (BKT) and Item Response Theory (IRT),
               Luminal dynamically adapts its response strategy based on student mastery.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { 
-                strategy: "Socratic Questioning", 
-                use: "Conceptual depth", 
+              {
+                strategy: "Socratic Questioning",
+                use: "Conceptual depth",
                 desc: "Guides the student to discover the answer through strategic questioning.",
                 icon: "❓"
               },
-              { 
-                strategy: "Analogy-Based", 
-                use: "Abstract concepts", 
+              {
+                strategy: "Analogy-Based",
+                use: "Abstract concepts",
                 desc: "Bridges the gap between complex theory and concrete, tangible grounding.",
                 icon: "💡"
               },
-              { 
-                strategy: "Scaffolded Learning", 
-                use: "Multi-step processes", 
+              {
+                strategy: "Scaffolded Learning",
+                use: "Multi-step processes",
                 desc: "Breaks complex ideas into manageable steps, ensuring prerequisites are met.",
                 icon: "🪜"
               },
@@ -200,8 +200,8 @@ const getStrategy = (mastery, difficulty) => {
         <Section id="rag">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
-              <INTERACTIVE_AnimatedViz 
-                vizType="rag_flow" 
+              <INTERACTIVE_AnimatedViz
+                vizType="rag_flow"
                 vizConfig={{
                   steps: ["PDF/Text", "Chunker", "VectorStore", "Query", "Augmented Prompt", "LLM Response"],
                   flow: "linear"
@@ -215,10 +215,10 @@ const getStrategy = (mastery, difficulty) => {
                 <h2 className="text-3xl font-bold text-white">RAG Architecture</h2>
               </div>
               <p className="text-slate-400 mb-6 leading-relaxed">
-                Retrieval-Augmented Generation (RAG) grounds the LLM in the student's own materials, 
+                Retrieval-Augmented Generation (RAG) grounds the LLM in the student's own materials,
                 eliminating hallucinations and providing a personalized knowledge loop.
               </p>
-              
+
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
@@ -259,9 +259,11 @@ const getStrategy = (mastery, difficulty) => {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent"></div>
           <h2 className="text-3xl font-bold text-white mb-4">Ready to build the future of learning?</h2>
           <p className="text-slate-400 mb-8">Explore our open-source contributions and technical whitepapers.</p>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-full transition-all hover:scale-105 shadow-lg shadow-indigo-500/20">
-            View GitHub Repository <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+          <a href="https://github.com/RafexStrike/Luminal-AI" target="_blank" rel="noopener noreferrer">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-full transition-all hover:scale-105 shadow-lg shadow-indigo-500/20">
+              View GitHub Repository <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </a>
         </div>
       </div>
     </div>

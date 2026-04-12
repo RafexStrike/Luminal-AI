@@ -5,17 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, 
-  Cpu, 
-  Zap, 
-  Layers, 
-  BrainCircuit, 
-  Lightbulb, 
-  Code2, 
-  Database, 
-  Users, 
-  CheckCircle2, 
+import {
+  BookOpen,
+  Cpu,
+  Zap,
+  Layers,
+  BrainCircuit,
+  Lightbulb,
+  Code2,
+  Database,
+  Users,
+  CheckCircle2,
   ArrowRight,
   Search,
   Network,
@@ -34,20 +34,19 @@ const SectionWrapper = ({ children, className = "", id = "" }) => (
 
 const Hero = () => (
   <div className="text-center mb-32 relative">
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }} 
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <Badge className="mb-4 px-4 py-1 bg-indigo-500/20 text-indigo-400 border-indigo-500/30 rounded-full">
-        Next-Gen Cognitive Architecture
+        All-in-one learing plaform for students
       </Badge>
       <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-indigo-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent leading-tight">
         Luminal AI
       </h1>
       <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-        The first cognitive architecture designed specifically for students. 
-        Bridging the gap between static content and active mastery through BKT-driven tutoring and RAG-powered precision.
+        The smart workspace where content becomes knowledge. From learing to personalized practice sessions, it’s the all-in-one toolkit designed for the way students actually learn.
       </p>
       <div className="flex gap-6 justify-center">
         <Link href="/auth/signup">
@@ -73,8 +72,8 @@ const RagShowcase = () => (
       </div>
       <h2 className="text-4xl font-bold text-white">Hallucination-Free Knowledge</h2>
       <p className="text-gray-400 text-lg leading-relaxed">
-        Luminal doesn't just guess. Our proprietary RAG (Retrieval-Augmented Generation) pipeline 
-        embeds your textbooks and notes into a high-dimensional vector space, ensuring every answer 
+        Luminal doesn't just guess. Our proprietary RAG (Retrieval-Augmented Generation) pipeline
+        embeds your textbooks and notes into a high-dimensional vector space, ensuring every answer
         is anchored in your actual source material.
       </p>
       <ul className="space-y-3">
@@ -103,34 +102,70 @@ const RagShowcase = () => (
   </SectionWrapper>
 );
 
-const SocraticTutor = () => (
-  <SectionWrapper id="tutor" className="text-center space-y-12">
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-        <BrainCircuit className="text-white w-6 h-6" />
-      </div>
-      <h2 className="text-4xl font-bold text-white">The Socratic Tutor</h2>
-      <p className="text-gray-400 text-lg leading-relaxed">
-        We move beyond simple Q&A. By combining Bayesian Knowledge Tracing (BKT) and Item Response Theory (IRT), 
-        Luminal maps your cognitive gaps in real-time, guiding you through an adaptive learning path 
-        that asks the right questions at the right time.
-      </p>
-    </div>
-    <div className="grid md:grid-cols-3 gap-8 mt-12">
-      {[
-        { title: 'BKT Logic', desc: 'Probabilistic tracking of skill mastery', icon: Activity },
-        { title: 'IRT Scaling', desc: 'Dynamic difficulty adjustment per question', icon: Network },
-        { title: 'Socratic Method', desc: 'Guided discovery through scaffolded prompts', icon: Lightbulb },
-      ].map((item, i) => (
-        <div key={i} className="p-8 bg-gray-900/50 rounded-2xl border border-gray-800 hover:border-blue-500/50 transition-all group">
-          <item.icon className="w-8 h-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-          <p className="text-gray-400">{item.desc}</p>
+const SocraticTutor = () => {
+  const concepts = [
+    {
+      title: 'BKT Logic',
+      desc: 'Probabilistic tracking of skill mastery',
+      icon: Activity,
+      link: 'https://en.wikipedia.org/wiki/Bayesian_Knowledge_Tracing'
+    },
+    {
+      title: 'IRT Scaling',
+      desc: 'Dynamic difficulty adjustment per question',
+      icon: Network,
+      link: 'https://en.wikipedia.org/wiki/Item_response_theory'
+    },
+    {
+      title: 'Socratic Method',
+      desc: 'Guided discovery through scaffolded prompts',
+      icon: Lightbulb,
+      link: 'https://en.wikipedia.org/wiki/Socratic_method'
+    },
+  ];
+
+  return (
+    <SectionWrapper id="tutor" className="text-center space-y-12">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+          <BrainCircuit className="text-white w-6 h-6" />
         </div>
-      ))}
-    </div>
-  </SectionWrapper>
-);
+        <h2 className="text-4xl font-bold text-white">The Socratic Tutor</h2>
+        <p className="text-gray-400 text-lg leading-relaxed">
+          We move beyond simple Q&A. By combining Bayesian Knowledge Tracing (BKT) and Item Response Theory (IRT),
+          Luminal maps your cognitive gaps in real-time, guiding you through an adaptive learning path
+          that asks the right questions at the right time.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8 mt-12">
+        {concepts.map((item, i) => (
+          <div
+            key={i}
+            className="flex flex-col items-start text-left p-8 bg-gray-900/50 rounded-2xl border border-gray-800 hover:border-blue-500/50 transition-all group h-full"
+          >
+            <item.icon className="w-8 h-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+            <p className="text-gray-400 mb-6">{item.desc}</p>
+
+            {/* mt-auto pushes the button to the bottom of the flex container */}
+            <div className="mt-auto">
+              <Button
+                variant="link"
+                asChild
+                className="text-blue-400 p-0 h-auto text-base font-semibold hover:text-blue-300 transition-colors"
+              >
+                <a href={item.link} target="_blank" rel="noopener noreferrer">
+                  Know what is {item.title.split(' ')[0]} <ArrowRight className="ml-2 w-4 h-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </SectionWrapper>
+  );
+};
 
 const IncrementalSummary = () => (
   <SectionWrapper id="summaries" className="grid md:grid-cols-2 gap-16 items-center">
@@ -157,13 +192,13 @@ const IncrementalSummary = () => (
       </div>
       <h2 className="text-4xl font-bold text-white">Incremental Summarization</h2>
       <p className="text-gray-400 text-lg leading-relaxed">
-        Stop rewriting your notes. Luminal's "Summarize as you go" workflow processes long study sessions 
-        into atomic JSON blocks that merge seamlessly, building a comprehensive knowledge graph 
+        Stop rewriting your notes. Luminal's "Summarize as you go" workflow processes long study sessions
+        into atomic JSON blocks that merge seamlessly, building a comprehensive knowledge graph
         without losing critical detail.
       </p>
-      <Button variant="link" className="text-blue-400 p-0 h-auto text-lg font-semibold">
+      {/* <Button variant="link" className="text-blue-400 p-0 h-auto text-lg font-semibold">
         Explore the workflow <ArrowRight className="ml-2 w-5 h-5" />
-      </Button>
+      </Button> */}
     </div>
   </SectionWrapper>
 );
@@ -205,8 +240,8 @@ const ActiveRecall = () => (
       </div>
       <h2 className="text-4xl font-bold text-white">The Active Recall Loop</h2>
       <p className="text-gray-400 text-lg leading-relaxed">
-        Reading is not learning. Luminal automates the bridge from consumption to retention. 
-        Our system analyzes your interaction patterns to generate optimized flashcards and 
+        Reading is not learning. Luminal automates the bridge from consumption to retention.
+        Our system analyzes your interaction patterns to generate optimized flashcards and
         adaptive quizzes that force retrieval, strengthening neural pathways.
       </p>
       <div className="grid grid-cols-2 gap-4">
@@ -243,11 +278,9 @@ const DevIntegration = () => (
       <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/30">
         <Code2 className="text-white w-6 h-6" />
       </div>
-      <h2 className="text-4xl font-bold text-white">Developer-First Integration</h2>
+      <h2 className="text-4xl font-bold text-white">Incremental Summarization</h2>
       <p className="text-gray-400 text-lg leading-relaxed">
-        Luminal is built for the modern AI stack. We support local LLM orchestration via 
-        Ollama and Qwen, ensuring your data stays private while leveraging agentic 
-        workflows for complex knowledge synthesis.
+        We’ve implemented cutting-edge research in structured memory to bring you incremental summarization that actually works. Unlike standard AI that gets "confused" by long documents, our system updates your study guides in real-time, ensuring your summaries are always pinpoint accurate and perfectly organized.
       </p>
     </div>
     <div className="max-w-4xl mx-auto p-8 bg-black rounded-3xl border border-gray-800 font-mono text-sm text-indigo-300 text-left shadow-2xl">
@@ -287,8 +320,8 @@ const KnowledgeHub = () => (
       </div>
       <h2 className="text-4xl font-bold text-white">The Knowledge Hub</h2>
       <p className="text-gray-400 text-lg leading-relaxed">
-        Centralize your intellectual assets. Manage collections of embeddings, 
-        source documents, and synthesized summaries in a unified hub. 
+        Centralize your intellectual assets. Manage collections of embeddings,
+        source documents, and synthesized summaries in a unified hub.
         Every piece of data is indexed for instant retrieval via semantic search.
       </p>
       <ul className="space-y-3">
@@ -308,11 +341,9 @@ const RealtimeCollab = () => (
       <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
         <Users className="text-white w-6 h-6" />
       </div>
-      <h2 className="text-4xl font-bold text-white">Real-time Collaboration</h2>
+      <h2 className="text-4xl font-bold text-white">Luminal is all you need</h2>
       <p className="text-gray-400 text-lg leading-relaxed">
-        Learning is a social act. Through our Recora-powered integration, study with 
-        peers in real-time, share curated knowledge collections, and engage in 
-        collaborative Socratic debates.
+        The smart workspace where content becomes knowledge. From deep-dive research to personalized practice sessions, it’s the all-in-one toolkit designed for the way students actually learn.
       </p>
     </div>
     <div className="relative max-w-4xl mx-auto p-12 bg-gradient-to-br from-indigo-900/40 to-blue-900/40 rounded-3xl border border-white/10 backdrop-blur-sm">
@@ -324,8 +355,8 @@ const RealtimeCollab = () => (
         ))}
       </div>
       <div className="p-6 bg-black/40 rounded-2xl border border-white/10 text-left">
-        <p className="text-indigo-400 font-bold text-sm mb-2">Sarah is editing: "Bell's Theorem Summary"</p>
-        <p className="text-gray-300 text-sm italic">"I think we should add a visualization for the CHSH inequality here..."</p>
+        <p className="text-indigo-400 font-bold text-sm mb-2">What is c-space in robotics...</p>
+        <p className="text-gray-300 text-sm italic">"In robotics represents the set of all possible mechanical configurations ..."</p>
       </div>
     </div>
   </SectionWrapper>
@@ -352,7 +383,6 @@ const LuminalAdvantage = () => (
             { feat: 'Learning Path', std: 'Linear/Random', lum: 'BKT & IRT Adaptive' },
             { feat: 'Retention', std: 'Passive Consumption', lum: 'Active Recall Loop' },
             { feat: 'Structure', std: 'Unstructured Chat', lum: 'Incremental Knowledge Hub' },
-            { feat: 'Privacy', std: 'Cloud-only', lum: 'Local-first (Ollama/Qwen)' },
           ].map((row, i) => (
             <tr key={i} className="border-b border-gray-800/50 hover:bg-indigo-500/5 transition-colors">
               <td className="py-4 px-6 font-medium">{row.feat}</td>
@@ -388,14 +418,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white relative overflow-hidden">
-       {/* Background Effects */}
-       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-         <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-600/10 rounded-full blur-3xl animate-pulse"></div>
-         <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-       </div>
- 
-       {/* Content */}
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Content */}
       <div className="relative z-10">
         <Hero />
         <RagShowcase />
