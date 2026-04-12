@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import Swal from 'sweetalert2';
 import theme from '../design/theme.config';
 import chat from '../design/chat.config';
 
@@ -31,6 +32,14 @@ import { INTERACTIVE_InteractiveExplainer } from '@/components/interactive/INTER
 // --- INTERACTIVE IMPORTS END ---
 
 import { useRouter } from 'next/navigation';
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+});
 
 export default function SECONDARY_ChatWindow({
   chatId = null,
@@ -441,10 +450,18 @@ export default function SECONDARY_ChatWindow({
 
   const handleGenerateFlashcards = async () => {
     if (selectedMessageIds.size === 0) {
-      alert('Please select at least one message');
+      Swal.fire({
+        icon: 'warning',
+        text: 'Please select at least one message',
+        confirmButtonColor: '#9333ea',
+      });
       return;
     }
     setIsLoading(true);
+    Toast.fire({
+      icon: 'info',
+      title: 'Hey, your Flashcards is getting generated! You will be notified once it\'s ready.',
+    });
     try {
       const response = await fetch('/api/secondStage/flashcards', {
         method: 'POST',
@@ -458,10 +475,17 @@ export default function SECONDARY_ChatWindow({
       const data = await response.json();
       onDataSaved();
       onTabChange('flashcards');
-      alert(`Generated ${data.cards?.length || 0} flashcards!`);
+      Toast.fire({
+        icon: 'success',
+        title: `Generated ${data.cards?.length || 0} flashcards!`,
+      });
     } catch (error) {
       console.error('Error generating flashcards:', error);
-      alert('Failed to generate flashcards: ' + error.message);
+      Toast.fire({
+        icon: 'error',
+        title: 'Failed to generate flashcards',
+        text: error.message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -469,10 +493,18 @@ export default function SECONDARY_ChatWindow({
 
   const handleGenerateQuizzes = async () => {
     if (selectedMessageIds.size === 0) {
-      alert('Please select at least one message');
+      Swal.fire({
+        icon: 'warning',
+        text: 'Please select at least one message',
+        confirmButtonColor: '#9333ea',
+      });
       return;
     }
     setIsLoading(true);
+    Toast.fire({
+      icon: 'info',
+      title: 'Hey, your Quiz is getting generated! You will be notified once it\'s ready.',
+    });
     try {
       const response = await fetch('/api/secondStage/quizzes', {
         method: 'POST',
@@ -486,10 +518,17 @@ export default function SECONDARY_ChatWindow({
       const data = await response.json();
       onDataSaved();
       onTabChange('quizzes');
-      alert(`Generated ${data.questions?.length || 0} quiz questions!`);
+      Toast.fire({
+        icon: 'success',
+        title: `Generated ${data.questions?.length || 0} quiz questions!`,
+      });
     } catch (error) {
       console.error('Error generating quizzes:', error);
-      alert('Failed to generate quizzes: ' + error.message);
+      Toast.fire({
+        icon: 'error',
+        title: 'Failed to generate quizzes',
+        text: error.message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -683,18 +722,21 @@ export default function SECONDARY_ChatWindow({
             >
               Generate Summary
             </button>
-            <button
-              onClick={() => handleGenerateFlashcards()}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
-            >
-              Generate Flashcards
-            </button>
-            <button
-              onClick={() => handleGenerateQuizzes()}
-              className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-lg shadow-violet-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950"
-            >
-              Generate Quizzes
-            </button>
+             <button
+               onClick={() => handleGenerateFlashcards()}
+               disabled={isLoading}
+               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+               Generate Flashcards
+             </button>
+             <button
+               onClick={() => handleGenerateQuizzes()}
+               disabled={isLoading}
+               className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all shadow-lg shadow-violet-500/20 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+               Generate Quizzes
+             </button>
+
           </div>
         </div>
       )}

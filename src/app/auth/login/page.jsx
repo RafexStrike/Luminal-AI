@@ -217,14 +217,14 @@ function LoginContent() {
                 disabled={loading}
                 className="w-full py-2.5 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(124,58,237,0.25)] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] text-sm"
               >
-                {loading ? "Accessing..." : "🛡️ Admin Access"}
+                {loading ? "Accessing..." : "Admin Access"}
               </button>
               <button
                 onClick={handleDemoUserLogin}
                 disabled={loading}
                 className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] text-sm"
               >
-                {loading ? "Accessing..." : "👤 User Account"}
+                {loading ? "Accessing..." : "User Account"}
               </button>
             </div>
           </div>
