@@ -107,6 +107,17 @@ export default function Navbar() {
                     <DropdownMenuItem>{session.user.name || session.user.email}</DropdownMenuItem>
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
+                    {session.user.role === "admin" && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs text-purple-400 font-semibold uppercase">Admin</div>
+                        <DropdownMenuItem onClick={() => router.push("/admin/dashboard")}>
+                          <span className="flex items-center gap-2">
+                            <span className="text-lg">🛡️</span>
+                            <span>Admin Dashboard</span>
+                          </span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuItem onClick={async () => {
                       const { signOut } = await import("@/lib/auth-client");
                       await signOut();

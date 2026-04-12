@@ -64,6 +64,51 @@ function LoginContent() {
     }
   };
 
+  const handleDemoAdminLogin = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      // Log in as admin with the demo admin credentials
+      const { data, error: loginError } = await authClient.signIn.email({
+        email: "admin@luminal.com",
+        password: "admin@123",
+      });
+
+      if (loginError) {
+        throw new Error(loginError.message || "Admin demo login failed");
+      }
+
+      router.push(redirectTo);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoUserLogin = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data, error: loginError } = await authClient.signIn.email({
+        email: "rafi@rafi.com",
+        password: "rafi123",
+      });
+
+      if (loginError) {
+        throw new Error(loginError.message || "Demo login failed");
+      }
+
+      router.push(redirectTo);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-[#1a0f2e] to-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -162,6 +207,27 @@ function LoginContent() {
             </svg>
             {googleLoading ? "Logging in..." : "Google"}
           </button>
+
+          {/* Quick Access Section */}
+          <div className="mt-8 pt-6 border-t border-purple-500/20">
+            <p className="text-center text-purple-200/60 text-xs font-semibold uppercase tracking-wider mb-4">Quick Access</p>
+            <div className="space-y-3">
+              <button
+                onClick={handleDemoAdminLogin}
+                disabled={loading}
+                className="w-full py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium rounded-lg hover:from-amber-500 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm animate-pulse hover:animate-none"
+              >
+                {loading ? "Accessing..." : "🛡️ Demo Admin Login"}
+              </button>
+              <button
+                onClick={handleDemoUserLogin}
+                disabled={loading}
+                className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+              >
+                {loading ? "Accessing..." : "👤 Demo Account Login"}
+              </button>
+            </div>
+          </div>
           {/* Signup Link */}
           <div className="text-center mt-8">
             <p className="text-purple-200/60">
