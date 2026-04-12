@@ -1,17 +1,375 @@
-// FILE: src/app/page.jsx
-// DESCRIPTION: Home page - redirects to login or shows landing for unauthenticated users
-
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-client';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { 
+  BookOpen, 
+  Cpu, 
+  Zap, 
+  Layers, 
+  BrainCircuit, 
+  Lightbulb, 
+  Code2, 
+  Database, 
+  Users, 
+  CheckCircle2, 
+  ArrowRight,
+  Search,
+  Network,
+  Activity
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
+// --- Modular Components ---
+
+const SectionWrapper = ({ children, className = "", id = "" }) => (
+  <section id={id} className={`py-24 px-6 max-w-7xl mx-auto ${className}`}>
+    {children}
+  </section>
+);
+
+const Hero = () => (
+  <div className="text-center mb-32 relative">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Badge className="mb-4 px-4 py-1 bg-indigo-500/20 text-indigo-400 border-indigo-500/30 rounded-full">
+        Next-Gen Cognitive Architecture
+      </Badge>
+      <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-indigo-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent leading-tight">
+        Luminal AI
+      </h1>
+      <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+        The first cognitive architecture designed specifically for students. 
+        Bridging the gap between static content and active mastery through BKT-driven tutoring and RAG-powered precision.
+      </p>
+      <div className="flex gap-6 justify-center">
+        <Link href="/auth/signup">
+          <Button size="lg" className="px-10 py-6 bg-indigo-600 hover:bg-indigo-700 text-lg rounded-xl transition-all hover:scale-105 shadow-xl shadow-indigo-500/20">
+            Get Started <ArrowRight className="ml-2 w-5 h-5" />
+          </Button>
+        </Link>
+        <Link href="/auth/login">
+          <Button size="lg" variant="outline" className="px-10 py-6 text-lg rounded-xl border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 transition-all">
+            Sign In
+          </Button>
+        </Link>
+      </div>
+    </motion.div>
+  </div>
+);
+
+const RagShowcase = () => (
+  <SectionWrapper id="rag" className="grid md:grid-cols-2 gap-16 items-center">
+    <div className="space-y-6">
+      <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <Search className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">Hallucination-Free Knowledge</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Luminal doesn't just guess. Our proprietary RAG (Retrieval-Augmented Generation) pipeline 
+        embeds your textbooks and notes into a high-dimensional vector space, ensuring every answer 
+        is anchored in your actual source material.
+      </p>
+      <ul className="space-y-3">
+        {['Source-cited responses', 'Zero-shot factual precision', 'Dynamic context windowing'].map((item) => (
+          <li key={item} className="flex items-center text-indigo-300">
+            <CheckCircle2 className="w-5 h-5 mr-2 text-indigo-500" /> {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div className="relative p-8 bg-gray-900 rounded-3xl border border-indigo-500/20 shadow-2xl">
+      <div className="space-y-4">
+        <div className="p-4 bg-gray-800 rounded-xl border border-gray-700 text-gray-300 text-sm">
+          "What are the core principles of BKT in Luminal?"
+        </div>
+        <div className="p-4 bg-indigo-900/30 rounded-xl border border-indigo-500/30 text-gray-200 text-sm relative">
+          Bayesian Knowledge Tracing (BKT) in Luminal models the probability that a student has mastered a skill based on their performance history...
+          <div className="mt-3 flex gap-2">
+            <Badge variant="outline" className="text-[10px] bg-indigo-500/10 border-indigo-500/30 text-indigo-400">Source: BKT_Logic.pdf:12</Badge>
+            <Badge variant="outline" className="text-[10px] bg-indigo-500/10 border-indigo-500/30 text-indigo-400">Source: Tutoring_Engine.md:4</Badge>
+          </div>
+        </div>
+      </div>
+      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-indigo-600/20 blur-3xl rounded-full"></div>
+    </div>
+  </SectionWrapper>
+);
+
+const SocraticTutor = () => (
+  <SectionWrapper id="tutor" className="text-center space-y-12">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+        <BrainCircuit className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">The Socratic Tutor</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        We move beyond simple Q&A. By combining Bayesian Knowledge Tracing (BKT) and Item Response Theory (IRT), 
+        Luminal maps your cognitive gaps in real-time, guiding you through an adaptive learning path 
+        that asks the right questions at the right time.
+      </p>
+    </div>
+    <div className="grid md:grid-cols-3 gap-8 mt-12">
+      {[
+        { title: 'BKT Logic', desc: 'Probabilistic tracking of skill mastery', icon: Activity },
+        { title: 'IRT Scaling', desc: 'Dynamic difficulty adjustment per question', icon: Network },
+        { title: 'Socratic Method', desc: 'Guided discovery through scaffolded prompts', icon: Lightbulb },
+      ].map((item, i) => (
+        <div key={i} className="p-8 bg-gray-900/50 rounded-2xl border border-gray-800 hover:border-blue-500/50 transition-all group">
+          <item.icon className="w-8 h-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+          <p className="text-gray-400">{item.desc}</p>
+        </div>
+      ))}
+    </div>
+  </SectionWrapper>
+);
+
+const IncrementalSummary = () => (
+  <SectionWrapper id="summaries" className="grid md:grid-cols-2 gap-16 items-center">
+    <div className="relative order-2 md:order-1 p-8 bg-gray-900 rounded-3xl border border-blue-500/20">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <span className="text-xs text-gray-500 ml-2 font-mono">incremental_summary_v1.json</span>
+        </div>
+        <div className="space-y-2 font-mono text-xs text-blue-300">
+          <p className="opacity-50">// Block 1: Core Concepts</p>
+          <p className="text-white">{"{ \"concept\": \"Quantum Entanglement\", \"summary\": \"Non-local connection...\" }"}</p>
+          <p className="opacity-50">// Block 2: Mathematical Proofs</p>
+          <p className="text-white">{"{ \"concept\": \"Bell's Theorem\", \"summary\": \"Proof against local hidden variables...\" }"}</p>
+          <p className="animate-pulse text-indigo-400">{"{ \"concept\": \"...\", \"status\": \"merging\" }"}</p>
+        </div>
+      </div>
+    </div>
+    <div className="space-y-6 order-1 md:order-2">
+      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
+        <Layers className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">Incremental Summarization</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Stop rewriting your notes. Luminal's "Summarize as you go" workflow processes long study sessions 
+        into atomic JSON blocks that merge seamlessly, building a comprehensive knowledge graph 
+        without losing critical detail.
+      </p>
+      <Button variant="link" className="text-blue-400 p-0 h-auto text-lg font-semibold">
+        Explore the workflow <ArrowRight className="ml-2 w-5 h-5" />
+      </Button>
+    </div>
+  </SectionWrapper>
+);
+
+const InteractiveVisualizer = () => (
+  <SectionWrapper id="visualizer" className="text-center space-y-12">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/30">
+        <Cpu className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">Socratic Learning</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Learn by getting asked. Not just by asking. Type @interactive in the chat to active Socratic Learning.
+      </p>
+    </div>
+    <div className="relative aspect-video max-w-5xl mx-auto bg-gray-900 rounded-3xl border border-indigo-500/30 overflow-hidden group">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 bg-indigo-500/20 rounded-full animate-ping mx-auto"></div>
+          <p className="text-indigo-400 font-mono text-sm">Socratic Learning is active</p>
+        </div>
+      </div>
+      <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/50 backdrop-blur-md rounded-xl border border-white/10 flex justify-between items-center">
+        <span className="text-xs text-gray-400 font-mono">What is f(x) = sin(x) * e^(-x)</span>
+        <div className="flex gap-2">
+          <div className="w-8 h-2 bg-indigo-500 rounded-full"></div>
+          <div className="w-8 h-2 bg-blue-500 rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  </SectionWrapper>
+);
+
+const ActiveRecall = () => (
+  <SectionWrapper id="recall" className="grid md:grid-cols-2 gap-16 items-center">
+    <div className="space-y-6">
+      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
+        <Zap className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">The Active Recall Loop</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Reading is not learning. Luminal automates the bridge from consumption to retention. 
+        Our system analyzes your interaction patterns to generate optimized flashcards and 
+        adaptive quizzes that force retrieval, strengthening neural pathways.
+      </p>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-4 bg-gray-900 rounded-xl border border-gray-800">
+          <h4 className="text-white font-bold mb-1">AI Flashcards</h4>
+          <p className="text-xs text-gray-500">Atomic extraction of key facts</p>
+        </div>
+        <div className="p-4 bg-gray-900 rounded-xl border border-gray-800">
+          <h4 className="text-white font-bold mb-1">Dynamic Quizzes</h4>
+          <p className="text-xs text-gray-500">IRT-based difficulty scaling</p>
+        </div>
+      </div>
+    </div>
+    <div className="relative grid grid-cols-2 gap-4">
+      <div className="p-6 bg-indigo-600 rounded-2xl rotate-3 shadow-xl">
+        <p className="text-white font-bold text-center">What is the BKT formula?</p>
+      </div>
+      <div className="p-6 bg-gray-800 rounded-2xl -rotate-3 border border-gray-700">
+        <p className="text-gray-400 text-center italic">Flip to reveal answer...</p>
+      </div>
+      <div className="p-6 bg-gray-800 rounded-2xl rotate-6 border border-gray-700">
+        <p className="text-gray-400 text-center italic">Next card in deck</p>
+      </div>
+      <div className="p-6 bg-blue-600 rounded-2xl -rotate-6 shadow-xl">
+        <p className="text-white font-bold text-center">Item Response Theory basics?</p>
+      </div>
+    </div>
+  </SectionWrapper>
+);
+
+const DevIntegration = () => (
+  <SectionWrapper id="dev" className="text-center space-y-12">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/30">
+        <Code2 className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">Developer-First Integration</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Luminal is built for the modern AI stack. We support local LLM orchestration via 
+        Ollama and Qwen, ensuring your data stays private while leveraging agentic 
+        workflows for complex knowledge synthesis.
+      </p>
+    </div>
+    <div className="max-w-4xl mx-auto p-8 bg-black rounded-3xl border border-gray-800 font-mono text-sm text-indigo-300 text-left shadow-2xl">
+      <div className="flex gap-2 mb-4">
+        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+      </div>
+      <p className="mb-2"><span className="text-purple-400">const</span> luminal = <span className="text-blue-400">new</span> LuminalAgent({"{"})</p>
+      <p className="ml-4 mb-2">  model: <span className="text-green-400">'qwen2.5-coder'</span>,</p>
+      <p className="ml-4 mb-2">  provider: <span className="text-green-400">'ollama'</span>,</p>
+      <p className="ml-4 mb-2">  ragEnabled: <span className="text-orange-400">true</span></p>
+      <p className="mb-2">{"});}"}</p>
+      <p className="mb-4 text-gray-500">// Initialize agentic knowledge loop</p>
+      <p className="text-white">await luminal.synthesizeKnowledge(<span className="text-green-400">'Quantum Physics'</span>);</p>
+    </div>
+  </SectionWrapper>
+);
+
+const KnowledgeHub = () => (
+  <SectionWrapper id="hub" className="grid md:grid-cols-2 gap-16 items-center">
+    <div className="relative order-2 md:order-1 p-8 bg-gray-900 rounded-3xl border border-indigo-500/20">
+      <div className="grid grid-cols-3 gap-4">
+        {[...Array(9)].map((_, i) => (
+          <div key={i} className="aspect-square rounded-lg bg-indigo-500/10 border border-indigo-500/30 animate-pulse"></div>
+        ))}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="p-4 bg-indigo-600 rounded-full shadow-2xl">
+          <Database className="text-white w-8 h-8" />
+        </div>
+      </div>
+    </div>
+    <div className="space-y-6 order-1 md:order-2">
+      <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <Database className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">The Knowledge Hub</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Centralize your intellectual assets. Manage collections of embeddings, 
+        source documents, and synthesized summaries in a unified hub. 
+        Every piece of data is indexed for instant retrieval via semantic search.
+      </p>
+      <ul className="space-y-3">
+        {['Multi-modal embedding support', 'Collection-based partitioning', 'Semantic versioning of notes'].map((item) => (
+          <li key={item} className="flex items-center text-indigo-300">
+            <CheckCircle2 className="w-5 h-5 mr-2 text-indigo-500" /> {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </SectionWrapper>
+);
+
+const RealtimeCollab = () => (
+  <SectionWrapper id="collab" className="text-center space-y-12">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+        <Users className="text-white w-6 h-6" />
+      </div>
+      <h2 className="text-4xl font-bold text-white">Real-time Collaboration</h2>
+      <p className="text-gray-400 text-lg leading-relaxed">
+        Learning is a social act. Through our Recora-powered integration, study with 
+        peers in real-time, share curated knowledge collections, and engage in 
+        collaborative Socratic debates.
+      </p>
+    </div>
+    <div className="relative max-w-4xl mx-auto p-12 bg-gradient-to-br from-indigo-900/40 to-blue-900/40 rounded-3xl border border-white/10 backdrop-blur-sm">
+      <div className="flex justify-center gap-4 mb-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="w-12 h-12 rounded-full bg-gray-700 border-2 border-indigo-500 overflow-hidden">
+            <div className="w-full h-full bg-indigo-400/20 animate-pulse"></div>
+          </div>
+        ))}
+      </div>
+      <div className="p-6 bg-black/40 rounded-2xl border border-white/10 text-left">
+        <p className="text-indigo-400 font-bold text-sm mb-2">Sarah is editing: "Bell's Theorem Summary"</p>
+        <p className="text-gray-300 text-sm italic">"I think we should add a visualization for the CHSH inequality here..."</p>
+      </div>
+    </div>
+  </SectionWrapper>
+);
+
+const LuminalAdvantage = () => (
+  <SectionWrapper id="advantage" className="space-y-12">
+    <div className="text-center max-w-3xl mx-auto space-y-6">
+      <h2 className="text-4xl font-bold text-white">The Luminal Advantage</h2>
+      <p className="text-gray-400 text-lg">Why settle for a generic LLM when you can have a structured pedagogy?</p>
+    </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b border-gray-800">
+            <th className="py-4 px-6 text-gray-400 font-medium">Feature</th>
+            <th className="py-4 px-6 text-gray-400 font-medium">Standard AI</th>
+            <th className="py-4 px-6 text-indigo-400 font-bold">Luminal AI</th>
+          </tr>
+        </thead>
+        <tbody className="text-gray-300">
+          {[
+            { feat: 'Factuality', std: 'Probabilistic/Hallucinations', lum: 'RAG-cited/Source-anchored' },
+            { feat: 'Learning Path', std: 'Linear/Random', lum: 'BKT & IRT Adaptive' },
+            { feat: 'Retention', std: 'Passive Consumption', lum: 'Active Recall Loop' },
+            { feat: 'Structure', std: 'Unstructured Chat', lum: 'Incremental Knowledge Hub' },
+            { feat: 'Privacy', std: 'Cloud-only', lum: 'Local-first (Ollama/Qwen)' },
+          ].map((row, i) => (
+            <tr key={i} className="border-b border-gray-800/50 hover:bg-indigo-500/5 transition-colors">
+              <td className="py-4 px-6 font-medium">{row.feat}</td>
+              <td className="py-4 px-6 text-gray-500">{row.std}</td>
+              <td className="py-4 px-6 text-indigo-300 font-semibold">{row.lum}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </SectionWrapper>
+);
 
 export default function HomePage() {
   const router = useRouter();
   const { data: session, isPending } = useAuth();
 
-  // Redirect authenticated users to secondStage
   if (session?.user) {
     router.push('/secondStage');
     return null;
@@ -21,8 +379,8 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading...</p>
+          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Initializing Luminal...</p>
         </div>
       </div>
     );
@@ -30,181 +388,58 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white relative overflow-hidden">
-      {/* Animated background gradient */}
+      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-violet-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-indigo-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between p-6 max-w-7xl mx-auto border-b border-gray-800/50 backdrop-blur-sm">
-        <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+      {/* Navbar */}
+      <nav className="relative z-50 flex items-center justify-between p-6 max-w-7xl mx-auto border-b border-gray-800/50 backdrop-blur-sm">
+        <div className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
           Luminal AI
         </div>
         <div className="flex gap-4">
-          <Link
-            href="/auth/login"
-            className="px-6 py-2 text-gray-300 hover:text-white font-medium transition-colors"
-          >
-            Log In
+          <Link href="/auth/login">
+            <Button variant="ghost" className="text-gray-300 hover:text-white">Log In</Button>
           </Link>
-          <Link
-            href="/auth/signup"
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 font-medium transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50"
-          >
-            Sign Up
+          <Link href="/auth/signup">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-500/30">
+              Sign Up
+            </Button>
           </Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-24">
-        <div className="text-center mb-32">
-          <h1 className="text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-violet-400 to-purple-400 bg-clip-text text-transparent leading-tight">
-            All In One Learning Platform
-          </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Experience the next generation of education technology. AI-powered tutoring, intelligent flashcard generation, adaptive quizzes, and comprehensive note-taking—unified in a single platform.
-          </p>
-          <div className="flex gap-6 justify-center">
-            <Link
-              href="/auth/signup"
-              className="px-10 py-4 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 font-semibold text-lg transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/auth/login"
-              className="px-10 py-4 border-2 border-purple-500/50 text-purple-300 rounded-lg hover:bg-purple-900/20 hover:border-purple-400 font-semibold text-lg transition-all"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mt-32">
-          <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-gray-700/50 hover:border-purple-500/50 transition-all group overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl mb-6 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3">AI Tutoring</h3>
-              <p className="text-gray-400 leading-relaxed">
-                Engage with advanced AI models trained to provide comprehensive, contextual answers to your questions with precision and clarity.
-              </p>
-            </div>
-          </div>
-
-          <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-gray-700/50 hover:border-purple-500/50 transition-all group overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl mb-6 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Smart Flashcards</h3>
-              <p className="text-gray-400 leading-relaxed">
-                Automatically generate optimized flashcards from your learning sessions using intelligent content extraction and spaced repetition algorithms.
-              </p>
-            </div>
-          </div>
-
-          <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-gray-700/50 hover:border-purple-500/50 transition-all group overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl mb-6 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Adaptive Quizzes</h3>
-              <p className="text-gray-400 leading-relaxed">
-                Validate your knowledge with dynamically generated assessments that adapt to your proficiency level and learning progress.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Value Proposition */}
-        <div className="mt-32 relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-12 border border-gray-700/50 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-transparent"></div>
-          <div className="relative z-10">
-            <h2 className="text-4xl font-bold mb-12 text-center bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
-              Enterprise-Grade Learning Platform
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="flex gap-5">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500/20 to-violet-600/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-lg">Personalized Learning Pathways</h4>
-                  <p className="text-gray-400 leading-relaxed">
-                    Advanced algorithms analyze your learning patterns to deliver customized content that matches your pace and comprehension level.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-5">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500/20 to-violet-600/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-lg">Optimized Efficiency</h4>
-                  <p className="text-gray-400 leading-relaxed">
-                    Reduce study time by up to 60% with intelligent content synthesis and automated knowledge retention systems.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-5">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500/20 to-violet-600/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-lg">Unified Ecosystem</h4>
-                  <p className="text-gray-400 leading-relaxed">
-                    Access AI tutoring, flashcards, quizzes, and comprehensive note-taking through a seamlessly integrated interface.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-5">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500/20 to-violet-600/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white mb-2 text-lg">Bank-Level Security</h4>
-                  <p className="text-gray-400 leading-relaxed">
-                    End-to-end encryption, zero-knowledge architecture, and SOC 2 Type II compliance ensure your data remains private and secure.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Content */}
+      <div className="relative z-10">
+        <Hero />
+        <RagShowcase />
+        <SocraticTutor />
+        <IncrementalSummary />
+        <InteractiveVisualizer />
+        <ActiveRecall />
+        <DevIntegration />
+        <KnowledgeHub />
+        <RealtimeCollab />
+        <LuminalAdvantage />
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 border-t border-gray-800/50 mt-32">
-        <div className="max-w-7xl mx-auto px-6 py-8 text-center text-gray-500">
-          <p>&copy; 2024 Luminal AI. All rights reserved.</p>
+      <footer className="relative z-10 border-t border-gray-800/50 mt-32">
+        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6 text-gray-500">
+          <div className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
+            Luminal AI
+          </div>
+          <p className="text-sm">&copy; {new Date().getFullYear()} Luminal AI. Cognitive Architecture for Mastery.</p>
+          <div className="flex gap-6 text-sm">
+            <Link href="#" className="hover:text-indigo-400 transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-indigo-400 transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-indigo-400 transition-colors">API</Link>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
