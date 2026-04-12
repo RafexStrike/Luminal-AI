@@ -712,15 +712,15 @@ export default function SECONDARY_ChatWindow({
                 className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-purple-500/50 hover:bg-purple-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 group"
               >
                 <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Regular Summary</div>
-                <div className="text-xs text-gray-400">Markdown format (150-300 words)</div>
+                <div className="text-xs text-gray-400">Normally generated summary by the LLM</div>
               </button>
               <button
                 onClick={() => handleGenerateSummary('incremental')}
                 disabled={isLoading}
                 className="w-full px-4 py-3 text-left rounded-lg border-2 border-gray-700/50 hover:border-purple-500/50 hover:bg-purple-900/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 group"
               >
-                <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Incremental JSON</div>
-                <div className="text-xs text-gray-400">Structured: key points, examples, questions</div>
+                <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">Incremental Summary</div>
+                <div className="text-xs text-gray-400">Created based on a research paper by Google Deepming</div>
               </button>
             </div>
             {isLoading && (

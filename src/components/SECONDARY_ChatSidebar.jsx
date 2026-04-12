@@ -640,11 +640,11 @@ export default function SECONDARY_ChatSidebar({
       )}
 
       {/* Footer */}
-      <div className="border-t border-gray-800/50 px-4 py-3 text-center">
+      {/* <div className="border-t border-gray-800/50 px-4 py-3 text-center">
         {collapsed ? null : (
           <div className="text-xs text-gray-500">Anonymous User</div>
         )}
-      </div>
+      </div> */}
 
       {/* Context Menu */}
       {contextMenu && (
