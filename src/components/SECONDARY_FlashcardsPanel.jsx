@@ -713,9 +713,9 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
           </div>
         </div>
 
-        {/* Cards grid */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         {/* Cards grid */}
+         <div className="flex-1 overflow-y-auto p-6">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {set.cards.map((card, cardIndex) => {
               const fc = getFSRSCard(fsrsState, activeSetIndex, cardIndex);
               const due = isDue(fc);

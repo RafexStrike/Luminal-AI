@@ -1,7 +1,17 @@
 'use client';
 
+import React, { useState } from 'react';
 import { RagSourceBadges } from './RagSourceBadges';
 import { RagResultCard } from './RagResultCard';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Target } from 'lucide-react';
 
 /**
  * Right-side sidebar for displaying RAG context
@@ -29,12 +39,15 @@ export function RagContextSidebar({
   isResizing = false,
   isLoading = false,
 }) {
+  const isMobile = useIsMobile();
+  const [isOpenMobile, setIsOpenMobile] = useState(false);
+
   // Don't render if no sources selected and no results
   if (ragSources.length === 0 && ragResults.length === 0) {
     return null;
   }
 
-  return (
+  const SidebarContent = () => (
     <>
       {/* Resize handle */}
       <div
@@ -125,4 +138,52 @@ export function RagContextSidebar({
       </div>
     </>
   );
+
+  if (isMobile) {
+    return (
+      <>
+        <Sheet open={isOpenMobile} onOpenChange={setIsOpenMobile}>
+          <SheetTrigger asChild>
+            <button
+              className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-purple-600 text-white shadow-2xl hover:bg-purple-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+              aria-label="Open RAG context"
+            >
+              <Target className="w-6 h-6" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="right" className="bg-gray-950 p-0 border-l-gray-800/50 text-gray-200">
+            <SheetHeader className="p-4 border-b border-gray-800/50">
+              <SheetTitle className="flex items-center gap-2">
+                <span>🎯</span> RAG Context
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-auto p-4 space-y-4">
+              {ragSources.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    Sources
+                  </h4>
+                  <RagSourceBadges sources={ragSources} isLoading={isLoading} />
+                </div>
+              )}
+              {ragResults.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Retrieved Context ({ragResults.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {ragResults.map((result, index) => (
+                      <RagResultCard key={index} result={result} index={index} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
+  return <SidebarContent />;
 }

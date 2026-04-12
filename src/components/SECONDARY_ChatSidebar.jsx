@@ -9,6 +9,13 @@ import theme from '../design/theme.config';
 import layout from '../design/layout.config';
 import { Skeleton } from './ui/skeleton';
 import { groupByCollection, getCollectionNames } from '../lib/collection-utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 
 /**
  * ChatContextMenu
@@ -345,9 +352,11 @@ export default function SECONDARY_ChatSidebar({
   currentChatId = null,
   onChatDeleted = () => {},
 }) {
+  const isMobile = useIsMobile();
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   // Modal states
   const [renameModal, setRenameModal] = useState(null);
@@ -560,7 +569,7 @@ export default function SECONDARY_ChatSidebar({
   const collections = groupByCollection(chats);
   const collectionNames = getCollectionNames(chats);
 
-  return (
+  const SidebarContent = () => (
     <div
       className={`flex flex-col h-full bg-gradient-to-b from-blue-900 to-blue-950 text-white border-r border-indigo-500/20 transition-all duration-300 ${
         collapsed ? layout.sidebar.width.collapsed : layout.sidebar.width.expanded
@@ -590,7 +599,7 @@ export default function SECONDARY_ChatSidebar({
           )}
         </button>
       </div>
- 
+  
       {/* Create Chat Button */}
       <div className="px-4 py-3">
         <button
@@ -607,119 +616,142 @@ export default function SECONDARY_ChatSidebar({
           {!collapsed && 'Create Chat'}
         </button>
       </div>
- 
+  
       {/* Error Message */}
       {error && !collapsed && (
         <div className="mx-3 mt-2 p-3 bg-red-900/20 border border-red-700/50 rounded text-xs text-red-200">
           {error}
         </div>
       )}
- 
+  
       {/* Chat List by Collections */}
        {!collapsed && (
-         <div className="flex-1 overflow-auto px-3 py-4">
-           {loading ? (
+          <div className="flex-1 overflow-auto px-3 py-4">
+            {loading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="p-2 space-y-2">
+                    <Skeleton className="h-4 w-full bg-blue-800/30" />
+                    <Skeleton className="h-3 w-3/4 bg-blue-800/20" />
+                  </div>
+                ))}
+              </div>
+            ) : chats.length === 0 ? (
+ 
+             <div className="text-sm text-blue-400/60 px-2">
+               No chats yet. Create one to get started.
+             </div>
+           ) : (
              <div className="space-y-2">
-               {Array.from({ length: 6 }).map((_, i) => (
-                 <div key={i} className="p-2 space-y-2">
-                   <Skeleton className="h-4 w-full bg-blue-800/30" />
-                   <Skeleton className="h-3 w-3/4 bg-blue-800/20" />
-                 </div>
+               {collections.map((collection) => (
+                 <CollectionSection
+                   key={collection.name}
+                   collection={collection}
+                   onSelectChat={onSelectSpace}
+                   onShowMenu={(chat, pos) => {
+                     setContextMenu(chat);
+                     setContextMenuPos(pos);
+                   }}
+                    selectedChatId={currentChatId}
+                    onError={(msg) => showToast('error', 'Error', msg)}
+                 />
+ 
                ))}
              </div>
-           ) : chats.length === 0 ? (
-
-            <div className="text-sm text-blue-400/60 px-2">
-              No chats yet. Create one to get started.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {collections.map((collection) => (
-                <CollectionSection
-                  key={collection.name}
-                  collection={collection}
-                  onSelectChat={onSelectSpace}
-                  onShowMenu={(chat, pos) => {
-                    setContextMenu(chat);
-                    setContextMenuPos(pos);
-                  }}
-                   selectedChatId={currentChatId}
-                   onError={(msg) => showToast('error', 'Error', msg)}
-                 />
-
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+           )}
+         </div>
+       )}
+  
+       {/* Collapsed View - Minimal Icons */}
+       {collapsed && (
+         <div className="flex-1 flex flex-col items-center gap-4 py-4">
+           <div className="cursor-pointer text-blue-200/60 hover:text-indigo-400 transition-colors" title="Chats">
+             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+               <path
+                 strokeLinecap="round"
+                 strokeLinejoin="round"
+                 strokeWidth={2}
+                 d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.7 9.7 0 01-4-.8L3 20l1.2-3A7.5 7.5 0 013 12c0-4.42 4.03-8 9-8s9 3.58 9 8z"
+               />
+             </svg>
+           </div>
+         </div>
+       )}
+  
+       {/* Footer */}
+       {/* <div className="border-t border-gray-800/50 px-4 py-3 text-center">
+         {collapsed ? null : (
+           <div className="text-xs text-gray-500">Anonymous User</div>
+         )}
+       </div> */}
  
-      {/* Collapsed View - Minimal Icons */}
-      {collapsed && (
-        <div className="flex-1 flex flex-col items-center gap-4 py-4">
-          <div className="cursor-pointer text-blue-200/60 hover:text-indigo-400 transition-colors" title="Chats">
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.7 9.7 0 01-4-.8L3 20l1.2-3A7.5 7.5 0 013 12c0-4.42 4.03-8 9-8s9 3.58 9 8z"
-              />
-            </svg>
-          </div>
-        </div>
-      )}
  
-      {/* Footer */}
-      {/* <div className="border-t border-gray-800/50 px-4 py-3 text-center">
-        {collapsed ? null : (
-          <div className="text-xs text-gray-500">Anonymous User</div>
-        )}
-      </div> */}
-
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <div className="fixed z-40" style={{ top: `${contextMenuPos.top}px`, left: `${contextMenuPos.left}px` }}>
-          <ChatContextMenu
-            chat={contextMenu}
-            onRename={handleRenameClick}
-            onMove={handleMoveClick}
-            onDelete={handleDeleteClick}
-            onClose={() => setContextMenu(null)}
-          />
-        </div>
-      )}
-
-      {/* Rename Modal */}
-      {renameModal && (
-        <RenameModal
-          chat={renameModal}
-          onConfirm={handleRenameConfirm}
-          onCancel={() => setRenameModal(null)}
-          isLoading={isOperating}
-        />
-      )}
-
-      {/* Move to Collection Modal */}
-      {moveModal && (
-        <MoveToCollectionModal
-          chat={moveModal}
-          existingCollections={collectionNames}
-          onConfirm={handleMoveConfirm}
-          onCancel={() => setMoveModal(null)}
-          isLoading={isOperating}
-        />
-      )}
-
-       {/* Delete Confirmation Modal */}
-       {deleteModal && (
-         <DeleteConfirmModal
-           chat={deleteModal}
-           onConfirm={handleDeleteConfirm}
-           onCancel={() => setDeleteModal(null)}
+       {/* Context Menu */}
+       {contextMenu && (
+         <div className="fixed z-40" style={{ top: `${contextMenuPos.top}px`, left: `${contextMenuPos.left}px` }}>
+           <ChatContextMenu
+             chat={contextMenu}
+             onRename={handleRenameClick}
+             onMove={handleMoveClick}
+             onDelete={handleDeleteClick}
+             onClose={() => setContextMenu(null)}
+           />
+         </div>
+       )}
+ 
+       {/* Rename Modal */}
+       {renameModal && (
+         <RenameModal
+           chat={renameModal}
+           onConfirm={handleRenameConfirm}
+           onCancel={() => setRenameModal(null)}
            isLoading={isOperating}
          />
        )}
-     </div>
-   );
- }
+ 
+       {/* Move to Collection Modal */}
+       {moveModal && (
+         <MoveToCollectionModal
+           chat={moveModal}
+           existingCollections={collectionNames}
+           onConfirm={handleMoveConfirm}
+           onCancel={() => setMoveModal(null)}
+           isLoading={isOperating}
+         />
+       )}
+ 
+        {/* Delete Confirmation Modal */}
+        {deleteModal && (
+          <DeleteConfirmModal
+            chat={deleteModal}
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => setDeleteModal(null)}
+            isLoading={isOperating}
+          />
+        )}
+      </div>
+    );
+  };
+
+  if (isMobile) {
+    return (
+      <>
+        <Sheet open={isOpenMobile} onOpenChange={setIsOpenMobile}>
+          <SheetTrigger asChild>
+            <button
+              className="fixed bottom-6 left-6 z-50 p-4 rounded-full bg-indigo-600 text-white shadow-2xl hover:bg-indigo-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label="Open chat sidebar"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className="bg-blue-950 p-0 border-r-indigo-500/20">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
+  return <SidebarContent />;
+}

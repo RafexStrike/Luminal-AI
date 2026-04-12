@@ -22,6 +22,12 @@ export const metadata = {
   description: "Chat with AI, generate flashcards, take quizzes, and learn smarter",
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>

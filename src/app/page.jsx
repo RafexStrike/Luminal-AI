@@ -27,7 +27,7 @@ import { Badge } from '@/components/ui/badge';
 // --- Modular Components ---
 
 const SectionWrapper = ({ children, className = "", id = "" }) => (
-  <section id={id} className={`py-24 px-6 max-w-7xl mx-auto ${className}`}>
+  <section id={id} className={`py-24 px-4 md:px-12 max-w-7xl mx-auto ${className}`}>
     {children}
   </section>
 );

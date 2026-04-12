@@ -327,7 +327,7 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
   return (
     <div ref={containerRef} className="relative w-full h-full flex flex-col bg-[#0a0a0f]">
       {/* Minimal Toolbar */}
-      <div className="border-b border-white/5 bg-[#0a0a0f]/60 backdrop-blur-md px-6 py-2 flex items-center gap-1 flex-wrap sticky top-0 z-40 transition-all duration-300">
+      <div className="border-b border-white/5 bg-[#0a0a0f]/60 backdrop-blur-md px-6 py-2 flex items-center gap-1 overflow-x-auto whitespace-nowrap sticky top-0 z-40 transition-all duration-300 scrollbar-hide">
         <ToolbarButton
           icon={Bold}
           onClick={() => editor.chain().focus().toggleBold().run()}

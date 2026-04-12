@@ -12,12 +12,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Sun, Moon } from "lucide-react";
+import { User, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const routes = [
   // { href: "/", label: "Home" },
@@ -50,30 +57,61 @@ export default function Navbar() {
         </Link>
 
         {/* Center - Nav Links */}
-         <nav className="hidden md:flex gap-6">
-           {routes.map((route) => {
-             if (route.landingOnly && pathname !== "/") return null;
-             return (
-               <Link
-                 key={route.href}
-                 href={route.href}
-                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                   pathname === route.href
-                     ? "text-primary"
-                     : "text-muted-foreground"
-                 }`}
-               >
-                 {route.label}
-               </Link>
-             );
-           })}
-         </nav>
+         <nav className="hidden lg:flex gap-6">
+            {routes.map((route) => {
+              if (route.landingOnly && pathname !== "/") return null;
+              return (
+                <Link
+                  key={route.href}
+                  href={route.href}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === route.href
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {route.label}
+                </Link>
+              );
+            })}
+          </nav>
 
         {/* Right - Search + Actions */}
         <div className="flex items-center gap-3">
+          {/* Mobile Menu Trigger */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-background text-foreground">
+              <SheetHeader className="text-left">
+                <SheetTitle>Navigation</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-6">
+                {routes.map((route) => {
+                  if (route.landingOnly && pathname !== "/") return null;
+                  return (
+                    <Link
+                      key={route.href}
+                      href={route.href}
+                      className={`text-lg font-medium transition-colors hover:text-primary ${
+                        pathname === route.href
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {route.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </SheetContent>
+          </Sheet>
     
-
-          {/* Theme Toggle */}
+ 
+           {/* Theme Toggle */}
           {/* {mounted && (
             <Button
               variant="ghost"
