@@ -19,6 +19,8 @@ import { RagContextSidebar } from './rag/RagContextSidebar';
 import { detectSlashCommand, RAG_SLASH_COMMANDS } from './rag/rag.constants';
 import { RAG_CONTENT_TYPES } from '@/lib/rag/content-types.js';
 import ChatComposer from './SECONDARY_ChatComposer';
+import { Skeleton } from './ui/skeleton';
+import LoadingSpinner from './ui/LoadingSpinner';
 // --- RAG IMPORTS END ---
 
 // --- HOOKS IMPORTS START ---
@@ -54,6 +56,7 @@ export default function SECONDARY_ChatWindow({
   const [selectedMessageIds, setSelectedMessageIds] = useState(new Set());
   const [composerText, setComposerText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   const [showStreamingPlaceholder, setShowStreamingPlaceholder] = useState(false);
 
@@ -116,6 +119,7 @@ export default function SECONDARY_ChatWindow({
   useEffect(() => {
     if (chatId) {
       const loadMessages = async () => {
+        setIsInitialLoading(true);
         try {
           const response = await fetch(
             `/api/secondStage/chat-history?chatId=${chatId}`
@@ -143,6 +147,8 @@ export default function SECONDARY_ChatWindow({
           setMessages(conversationMessages);
         } catch (error) {
           console.error('Error loading chat history:', error);
+        } finally {
+          setIsInitialLoading(false);
         }
       };
       loadMessages();
@@ -536,17 +542,35 @@ export default function SECONDARY_ChatWindow({
 
   const getSelectedCount = () => selectedMessageIds.size;
 
-  return (
-    <div className="flex flex-col h-full bg-gray-950 text-white">
-      {/* Main content container with sidebar */}
-      <div className="flex flex-1 overflow-hidden">
+    return (
+      <div className="flex flex-col h-full bg-gray-950 text-white relative">
+        {isInitialLoading && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <LoadingSpinner size="xl" className="text-purple-500" />
+            <p className="text-gray-400 mt-4 font-medium animate-pulse">Loading session...</p>
+          </div>
+        )}
+        {/* Main content container with sidebar */}
+        <div className="flex flex-1 overflow-hidden">
+
         {/* Messages Area - takes remaining space */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Scrollable messages area */}
           <div className="flex-1 overflow-auto p-6 space-y-4">
             {messages.length === 0 && (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
+              <div className="h-full flex flex-col items-center justify-center gap-4 p-6">
+                <div className="w-full max-w-2xl space-y-6">
+                  <div className="flex justify-start">
+                    <Skeleton className="h-16 w-64 bg-gray-800/50 rounded-2xl rounded-bl-none" />
+                  </div>
+                  <div className="flex justify-end">
+                    <Skeleton className="h-12 w-48 bg-purple-900/30 rounded-2xl rounded-br-none" />
+                  </div>
+                  <div className="flex justify-start">
+                    <Skeleton className="h-20 w-96 bg-gray-800/50 rounded-2xl rounded-bl-none" />
+                  </div>
+                </div>
+                <div className="text-center mt-8">
                   <p className="text-gray-400">Start a conversation to begin learning</p>
                 </div>
               </div>
@@ -660,10 +684,12 @@ export default function SECONDARY_ChatWindow({
 
             {/* Streaming Placeholder */}
             {showStreamingPlaceholder && (
-              <div className="flex justify-center gap-3 w-full my-4">
+              <div className="flex justify-center gap-3 w-full my-4 animate-in fade-in duration-500">
                 <div className="w-[95%] md:w-[85%] lg:w-[80%] max-w-5xl bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 rounded-2xl p-6 border border-gray-700/50">
-                  <div className="h-2 w-24 bg-purple-500/20 rounded animate-pulse" />
-                  <p className="text-xs text-gray-500 mt-2">Waiting for response...</p>
+                  <div className="flex gap-3 items-center">
+                    <LoadingSpinner size="sm" className="text-purple-500" />
+                    <Skeleton className="h-4 w-48 bg-gray-700/50" />
+                  </div>
                 </div>
               </div>
             )}
@@ -699,15 +725,17 @@ export default function SECONDARY_ChatWindow({
         </div>
 
         {/* RAG Context Sidebar - right panel */}
-        <RagContextSidebar
-          ragSources={ragSources}
-          ragResults={ragResults}
-          isCollapsed={ragSidebarState.isCollapsed}
-          onToggleCollapse={ragSidebarState.toggleCollapse}
-          sidebarWidth={ragSidebarState.sidebarWidth}
-          onResizeStart={ragSidebarState.startResize}
-          isResizing={ragSidebarState.isResizing}
-        />
+         <RagContextSidebar
+           ragSources={ragSources}
+           ragResults={ragResults}
+           isCollapsed={ragSidebarState.isCollapsed}
+           onToggleCollapse={ragSidebarState.toggleCollapse}
+           sidebarWidth={ragSidebarState.sidebarWidth}
+           onResizeStart={ragSidebarState.startResize}
+           isResizing={ragSidebarState.isResizing}
+           isLoading={isLoading}
+         />
+
       </div>
 
       {/* Selection Info Bar */}
@@ -765,14 +793,13 @@ export default function SECONDARY_ChatWindow({
                 <div className="text-xs text-gray-400">Created based on a research paper by Google Deepming</div>
               </button>
             </div>
-            {isLoading && (
-              <div className="text-center py-4">
-                <div className="inline-block">
-                  <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-                <p className="text-sm text-gray-400 mt-2">Generating summary...</p>
-              </div>
-            )}
+             {isLoading && (
+               <div className="text-center py-4 animate-in fade-in duration-300">
+                 <LoadingSpinner size="md" className="mx-auto text-purple-500" />
+                 <p className="text-sm text-gray-400 mt-2">Generating summary...</p>
+               </div>
+             )}
+
             <button
               onClick={() => setShowSummaryDialog(false)}
               disabled={isLoading}

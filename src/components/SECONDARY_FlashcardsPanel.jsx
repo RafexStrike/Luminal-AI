@@ -19,6 +19,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 // ═══════════════════════════════════════════════════════
 // FSRS-LITE ALGORITHM (self-contained)
@@ -452,10 +454,27 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-3">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mx-auto" />
-          <p className="text-gray-400 text-sm">Loading flashcards...</p>
+      <div className="p-6 space-y-6 max-w-5xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="flex items-end justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48 bg-gray-800" />
+            <Skeleton className="h-4 w-32 bg-gray-800" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24 w-full bg-gray-800/50 rounded-xl" />
+          ))}
+        </div>
+        <Skeleton className="h-20 w-full bg-gray-800/50 rounded-xl" />
+        <div className="grid grid-cols-1 gap-6">
+          <div className="rounded-xl border border-gray-800 bg-gray-900/40 overflow-hidden">
+            <Skeleton className="h-16 w-full bg-gray-800" />
+            <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Skeleton className="h-40 w-full bg-gray-800/50 rounded-xl" />
+              <Skeleton className="h-40 w-full bg-gray-800/50 rounded-xl" />
+            </div>
+          </div>
         </div>
       </div>
     );

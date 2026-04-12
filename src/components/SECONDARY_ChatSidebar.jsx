@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import theme from '../design/theme.config';
 import layout from '../design/layout.config';
+import { Skeleton } from './ui/skeleton';
 import { groupByCollection, getCollectionNames } from '../lib/collection-utils';
 
 /**
@@ -598,11 +599,19 @@ export default function SECONDARY_ChatSidebar({
       )}
  
       {/* Chat List by Collections */}
-      {!collapsed && (
-        <div className="flex-1 overflow-auto px-3 py-4">
-          {loading ? (
-            <div className="text-sm text-blue-400/60 px-2">Loading...</div>
-          ) : chats.length === 0 ? (
+       {!collapsed && (
+         <div className="flex-1 overflow-auto px-3 py-4">
+           {loading ? (
+             <div className="space-y-2">
+               {Array.from({ length: 6 }).map((_, i) => (
+                 <div key={i} className="p-2 space-y-2">
+                   <Skeleton className="h-4 w-full bg-blue-800/30" />
+                   <Skeleton className="h-3 w-3/4 bg-blue-800/20" />
+                 </div>
+               ))}
+             </div>
+           ) : chats.length === 0 ? (
+
             <div className="text-sm text-blue-400/60 px-2">
               No chats yet. Create one to get started.
             </div>

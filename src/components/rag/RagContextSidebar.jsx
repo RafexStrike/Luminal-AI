@@ -27,6 +27,7 @@ export function RagContextSidebar({
   sidebarWidth = 320,
   onResizeStart = () => {},
   isResizing = false,
+  isLoading = false,
 }) {
   // Don't render if no sources selected and no results
   if (ragSources.length === 0 && ragResults.length === 0) {
@@ -77,7 +78,7 @@ export function RagContextSidebar({
                 <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                   Sources
                 </h4>
-                <RagSourceBadges sources={ragSources} />
+                <RagSourceBadges sources={ragSources} isLoading={isLoading} />
               </div>
             )}
 

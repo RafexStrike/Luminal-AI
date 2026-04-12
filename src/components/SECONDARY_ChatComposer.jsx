@@ -5,6 +5,7 @@
 'use client';
 
 import { memo, forwardRef, useEffect, useRef } from 'react';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const ChatComposer = memo(
   forwardRef(function ChatComposer(
@@ -89,10 +90,17 @@ const ChatComposer = memo(
           className="flex-shrink-0 px-6 h-[52px] bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 flex items-center justify-center gap-2"
           aria-label="Send message"
         >
-          Send
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
+          {isLoading ? (
+            <LoadingSpinner size="sm" className="text-white" />
+          ) : (
+            <>
+              Send
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </>
+          )}
+
         </button>
       </div>
     );

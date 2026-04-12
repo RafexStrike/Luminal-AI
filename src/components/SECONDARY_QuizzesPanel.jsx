@@ -4,6 +4,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 /**
  * SECONDARY_QuizzesPanel
@@ -80,10 +82,26 @@ export default function SECONDARY_QuizzesPanel({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="text-gray-600">Loading quizzes...</p>
-        </div>
+      <div className="p-6 space-y-6 animate-in fade-in duration-500">
+        <Skeleton className="h-16 w-full max-w-md bg-gray-800/50 rounded-xl" />
+        {[1, 2].map((setIdx) => (
+          <div key={setIdx} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700 p-6 space-y-6">
+            <Skeleton className="h-6 w-1/3 bg-gray-800 rounded" />
+            <div className="space-y-6">
+              {[1, 2, 3].map((qIdx) => (
+                <div key={qIdx} className="border border-gray-700 rounded-lg p-4 space-y-4">
+                  <Skeleton className="h-5 w-3/4 bg-gray-800 rounded" />
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((oIdx) => (
+                      <Skeleton key={oIdx} className="h-10 w-full bg-gray-800/50 rounded-lg" />
+                    ))}
+                  </div>
+                  <Skeleton className="h-10 w-full bg-gray-800 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

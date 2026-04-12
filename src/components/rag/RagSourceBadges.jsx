@@ -1,8 +1,10 @@
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+
 /**
  * Component to display source type badges with icons
  * Shows which sources are being used for RAG context
  */
-export function RagSourceBadges({ sources = [] }) {
+export function RagSourceBadges({ sources = [], isLoading = false }) {
   const sourceIcons = {
     flashcard: { icon: '🎴', label: 'Flashcards', color: 'bg-blue-500/20 border-blue-500/40 text-blue-300' },
     quiz: { icon: '❓', label: 'Quizzes', color: 'bg-purple-500/20 border-purple-500/40 text-purple-300' },
@@ -10,6 +12,14 @@ export function RagSourceBadges({ sources = [] }) {
   };
 
   if (!sources || sources.length === 0) {
+    if (isLoading) {
+      return (
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-800/30 text-gray-400 text-xs font-medium">
+          <LoadingSpinner size="sm" className="text-gray-400" />
+          <span>Searching sources...</span>
+        </div>
+      );
+    }
     return null;
   }
 
