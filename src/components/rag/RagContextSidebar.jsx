@@ -52,9 +52,9 @@ export function RagContextSidebar({
       {/* Resize handle */}
       <div
         onMouseDown={onResizeStart}
-        className={`w-1 bg-gray-800 hover:bg-purple-600 transition-colors cursor-col-resize flex-shrink-0 ${
-          isResizing ? 'bg-purple-600' : ''
-        }`}
+         className={`w-1 bg-gray-800 hover:bg-indigo-600 transition-colors cursor-col-resize flex-shrink-0 ${
+           isResizing ? 'bg-indigo-600' : ''
+         }`}
         aria-label="Resize sidebar"
       />
 
@@ -128,11 +128,11 @@ export function RagContextSidebar({
         {isCollapsed && (
           <div className="flex-1 flex flex-col items-center justify-center py-4 px-2 text-center">
             <span className="text-lg mb-2">🎯</span>
-            {ragResults.length > 0 && (
-              <span className="text-xs font-bold text-purple-400 bg-purple-500/20 rounded px-2 py-1">
-                {ragResults.length}
-              </span>
-            )}
+             {ragResults.length > 0 && (
+               <span className="text-xs font-bold text-indigo-400 bg-indigo-500/20 rounded px-2 py-1">
+                 {ragResults.length}
+               </span>
+             )}
           </div>
         )}
       </div>
@@ -144,10 +144,10 @@ export function RagContextSidebar({
       <>
         <Sheet open={isOpenMobile} onOpenChange={setIsOpenMobile}>
           <SheetTrigger asChild>
-            <button
-              className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-purple-600 text-white shadow-2xl hover:bg-purple-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
-              aria-label="Open RAG context"
-            >
+             <button
+               className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-indigo-600 text-white shadow-2xl hover:bg-indigo-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+               aria-label="Open RAG context"
+             >
               <Target className="w-6 h-6" />
             </button>
           </SheetTrigger>

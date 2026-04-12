@@ -38,13 +38,13 @@ function HealthIndicator({ name, status, details }) {
     degraded: "bg-amber-500",
   };
 
-  return (
-    <div className="p-4 rounded-lg border border-purple-500/20 bg-[#130b24]/50">
+    return (
+      <div className="p-4 rounded-lg border border-indigo-500/20 bg-indigo-950/50">
       <div className="flex items-center gap-3 mb-2">
         <div className={`w-3 h-3 rounded-full ${statusColors[status]}`}></div>
         <span className="font-medium text-white">{name}</span>
       </div>
-      {details && <p className="text-xs text-purple-200/60 ml-6">{details}</p>}
+       {details && <p className="text-xs text-indigo-200/60 ml-6">{details}</p>}
     </div>
   );
 }
@@ -82,30 +82,30 @@ function UserSessionTable() {
     setLoading(false);
   }, []);
 
-  if (loading) {
-    return <div className="text-center py-8 text-purple-200/60">Loading sessions...</div>;
-  }
+   if (loading) {
+     return <div className="text-center py-8 text-indigo-200/60">Loading sessions...</div>;
+   }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-purple-500/20">
-            <th className="text-left py-3 px-4 font-semibold text-purple-200">User Email</th>
-            <th className="text-left py-3 px-4 font-semibold text-purple-200">Session Start</th>
-            <th className="text-left py-3 px-4 font-semibold text-purple-200">Current Activity</th>
-            <th className="text-left py-3 px-4 font-semibold text-purple-200">Flashcards Generated</th>
-          </tr>
-        </thead>
+         <thead>
+           <tr className="border-b border-indigo-500/20">
+             <th className="text-left py-3 px-4 font-semibold text-indigo-200">User Email</th>
+             <th className="text-left py-3 px-4 font-semibold text-indigo-200">Session Start</th>
+             <th className="text-left py-3 px-4 font-semibold text-indigo-200">Current Activity</th>
+             <th className="text-left py-3 px-4 font-semibold text-indigo-200">Flashcards Generated</th>
+           </tr>
+         </thead>
         <tbody>
-          {sessions.map((session) => (
-            <tr key={session.id} className="border-b border-purple-500/10 hover:bg-purple-500/5 transition">
-              <td className="py-3 px-4 text-white">{session.email}</td>
-              <td className="py-3 px-4 text-purple-200/70">{session.sessionStart}</td>
-              <td className="py-3 px-4 text-purple-200/70">{session.activity}</td>
-              <td className="py-3 px-4 font-semibold text-green-400">{session.flashcardsGenerated}</td>
-            </tr>
-          ))}
+           {sessions.map((session) => (
+             <tr key={session.id} className="border-b border-indigo-500/10 hover:bg-indigo-500/5 transition">
+               <td className="py-3 px-4 text-white">{session.email}</td>
+               <td className="py-3 px-4 text-indigo-200/70">{session.sessionStart}</td>
+               <td className="py-3 px-4 text-indigo-200/70">{session.activity}</td>
+               <td className="py-3 px-4 font-semibold text-green-400">{session.flashcardsGenerated}</td>
+             </tr>
+           ))}
         </tbody>
       </table>
     </div>
@@ -225,28 +225,28 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-[#1a0f2e] to-black">
       {/* Header */}
-      <header className="border-b border-purple-500/20 bg-[#0f0819]/50 backdrop-blur-xl sticky top-0 z-40">
+       <header className="border-b border-indigo-500/20 bg-indigo-950/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="container max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="p-2 hover:bg-purple-500/10 rounded-lg transition-colors"
-                title="Back to home"
-              >
-                <ArrowLeft className="h-5 w-5 text-purple-400" />
-              </Link>
+               <Link
+                 href="/"
+                 className="p-2 hover:bg-indigo-500/10 rounded-lg transition-colors"
+                 title="Back to home"
+               >
+                 <ArrowLeft className="h-5 w-5 text-indigo-400" />
+               </Link>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                  Admin Dashboard
-                </h1>
-                <p className="text-purple-200/60 text-sm mt-1">System management and analytics</p>
+                 <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
+                   Admin Dashboard
+                 </h1>
+                 <p className="text-indigo-200/60 text-sm mt-1">System management and analytics</p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-purple-200 font-medium">{session?.user?.email}</p>
-              <p className="text-purple-200/60 text-sm">Administrator</p>
-            </div>
+               <div className="text-right">
+                 <p className="text-indigo-200 font-medium">{session?.user?.email}</p>
+                 <p className="text-indigo-200/60 text-sm">Administrator</p>
+               </div>
           </div>
         </div>
       </header>
@@ -255,10 +255,10 @@ export default function AdminDashboard() {
       <main className="container max-w-7xl mx-auto px-4 py-8">
         {/* Overview Stats */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-purple-400" />
-            System Overview
-          </h2>
+           <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+             <BarChart3 className="h-6 w-6 text-indigo-400" />
+             System Overview
+           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={Database}
@@ -293,10 +293,10 @@ export default function AdminDashboard() {
 
         {/* System Health */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <Activity className="h-6 w-6 text-purple-400" />
-            System Health
-          </h2>
+           <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+             <Activity className="h-6 w-6 text-indigo-400" />
+             System Health
+           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <HealthIndicator
               name="LLM Service (Ollama)"
@@ -318,13 +318,13 @@ export default function AdminDashboard() {
 
         {/* User Sessions */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <Users className="h-6 w-6 text-purple-400" />
-            Recent Study Sessions
-          </h2>
-          <div className="bg-[#130b24] border border-purple-500/20 rounded-xl overflow-hidden">
-            <UserSessionTable />
-          </div>
+           <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+             <Users className="h-6 w-6 text-indigo-400" />
+             Recent Study Sessions
+           </h2>
+           <div className="bg-indigo-950 border border-indigo-500/20 rounded-xl overflow-hidden">
+             <UserSessionTable />
+           </div>
         </section>
 
         {/* Management Actions */}
@@ -337,9 +337,9 @@ export default function AdminDashboard() {
         </section> */}
 
         {/* Footer Info */}
-        <div className="mt-12 pt-8 border-t border-purple-500/20 text-center text-purple-200/60 text-sm">
-          <p>Dashboard updated every 5 minutes • Admin-only access • Generated {new Date().toLocaleString()}</p>
-        </div>
+         <div className="mt-12 pt-8 border-t border-indigo-500/20 text-center text-indigo-200/60 text-sm">
+           <p>Dashboard updated every 5 minutes • Admin-only access • Generated {new Date().toLocaleString()}</p>
+         </div>
       </main>
     </div>
   );

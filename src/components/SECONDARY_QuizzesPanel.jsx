@@ -125,14 +125,14 @@ export default function SECONDARY_QuizzesPanel({
   return (
     <div className="p-6 space-y-6">
       {/* Score Header */}
-      {checkedAnswers.size > 0 && (
-        <div className="bg-gradient-to-r from-purple-900/40 to-violet-900/25 rounded-xl p-4 border border-gray-700 text-white">
-          <div className="text-sm text-gray-200">
-            Score: <span className="font-bold text-lg text-purple-300">{score}</span> /{' '}
-            <span className="font-bold text-lg text-gray-200">{checkedAnswers.size}</span>
-          </div>
-        </div>
-      )}
+       {checkedAnswers.size > 0 && (
+         <div className="bg-gradient-to-r from-indigo-900/40 to-blue-900/25 rounded-xl p-4 border border-gray-700 text-white">
+           <div className="text-sm text-gray-200">
+             Score: <span className="font-bold text-lg text-indigo-300">{score}</span> /{' '}
+             <span className="font-bold text-lg text-gray-200">{checkedAnswers.size}</span>
+           </div>
+         </div>
+       )}
 
       {/* Quiz Sets */}
       {quizzes.map((quiz, quizIndex) => (
@@ -182,9 +182,9 @@ export default function SECONDARY_QuizzesPanel({
                               ? 'border-green-500 bg-green-900/30 text-green-200'
                               : isSelected && isChecked
                               ? 'border-red-500 bg-red-900/30 text-red-200'
-                              : isSelected
-                              ? 'border-purple-500 bg-purple-900/20 text-purple-200'
-                              : 'border-gray-700 bg-gray-900/10 hover:border-gray-600 text-gray-100'
+                               : isSelected
+                               ? 'border-indigo-500 bg-indigo-900/20 text-indigo-200'
+                               : 'border-gray-700 bg-gray-900/10 hover:border-gray-600 text-gray-100'
                           } ${isChecked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                           <div className="flex items-center gap-3">
@@ -218,15 +218,15 @@ export default function SECONDARY_QuizzesPanel({
 
                   {/* Check/Reveal Feedback */}
                     {!isChecked ? (
-                      <button
-                        onClick={() =>
-                          handleCheckAnswer(questionKey, { questions: quiz.questions })
-                        }
-                        disabled={selectedOption === undefined}
-                        className="w-full px-4 py-2 bg-gradient-to-r from-purple-700 to-violet-600 text-white rounded-lg hover:opacity-95 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Check Answer
-                      </button>
+                       <button
+                         onClick={() =>
+                           handleCheckAnswer(questionKey, { questions: quiz.questions })
+                         }
+                         disabled={selectedOption === undefined}
+                         className="w-full px-4 py-2 bg-gradient-to-r from-indigo-700 to-blue-600 text-white rounded-lg hover:opacity-95 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                       >
+                         Check Answer
+                       </button>
                     ) : (
                       <div
                         className={`p-3 rounded-lg ${

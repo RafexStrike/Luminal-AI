@@ -47,7 +47,7 @@
 :root {
   --radius: 0.75rem;
 
-  /* Light mode - Modern grays with purple accents */
+  /* Light mode - Modern grays with indigo accents */
   --background: oklch(0.98 0 0);
   --foreground: oklch(0.15 0 0);
   --card: oklch(1 0 0);
@@ -311,7 +311,7 @@
 }
 
 .editor-content a {
-  @apply text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors;
+  @apply text-indigo-400 hover:text-indigo-300 underline underline-offset-4 transition-colors;
 }
 
 .editor-content table {
@@ -342,12 +342,12 @@
 
 /* Selection */
 ::selection {
-  @apply bg-purple-500/30 text-foreground;
+  @apply bg-indigo-500/30 text-foreground;
 }
 
 /* Focus styles */
 *:focus-visible {
-  @apply outline-none ring-2 ring-purple-500 ring-offset-2 ring-offset-background;
+  @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-background;
 }
 
 /* Glassmorphism utility */
@@ -406,6 +406,6 @@
 
   /* Modern Selection */
   .tiptap *::selection {
-    @apply bg-purple-500/30 text-white;
+    @apply bg-indigo-500/30 text-white;
   }
 }

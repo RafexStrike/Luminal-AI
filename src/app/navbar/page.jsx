@@ -130,7 +130,7 @@ export default function Navbar() {
           {mounted && isAdmin && (
             <Button
               onClick={() => router.push("/admin/dashboard")}
-              className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg"
+               className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:via-blue-500 hover:to-indigo-500 text-white font-semibold shadow-lg"
             >
               <span className="text-lg mr-2">🛡️</span>
               Admin Dashboard
@@ -165,7 +165,7 @@ export default function Navbar() {
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     {isAdmin && (
                       <>
-                        <div className="px-2 py-1.5 text-xs text-purple-400 font-semibold uppercase">Admin</div>
+                         <div className="px-2 py-1.5 text-xs text-indigo-400 font-semibold uppercase">Admin</div>
                         <DropdownMenuItem onClick={() => router.push("/admin/dashboard")}>
                           <span className="flex items-center gap-2">
                             <span className="text-lg">🛡️</span>

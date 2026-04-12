@@ -289,7 +289,7 @@ const DevIntegration = () => (
         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
         <div className="w-3 h-3 rounded-full bg-green-500"></div>
       </div>
-      <p className="mb-2"><span className="text-purple-400">const</span> luminal = <span className="text-blue-400">new</span> LuminalAgent({"{"})</p>
+       <p className="mb-2"><span className="text-indigo-400">const</span> luminal = <span className="text-blue-400">new</span> LuminalAgent({"{"})</p>
       <p className="ml-4 mb-2">  model: <span className="text-green-400">'qwen2.5-coder'</span>,</p>
       <p className="ml-4 mb-2">  provider: <span className="text-green-400">'ollama'</span>,</p>
       <p className="ml-4 mb-2">  ragEnabled: <span className="text-orange-400">true</span></p>

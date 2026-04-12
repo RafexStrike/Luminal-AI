@@ -15,13 +15,13 @@ import React from 'react';
 export function INTERACTIVE_StepCard({ step, isActive, stepNumber }) {
     const stateColors = {
         idle: 'bg-gray-800/60 border-gray-700/60 text-gray-400',
-        active: 'bg-purple-900/40 border-purple-500/60 text-purple-300',
+         active: 'bg-indigo-900/40 border-indigo-500/60 text-indigo-300',
         done: 'bg-emerald-900/30 border-emerald-600/50 text-emerald-400',
     };
 
     const stateDot = {
         idle: 'bg-gray-600',
-        active: 'bg-purple-400 animate-pulse',
+         active: 'bg-indigo-400 animate-pulse',
         done: 'bg-emerald-400',
     };
 
@@ -35,7 +35,7 @@ export function INTERACTIVE_StepCard({ step, isActive, stepNumber }) {
             className={`
         relative rounded-xl border p-4 transition-all duration-200
         ${vsColor}
-        ${isActive ? 'ring-2 ring-purple-500/70 shadow-lg shadow-purple-900/30' : 'opacity-70 hover:opacity-90'}
+         ${isActive ? 'ring-2 ring-indigo-500/70 shadow-lg shadow-indigo-900/30' : 'opacity-70 hover:opacity-90'}
       `}
         >
             {/* Step number badge */}

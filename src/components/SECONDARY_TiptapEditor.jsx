@@ -193,7 +193,7 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
     },
     editorProps: {
       attributes: {
-        class: 'tiptap outline-none focus:outline-none px-8 py-10 text-gray-100 min-h-[calc(100vh-200px)] font-sans max-w-4xl mx-auto selection:bg-purple-500/30',
+         class: 'tiptap outline-none focus:outline-none px-8 py-10 text-gray-100 min-h-[calc(100vh-200px)] font-sans max-w-4xl mx-auto selection:bg-indigo-500/30',
       },
       handleKeyDown: (view, event) => {
         if (!showSlashMenuRef.current) return false;
@@ -366,10 +366,10 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
           title="Bullet List"
         />
         <div className="w-px h-4 bg-white/10 mx-2" />
-        <button
-          onClick={() => setAiModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 text-sm font-semibold transition-all shadow-lg shadow-purple-600/20 group active:scale-95"
-        >
+           <button
+             onClick={() => setAiModalOpen(true)}
+             className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold transition-all shadow-lg shadow-indigo-600/20 group active:scale-95"
+           >
           <Sparkles size={14} className="group-hover:rotate-12 transition-transform" />
           Ask AI
         </button>
@@ -408,24 +408,24 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
                   const Icon = item.icon;
                   const isActive = index === selectedIndex;
                   return (
-                    <button
-                      key={index}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => selectCommand(item)}
-                      className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-left transition-all duration-200 group ${isActive
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                        : 'hover:bg-white/5 text-gray-300'
-                        }`}
-                    >
+                     <button
+                       key={index}
+                       onMouseDown={(e) => e.preventDefault()}
+                       onClick={() => selectCommand(item)}
+                       className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-left transition-all duration-200 group ${isActive
+                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                         : 'hover:bg-white/5 text-gray-300'
+                         }`}
+                     >
                       <div className={`p-1.5 rounded-md transition-colors ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 group-hover:bg-white/10'}`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex flex-col flex-1 min-w-0">
                         <span className="font-semibold leading-tight truncate">{item.title}</span>
-                        <span className={`text-[10px] truncate ${isActive ? 'text-purple-100' : 'text-gray-500'}`}>{item.description}</span>
+                         <span className={`text-[10px] truncate ${isActive ? 'text-indigo-100' : 'text-gray-500'}`}>{item.description}</span>
                       </div>
                       {isActive && (
-                        <div className="text-[10px] font-mono text-purple-200 bg-white/10 px-1 rounded border border-white/20 animate-pulse">
+                         <div className="text-[10px] font-mono text-indigo-200 bg-white/10 px-1 rounded border border-white/20 animate-pulse">
                           ↵
                         </div>
                       )}
@@ -444,11 +444,11 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
       <Dialog open={aiModalOpen} onOpenChange={setAiModalOpen}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden bg-gray-950 border-gray-800 text-white shadow-2xl rounded-2xl">
           <div className="p-6 space-y-4">
-            <DialogTitle className="text-xl font-bold flex items-center gap-3 text-purple-400">
-              <div className="p-2 bg-purple-500/10 rounded-xl">
-                <Sparkles size={20} className="text-purple-500" />
-              </div>
-              AI Writing Assistant
+             <DialogTitle className="text-xl font-bold flex items-center gap-3 text-indigo-400">
+               <div className="p-2 bg-indigo-500/10 rounded-xl">
+                 <Sparkles size={20} className="text-indigo-500" />
+               </div>
+               AI Writing Assistant
             </DialogTitle>
 
             {aiResponse && (
@@ -458,12 +458,12 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
             )}
 
             <div className="relative group">
-              <textarea
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Write an outline, rewrite this section, or expand on..."
-                className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white placeholder:text-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all resize-none min-h-[120px]"
-                onKeyDown={(e) => {
+               <textarea
+                 value={aiPrompt}
+                 onChange={(e) => setAiPrompt(e.target.value)}
+                 placeholder="Write an outline, rewrite this section, or expand on..."
+                 className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white placeholder:text-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none min-h-[120px]"
+                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleAiSubmit();
@@ -471,11 +471,11 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
                 }}
               />
               <div className="absolute bottom-3 right-3 flex gap-2">
-                <button
-                  onClick={handleAiSubmit}
-                  disabled={isAiLoading || !aiPrompt.trim()}
-                  className="px-4 py-2 bg-purple-600 rounded-lg text-white font-semibold hover:bg-purple-700 disabled:opacity-50 transition-all flex items-center gap-2 shadow-lg shadow-purple-600/20"
-                >
+                 <button
+                   onClick={handleAiSubmit}
+                   disabled={isAiLoading || !aiPrompt.trim()}
+                   className="px-4 py-2 bg-indigo-600 rounded-lg text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20"
+                 >
                   {isAiLoading ? 'Thinking...' : 'Generate'}
                   {!isAiLoading && <CornerDownLeft size={14} />}
                 </button>
@@ -490,12 +490,12 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
                 >
                   Replace
                 </button>
-                <button
-                  onClick={() => insertAiResponse('append')}
-                  className="text-sm px-4 py-2 rounded-lg bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 transition-colors font-semibold"
-                >
-                  Insert below
-                </button>
+                 <button
+                   onClick={() => insertAiResponse('append')}
+                   className="text-sm px-4 py-2 rounded-lg bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30 transition-colors font-semibold"
+                 >
+                   Insert below
+                 </button>
               </div>
             )}
           </div>
@@ -509,9 +509,9 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
           <span className="w-px h-2 bg-white/10" />
           <span>{editor.storage.characterCount?.characters() || 0} characters</span>
         </div>
-        <div className="flex items-center gap-1 text-purple-500/40 lowercase tracking-tighter">
-          Luminal AI Editor
-        </div>
+         <div className="flex items-center gap-1 text-indigo-500/40 lowercase tracking-tighter">
+           Luminal AI Editor
+         </div>
       </div>
     </div>
   );
@@ -520,14 +520,14 @@ export default function SECONDARY_TiptapEditor({ value = '', onChange = () => { 
 // Reusable toolbar button component
 function ToolbarButton({ icon: Icon, onClick, active = false, title }) {
   return (
-    <button
-      onClick={onClick}
-      title={title}
-      className={`p-2 rounded-lg transition-all duration-200 group active:scale-90 ${active
-        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-        : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium'
-        }`}
-    >
+     <button
+       onClick={onClick}
+       title={title}
+       className={`p-2 rounded-lg transition-all duration-200 group active:scale-90 ${active
+         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+         : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium'
+         }`}
+     >
       <Icon size={18} className={active ? 'scale-110' : 'group-hover:scale-110 transition-transform'} />
     </button>
   );

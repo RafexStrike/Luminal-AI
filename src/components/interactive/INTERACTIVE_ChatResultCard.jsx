@@ -36,7 +36,7 @@ export function INTERACTIVE_ChatResultCard({
             className={`
         rounded-xl border p-4 transition-all duration-200 w-full max-w-md
         ${status === 'pending' ? 'border-yellow-700/40 bg-yellow-900/10' : ''}
-        ${status === 'success' ? 'border-purple-700/40 bg-purple-900/10' : ''}
+         ${status === 'success' ? 'border-indigo-700/40 bg-indigo-900/10' : ''}
         ${status === 'error' ? 'border-red-700/40   bg-red-900/10' : ''}
       `}
         >
@@ -81,7 +81,7 @@ export function INTERACTIVE_ChatResultCard({
                             console.log('INTERACTIVE: Open clicked from ChatResultCard');
                             onOpen?.();
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 text-white text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                     >
                         <ExternalLink className="w-3 h-3" aria-hidden="true" />
                         Open
@@ -95,10 +95,10 @@ export function INTERACTIVE_ChatResultCard({
                                 console.log('INTERACTIVE: View Summary clicked from ChatResultCard');
                                 onViewSummary();
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
-                        >
-                            <FileText className="w-3 h-3" aria-hidden="true" />
-                            View Summary
+                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                             >
+                               <FileText className="w-3 h-3" aria-hidden="true" />
+                               View Summary
                         </button>
                     )}
                 </div>
@@ -129,10 +129,10 @@ export function INTERACTIVE_ChatResultCard({
                                 console.log('INTERACTIVE: View Plain Explanation clicked from ChatResultCard');
                                 onViewSummary();
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
-                        >
-                            <FileText className="w-3 h-3" aria-hidden="true" />
-                            View Plain Explanation
+                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                             >
+                               <FileText className="w-3 h-3" aria-hidden="true" />
+                               View Plain Explanation
                         </button>
                     )}
                 </div>

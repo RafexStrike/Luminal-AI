@@ -117,13 +117,13 @@ export default function FlashcardDashboard({ collections = [], allCards = {} }) 
         </Card>
 
         {/* Reviewed Today */}
-        <Card className="bg-gradient-to-br from-purple-900/25 to-violet-900/20 border-purple-700/50 p-5">
-          <div className="text-4xl font-bold text-purple-300">{stats.reviewedTodayCount}</div>
-          <div className="text-sm text-gray-400 mt-1">Reviewed Today</div>
-          {stats.reviewedTodayCount > 0 && (
-            <div className="text-xs text-purple-400/70 mt-1">✓ Great work!</div>
-          )}
-        </Card>
+         <Card className="bg-gradient-to-br from-indigo-900/25 to-blue-900/20 border-indigo-700/50 p-5">
+           <div className="text-4xl font-bold text-indigo-300">{stats.reviewedTodayCount}</div>
+           <div className="text-sm text-gray-400 mt-1">Reviewed Today</div>
+           {stats.reviewedTodayCount > 0 && (
+             <div className="text-xs text-indigo-400/70 mt-1">✓ Great work!</div>
+           )}
+         </Card>
       </div>
 
       {/* ── Two-column section ── */}
@@ -155,10 +155,10 @@ export default function FlashcardDashboard({ collections = [], allCards = {} }) 
 
                     {/* Bar */}
                     <div className="flex-1 bg-gray-800 rounded-full h-5 relative overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.max(barPct, day.count > 0 ? 4 : 0)}%` }}
-                      />
+                         <div
+                           className="h-full bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full transition-all duration-500"
+                           style={{ width: `${Math.max(barPct, day.count > 0 ? 4 : 0)}%` }}
+                         />
                     </div>
 
                     {/* Count */}

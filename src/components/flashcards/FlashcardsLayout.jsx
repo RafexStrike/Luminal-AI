@@ -334,11 +334,11 @@ export default function FlashcardsLayout({ chatId = null, onGenerateFlashcards =
                     <div className="text-sm text-gray-400 mt-2 line-clamp-2">
                       {card.back}
                     </div>
-                    <div className="flex gap-2 mt-3 text-xs">
-                      <span className="text-purple-400">S: {(card.stability || 0).toFixed(1)}d</span>
-                      <span className="text-blue-400">D: {(card.difficulty || 5).toFixed(1)}</span>
-                      <span className="text-gray-500">Lapses: {card.lapses || 0}</span>
-                    </div>
+                     <div className="flex gap-2 mt-3 text-xs">
+                       <span className="text-indigo-400">S: {(card.stability || 0).toFixed(1)}d</span>
+                       <span className="text-blue-400">D: {(card.difficulty || 5).toFixed(1)}</span>
+                       <span className="text-gray-500">Lapses: {card.lapses || 0}</span>
+                     </div>
                   </div>
                 ))}
               </div>

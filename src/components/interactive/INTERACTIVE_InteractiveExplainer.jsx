@@ -11,12 +11,12 @@ import { INTERACTIVE_AnimatedViz } from './INTERACTIVE_AnimatedViz';
 function ProgressDots({ total, current }) {
     return (
         <div className="flex items-center gap-2 justify-center" aria-label={`Turn ${current + 1} of ${total}`}>
-            {Array.from({ length: total }, (_, i) => (
-                <div key={i} className={`rounded-full transition-all duration-400 ${i < current ? 'w-2 h-2 bg-purple-500' :
-                    i === current ? 'w-3 h-3 bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.7)]' :
-                        'w-2 h-2 bg-gray-700'
-                    }`} />
-            ))}
+             {Array.from({ length: total }, (_, i) => (
+                 <div key={i} className={`rounded-full transition-all duration-400 ${i < current ? 'w-2 h-2 bg-indigo-500' :
+                     i === current ? 'w-3 h-3 bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.7)]' :
+                         'w-2 h-2 bg-gray-700'
+                     }`} />
+             ))}
         </div>
     );
 }
@@ -27,9 +27,9 @@ function ConceptTags({ concepts = [] }) {
     return (
         <div className="flex flex-wrap gap-1.5 mt-3">
             {concepts.map((c, i) => (
-                <span key={i} className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-900/40 border border-purple-500/40 text-purple-300">
-                    {c}
-                </span>
+                 <span key={i} className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-900/40 border border-indigo-500/40 text-indigo-300">
+                     {c}
+                 </span>
             ))}
         </div>
     );
@@ -41,18 +41,18 @@ function HintToggle({ hint }) {
     if (!hint) return null;
     return (
         <div className="mt-3">
-            <button
-                onClick={() => setOpen(o => !o)}
-                className="text-xs text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500 rounded"
-                aria-expanded={open}
-            >
+             <button
+                 onClick={() => setOpen(o => !o)}
+                 className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 rounded"
+                 aria-expanded={open}
+             >
                 <span>{open ? '▾' : '▸'}</span>
                 {open ? 'Hide hint' : 'Need a hint?'}
             </button>
             {open && (
-                <p className="mt-1.5 text-sm text-gray-400 italic border-l-2 border-purple-700 pl-3">
-                    {hint}
-                </p>
+                 <p className="mt-1.5 text-sm text-gray-400 italic border-l-2 border-indigo-700 pl-3">
+                     {hint}
+                 </p>
             )}
         </div>
     );
@@ -77,12 +77,12 @@ function ResponseHistory({ turns, responses }) {
 function CompletionScreen({ topic, turns, responses, onClose, onRestart }) {
     return (
         <div className="flex flex-col items-center gap-6 py-8 px-4 text-center">
-            <div className="w-20 h-20 rounded-full bg-purple-900/60 border-2 border-purple-500 flex items-center justify-center text-4xl shadow-[0_0_24px_rgba(168,85,247,0.4)]">
-                🧠
-            </div>
+             <div className="w-20 h-20 rounded-full bg-indigo-900/60 border-2 border-indigo-500 flex items-center justify-center text-4xl shadow-[0_0_24px_rgba(99,102,241,0.4)]">
+                 🧠
+             </div>
             <div>
                 <h2 className="text-2xl font-bold text-white mb-1">Session Complete!</h2>
-                <p className="text-gray-400 text-sm">You explored <span className="text-purple-300 font-semibold">{topic}</span> through {turns.length} Socratic turns.</p>
+                 <p className="text-gray-400 text-sm">You explored <span className="text-indigo-300 font-semibold">{topic}</span> through {turns.length} Socratic turns.</p>
             </div>
 
             {/* Journey summary */}
@@ -90,10 +90,10 @@ function CompletionScreen({ topic, turns, responses, onClose, onRestart }) {
                 {turns.map((turn, i) => (
                     <div key={i} className="rounded-lg bg-gray-900/60 border border-gray-700/50 px-3 py-2">
                         <div className="flex gap-2 items-start">
-                            <span className="shrink-0 w-5 h-5 rounded-full bg-purple-700 text-white text-xs flex items-center justify-center font-bold mt-0.5">{i + 1}</span>
+                             <span className="shrink-0 w-5 h-5 rounded-full bg-indigo-700 text-white text-xs flex items-center justify-center font-bold mt-0.5">{i + 1}</span>
                             <div>
                                 <p className="text-gray-400 text-xs">{turn.question}</p>
-                                {responses[i] && <p className="text-purple-300 text-xs mt-0.5 font-medium">Your answer: {responses[i]}</p>}
+                                 {responses[i] && <p className="text-indigo-300 text-xs mt-0.5 font-medium">Your answer: {responses[i]}</p>}
                             </div>
                         </div>
                     </div>
@@ -101,14 +101,14 @@ function CompletionScreen({ topic, turns, responses, onClose, onRestart }) {
             </div>
 
             <div className="flex gap-3">
-                <button onClick={onRestart}
-                    className="px-5 py-2 rounded-lg border border-purple-500/60 text-purple-300 hover:bg-purple-900/40 transition-colors text-sm font-medium">
-                    ↺ Restart
-                </button>
-                <button onClick={onClose}
-                    className="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 transition-all text-sm font-medium shadow-lg shadow-purple-500/30">
-                    Done
-                </button>
+                 <button onClick={onRestart}
+                     className="px-5 py-2 rounded-lg border border-indigo-500/60 text-indigo-300 hover:bg-indigo-900/40 transition-colors text-sm font-medium">
+                     ↺ Restart
+                 </button>
+                 <button onClick={onClose}
+                     className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 transition-all text-sm font-medium shadow-lg shadow-indigo-500/30">
+                     Done
+                 </button>
             </div>
         </div>
     );

@@ -44,15 +44,15 @@ const ChatComposer = memo(
     return (
       <div className="flex items-end gap-3 w-full">
         {/* Context Button */}
-        <button
-          onClick={onToggleRagMenu}
-          title={showSlashMenu ? 'Close context menu' : 'Open context menu'}
-          className={`flex-shrink-0 w-[52px] h-[52px] flex items-center justify-center rounded-xl border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 ${showSlashMenu
-            ? 'bg-purple-600/20 border-purple-500/50 text-purple-400'
-            : 'bg-gray-800/80 border-gray-700/80 hover:border-purple-500/50 text-gray-400 hover:text-purple-400'
-            }`}
-          aria-label="Toggle context menu"
-        >
+         <button
+           onClick={onToggleRagMenu}
+           title={showSlashMenu ? 'Close context menu' : 'Open context menu'}
+           className={`flex-shrink-0 w-[52px] h-[52px] flex items-center justify-center rounded-xl border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${showSlashMenu
+             ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-400'
+             : 'bg-gray-800/80 border-gray-700/80 hover:border-indigo-500/50 text-gray-400 hover:text-indigo-400'
+             }`}
+           aria-label="Toggle context menu"
+         >
           {/* Meaningful icon: database / layers / context */}
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
@@ -60,7 +60,7 @@ const ChatComposer = memo(
         </button>
 
         {/* Input Wrapper */}
-        <div className="flex-1 relative flex items-center bg-gray-900/60 rounded-xl border border-gray-700/50 focus-within:border-purple-500/80 focus-within:shadow-[0_0_15px_rgba(168,85,247,0.15)] transition-all">
+         <div className="flex-1 relative flex items-center bg-gray-900/60 rounded-xl border border-gray-700/50 focus-within:border-indigo-500/80 focus-within:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all">
           <textarea
             ref={internalTextareaRef}
             placeholder="Type / for context options... or just start typing (shift+enter for new line)"
@@ -71,25 +71,25 @@ const ChatComposer = memo(
             rows="1"
             disabled={isInteractiveQuery}
           />
-          {isInteractiveQuery && (
-            <div className="absolute inset-0 flex items-center justify-center bg-purple-900/30 text-purple-300 text-sm font-medium rounded-xl pointer-events-none">
-              @interactive
-            </div>
-          )}
-          {isInteractiveQuery && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs font-medium bg-purple-600 text-white rounded-full">
-              AI
-            </span>
-          )}
+           {isInteractiveQuery && (
+             <div className="absolute inset-0 flex items-center justify-center bg-indigo-900/30 text-indigo-300 text-sm font-medium rounded-xl pointer-events-none">
+               @interactive
+             </div>
+           )}
+           {isInteractiveQuery && (
+             <span className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs font-medium bg-indigo-600 text-white rounded-full">
+               AI
+             </span>
+           )}
         </div>
 
         {/* Send button */}
-        <button
-          onClick={onSendClick}
-          disabled={!composerText.trim() || isLoading || isInteractiveQuery}
-          className="flex-shrink-0 px-6 h-[52px] bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl hover:from-purple-700 hover:to-violet-700 transition-all shadow-lg shadow-purple-500/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 flex items-center justify-center gap-2"
-          aria-label="Send message"
-        >
+         <button
+           onClick={onSendClick}
+           disabled={!composerText.trim() || isLoading || isInteractiveQuery}
+           className="flex-shrink-0 px-6 h-[52px] bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-500/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 flex items-center justify-center gap-2"
+           aria-label="Send message"
+         >
           {isLoading ? (
             <LoadingSpinner size="sm" className="text-white" />
           ) : (

@@ -34,7 +34,7 @@ export function INTERACTIVE_KBList({ items = [], onItemClick }) {
     return (
         <aside aria-label="Knowledge base snippets">
             <div className="flex items-center gap-2 mb-3">
-                <BookOpen className="w-3.5 h-3.5 text-purple-400" aria-hidden="true" />
+                 <BookOpen className="w-3.5 h-3.5 text-indigo-400" aria-hidden="true" />
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Knowledge Base
                 </span>
@@ -53,14 +53,14 @@ export function INTERACTIVE_KBList({ items = [], onItemClick }) {
                                 onClick={() => handleClick(item)}
                                 className={`
                   w-full text-left rounded-lg border px-3 py-2.5 text-xs leading-relaxed transition-all duration-150
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500
-                  ${isActive
-                                        ? 'border-purple-500/60 bg-purple-900/30 text-purple-200'
-                                        : 'border-gray-700/50 bg-gray-800/40 text-gray-400 hover:border-gray-600/70 hover:text-gray-300'
-                                    }
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                   ${isActive
+                                         ? 'border-indigo-500/60 bg-indigo-900/30 text-indigo-200'
+                                         : 'border-gray-700/50 bg-gray-800/40 text-gray-400 hover:border-gray-600/70 hover:text-gray-300'
+                                     }
                 `}
                             >
-                                <span className="font-mono text-purple-500 mr-1.5">[{item.id}]</span>
+                                 <span className="font-mono text-indigo-500 mr-1.5">[{item.id}]</span>
                                 {item.text}
                             </button>
                         </li>

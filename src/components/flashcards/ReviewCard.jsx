@@ -141,11 +141,11 @@ export default function ReviewCard({
           }}
         >
           {/* Front face */}
-          <div
-            className="absolute w-full h-full bg-gradient-to-br from-purple-900/40 to-violet-900/25 rounded-2xl border-2 border-purple-500/60 p-7 flex flex-col items-center justify-center text-center shadow-xl shadow-purple-900/20"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <div className="text-xs font-semibold text-purple-400 mb-4 uppercase tracking-widest">Question</div>
+           <div
+             className="absolute w-full h-full bg-gradient-to-br from-indigo-900/40 to-blue-900/25 rounded-2xl border-2 border-indigo-500/60 p-7 flex flex-col items-center justify-center text-center shadow-xl shadow-indigo-900/20"
+             style={{ backfaceVisibility: 'hidden' }}
+           >
+             <div className="text-xs font-semibold text-indigo-400 mb-4 uppercase tracking-widest">Question</div>
             <div className="text-xl font-medium text-white leading-relaxed break-words">
               {card.front}
             </div>

@@ -191,10 +191,10 @@ function BarCalendar({ days, maxCount }) {
         <div key={i} className="flex items-center gap-3">
           <span className="w-8 text-right text-xs font-semibold text-gray-400 flex-shrink-0">{d.label}</span>
           <div className="flex-1 bg-gray-800 rounded-full h-5 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-500"
-              style={{ width: d.count > 0 ? `${Math.max((d.count / max) * 100, 5)}%` : '0%' }}
-            />
+               <div
+               className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 transition-all duration-500"
+               style={{ width: d.count > 0 ? `${Math.max((d.count / max) * 100, 5)}%` : '0%' }}
+             />
           </div>
           <div className="w-20 text-xs flex-shrink-0">
             {d.count > 0 ? (
@@ -486,10 +486,10 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
         <div className="text-center max-w-sm">
           <div className="text-6xl mb-5">🃏</div>
           <h2 className="text-xl font-bold text-gray-100 mb-2">No flashcards yet</h2>
-          <p className="text-gray-400 text-sm">
-            Select messages in the chat and click{' '}
-            <span className="text-purple-400 font-semibold">"Generate Flashcards"</span> to create your first set.
-          </p>
+            <p className="text-gray-400 text-sm">
+             Select messages in the chat and click{' '}
+             <span className="text-indigo-400 font-semibold">"Generate Flashcards"</span> to create your first set.
+           </p>
         </div>
       </div>
     );
@@ -540,12 +540,12 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
           ))}
         </div>
 
-        <button
-          onClick={() => setView('dashboard')}
-          className="px-10 py-3 bg-gradient-to-r from-purple-700 to-violet-600 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity text-base"
-        >
-          Back to Dashboard →
-        </button>
+         <button
+           onClick={() => setView('dashboard')}
+           className="px-10 py-3 bg-gradient-to-r from-indigo-700 to-blue-600 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity text-base"
+         >
+           Back to Dashboard →
+         </button>
       </div>
     );
   }
@@ -615,14 +615,14 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
             style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
           >
             {/* Front */}
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center text-center rounded-2xl border-2 border-purple-500/50 bg-gradient-to-br from-purple-900/30 to-violet-900/20 p-8"
-              style={{ backfaceVisibility: 'hidden' }}
-            >
-              <div className="text-xs font-semibold text-purple-400 uppercase tracking-widest mb-3">Question</div>
-              <div className="text-xl font-medium text-white leading-relaxed">{apiCard?.q}</div>
-              <div className="text-xs text-gray-500 mt-6 italic">Click or <kbd className="px-1 bg-gray-800/50 rounded">Space</kbd> to reveal</div>
-            </div>
+               <div
+               className="absolute inset-0 flex flex-col items-center justify-center text-center rounded-2xl border-2 border-indigo-500/50 bg-gradient-to-br from-indigo-900/30 to-blue-900/20 p-8"
+               style={{ backfaceVisibility: 'hidden' }}
+             >
+               <div className="text-xs font-semibold text-indigo-400 uppercase tracking-widest mb-3">Question</div>
+               <div className="text-xl font-medium text-white leading-relaxed">{apiCard?.q}</div>
+               <div className="text-xs text-gray-500 mt-6 italic">Click or <kbd className="px-1 bg-gray-800/50 rounded">Space</kbd> to reveal</div>
+             </div>
             {/* Back */}
             <div
               className="absolute inset-0 flex flex-col items-center justify-center text-center rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-br from-emerald-900/30 to-green-900/20 p-8"
@@ -835,13 +835,13 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
             bgClass="from-orange-900/20 to-red-900/20 border-orange-700/40"
             sub={`~${Math.max(1, Math.ceil(globalStats.totalDue * 1.5))} min`}
           />
-          <StatCard
-            value={globalStats.totalReviewedToday}
-            label="Reviewed Today"
-            colorClass="text-purple-300"
-            bgClass="from-purple-900/20 to-violet-900/20 border-purple-700/40"
-            sub={globalStats.totalReviewedToday > 0 ? '✓ Keep it up!' : undefined}
-          />
+           <StatCard
+             value={globalStats.totalReviewedToday}
+             label="Reviewed Today"
+             colorClass="text-indigo-300"
+             bgClass="from-indigo-900/20 to-blue-900/20 border-indigo-700/40"
+             sub={globalStats.totalReviewedToday > 0 ? '✓ Keep it up!' : undefined}
+           />
         </div>
 
         {/* ── Target Memory Date ── */}
@@ -856,14 +856,14 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
               value={targetDateInput}
               min={new Date().toISOString().split('T')[0]}
               onChange={e => handleSetTargetDate(e.target.value)}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-purple-500 transition-colors"
+               className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
             />
             {targetPlan ? (
               <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-purple-300">{targetPlan.daysLeft}</span>
-                  <span className="text-sm text-gray-400">days left</span>
-                </div>
+                 <div className="flex items-center gap-2">
+                   <span className="text-2xl font-bold text-indigo-300">{targetPlan.daysLeft}</span>
+                   <span className="text-sm text-gray-400">days left</span>
+                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-2xl font-bold ${targetPlan.feasible ? 'text-green-300' : 'text-red-300'}`}>
                     {targetPlan.cardsPerDay}
@@ -927,12 +927,12 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
                   >
                     Browse Cards
                   </button>
-                  <button
-                    onClick={() => handleStartReview(setIndex)}
-                    className="px-4 py-1.5 text-sm font-semibold bg-gradient-to-r from-purple-700 to-violet-600 text-white rounded-lg hover:opacity-90 transition-opacity"
-                  >
-                    {st.dueCount > 0 ? `Review (${st.dueCount})` : 'Practice All'}
-                  </button>
+                     <button
+                       onClick={() => handleStartReview(setIndex)}
+                       className="px-4 py-1.5 text-sm font-semibold bg-gradient-to-r from-indigo-700 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity"
+                     >
+                       {st.dueCount > 0 ? `Review (${st.dueCount})` : 'Practice All'}
+                     </button>
                 </div>
               </div>
 
@@ -971,16 +971,17 @@ export default function SECONDARY_FlashcardsPanel({ chatId = null, refreshTrigge
                                 {(wc.stability || FSRS.DEFAULT_STABILITY).toFixed(1)}d
                               </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-700 rounded-full h-1.5 overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full ${(wc.stability || 0) < 2 ? 'bg-red-500' :
-                                      (wc.stability || 0) < 5 ? 'bg-orange-500' : 'bg-green-500'
-                                    }`}
-                                  style={{ width: `${Math.max(stabilityPct, 3)}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-gray-600 flex-shrink-0">
+                             <div className="flex items-center gap-2">
+                               <div className="flex-1 bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                                 <div
+                                   className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                   <div
+                                     className="h-full bg-gradient-to-r from-indigo-600 to-blue-500 rounded-full transition-all duration-500"
+                                     style={{ width: `${stabilityPct}%` }}
+                                   />
+                                 </div>
+                               </div>
+                               <span className="text-xs text-gray-600 flex-shrink-0">
                                 {wc.lastReviewedAt
                                   ? `Last: ${new Date(wc.lastReviewedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
                                   : 'Never reviewed'}

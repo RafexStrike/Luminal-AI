@@ -7,7 +7,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 export function RagSourceBadges({ sources = [], isLoading = false }) {
   const sourceIcons = {
     flashcard: { icon: '🎴', label: 'Flashcards', color: 'bg-blue-500/20 border-blue-500/40 text-blue-300' },
-    quiz: { icon: '❓', label: 'Quizzes', color: 'bg-purple-500/20 border-purple-500/40 text-purple-300' },
+    quiz: { icon: '❓', label: 'Quizzes', color: 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' },
     note: { icon: '📝', label: 'Notes', color: 'bg-green-500/20 border-green-500/40 text-green-300' },
   };
 

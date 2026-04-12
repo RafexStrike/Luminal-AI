@@ -116,10 +116,10 @@ export default function ReviewQueue({
             <div className="text-3xl font-bold text-green-300">{retentionPct}%</div>
             <div className="text-xs text-gray-400 mt-1">Correct Rate</div>
           </Card>
-          <Card className="bg-purple-900/30 border-purple-700 p-4 text-center">
-            <div className="text-3xl font-bold text-purple-300">{sessionStats.easy + sessionStats.good}</div>
-            <div className="text-xs text-gray-400 mt-1">Good / Easy</div>
-          </Card>
+           <Card className="bg-indigo-900/30 border-indigo-700 p-4 text-center">
+             <div className="text-3xl font-bold text-indigo-300">{sessionStats.easy + sessionStats.good}</div>
+             <div className="text-xs text-gray-400 mt-1">Good / Easy</div>
+           </Card>
           <Card className="bg-red-900/30 border-red-700 p-4 text-center">
             <div className="text-3xl font-bold text-red-300">{sessionStats.again}</div>
             <div className="text-xs text-gray-400 mt-1">Again</div>
@@ -146,12 +146,12 @@ export default function ReviewQueue({
           </div>
         </div>
 
-        <Button
-          onClick={() => onQueueEmpty?.()}
-          className="bg-gradient-to-r from-purple-700 to-violet-600 hover:opacity-95 px-8 py-3 text-base"
-        >
-          Back to Collection →
-        </Button>
+         <Button
+           onClick={() => onQueueEmpty?.()}
+           className="bg-gradient-to-r from-indigo-700 to-blue-600 hover:opacity-95 px-8 py-3 text-base"
+         >
+           Back to Collection →
+         </Button>
       </div>
     );
   }
@@ -206,10 +206,10 @@ export default function ReviewQueue({
 
       {/* Progress bar */}
       <div className="w-full bg-gray-800 rounded-full h-2">
-        <div
-          className="bg-gradient-to-r from-purple-600 to-violet-600 h-2 rounded-full transition-all duration-500"
-          style={{ width: `${progress}%` }}
-        />
+         <div
+           className="bg-gradient-to-r from-indigo-600 to-blue-600 h-2 rounded-full transition-all duration-500"
+           style={{ width: `${progress}%` }}
+         />
       </div>
 
       {/* Current card */}
