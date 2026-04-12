@@ -74,7 +74,7 @@ export default function Navbar() {
     
 
           {/* Theme Toggle */}
-          {mounted && (
+          {/* {mounted && (
             <Button
               variant="ghost"
               size="icon"
@@ -86,7 +86,7 @@ export default function Navbar() {
                 <Moon className="h-5 w-5" />
               )}
             </Button>
-          )}
+          )} */}
 
           {/* Admin Dashboard Button - Prominent in marked area */}
           {mounted && isAdmin && (
