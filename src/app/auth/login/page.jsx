@@ -110,14 +110,14 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-[#1a0f2e] to-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950 via-slate-950 to-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-[#241744]/60 backdrop-blur-xl rounded-2xl shadow-[0_0_40px_rgba(99,39,192,0.15)] border border-purple-500/20 p-8">
+        <div className="bg-blue-900/40 backdrop-blur-xl rounded-2xl shadow-[0_0_40px_rgba(30,58,138,0.15)] border border-indigo-500/20 p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Welcome Back</h1>
-            <p className="text-purple-200/80">Log in to your Luminal account</p>
+            <p className="text-blue-200/80">Log in to your Luminal account</p>
           </div>
 
           {/* Error Message */}
@@ -130,41 +130,42 @@ function LoginContent() {
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-4 mb-6">
             {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-purple-200/80 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 bg-[#130b24]/50 border border-purple-500/20 rounded-xl text-white placeholder-purple-300/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                disabled={loading}
-              />
-            </div>
+             <div>
+               <label className="block text-sm font-medium text-blue-200/80 mb-2">
+                 Email Address
+               </label>
+               <input
+                 type="email"
+                 value={email}
+                 onChange={(e) => setEmail(e.target.value)}
+                 placeholder="you@example.com"
+                 className="w-full px-4 py-3 bg-blue-950/50 border border-indigo-500/20 rounded-xl text-white placeholder-blue-300/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all"
+                 disabled={loading}
+               />
+             </div>
+ 
+             {/* Password Input */}
+             <div>
+               <label className="block text-sm font-medium text-blue-200/80 mb-2">
+                 Password
+               </label>
+               <input
+                 type="password"
+                 value={password}
+                 onChange={(e) => setPassword(e.target.value)}
+                 placeholder="••••••••"
+                 className="w-full px-4 py-3 bg-blue-950/50 border border-indigo-500/20 rounded-xl text-white placeholder-blue-300/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all"
+                 disabled={loading}
+               />
+             </div>
+ 
+             {/* Login Button */}
+             <button
+               type="submit"
+               disabled={loading}
+               className="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] transform hover:-translate-y-0.5"
+             >
 
-            {/* Password Input */}
-            <div>
-              <label className="block text-sm font-medium text-purple-200/80 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 bg-[#130b24]/50 border border-purple-500/20 rounded-xl text-white placeholder-purple-300/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Login Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)] transform hover:-translate-y-0.5"
-            >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -174,19 +175,20 @@ function LoginContent() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-            <span className="text-purple-300/50 text-sm font-medium">or continue with</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-          </div>
+           {/* Divider */}
+           <div className="flex items-center gap-4 mb-6">
+             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+             <span className="text-blue-300/50 text-sm font-medium">or continue with</span>
+             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+           </div>
+ 
+           {/* Google Login Button */}
+           <button
+             onClick={handleGoogleLogin}
+             disabled={googleLoading}
+             className="w-full py-3 border border-indigo-500/20 bg-blue-950/30 text-white font-medium rounded-xl hover:bg-indigo-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+           >
 
-          {/* Google Login Button */}
-          <button
-            onClick={handleGoogleLogin}
-            disabled={googleLoading}
-            className="w-full py-3 border border-purple-500/20 bg-[#130b24]/30 text-white font-medium rounded-xl hover:bg-purple-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          >
             <svg className="w-5 h-5 text-white" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
@@ -209,34 +211,35 @@ function LoginContent() {
           </button>
 
           {/* Quick Access Section */}
-          <div className="mt-8 pt-6 border-t border-purple-500/20">
-            <p className="text-center text-purple-200/60 text-xs font-semibold uppercase tracking-wider mb-4">Quick Access Demo</p>
-            <div className="space-y-3">
-              <button
-                onClick={handleDemoAdminLogin}
-                disabled={loading}
-                className="w-full py-2.5 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(124,58,237,0.25)] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] text-sm"
-              >
-                {loading ? "Accessing..." : "Admin Access"}
-              </button>
-              <button
-                onClick={handleDemoUserLogin}
-                disabled={loading}
-                className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] text-sm"
-              >
-                {loading ? "Accessing..." : "User Account"}
-              </button>
-            </div>
-          </div>
-          {/* Signup Link */}
-          <div className="text-center mt-8">
-            <p className="text-purple-200/60">
-              Don't have an account?{" "}
-              <Link href="/auth/signup" className="text-purple-400 font-medium hover:text-purple-300 hover:underline transition-colors">
-                Sign up
-              </Link>
-            </p>
-          </div>
+           <div className="mt-8 pt-6 border-t border-indigo-500/20">
+             <p className="text-center text-blue-200/60 text-xs font-semibold uppercase tracking-wider mb-4">Quick Access Demo</p>
+             <div className="space-y-3">
+               <button
+                 onClick={handleDemoAdminLogin}
+                 disabled={loading}
+                 className="w-full py-2.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-indigo-500 hover:via-blue-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(79,70,229,0.25)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] text-sm"
+               >
+                 {loading ? "Accessing..." : "Admin Access"}
+               </button>
+               <button
+                 onClick={handleDemoUserLogin}
+                 disabled={loading}
+                 className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] text-sm"
+               >
+                 {loading ? "Accessing..." : "User Account"}
+               </button>
+             </div>
+           </div>
+           {/* Signup Link */}
+           <div className="text-center mt-8">
+             <p className="text-blue-200/60">
+               Don't have an account?{" "}
+               <Link href="/auth/signup" className="text-indigo-400 font-medium hover:text-indigo-300 hover:underline transition-colors">
+                 Sign up
+               </Link>
+             </p>
+           </div>
+
         </div>
       </div>
     </div>
