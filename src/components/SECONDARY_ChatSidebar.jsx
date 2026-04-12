@@ -731,8 +731,6 @@ export default function SECONDARY_ChatSidebar({
         )}
       </div>
     );
-  };
-
   if (isMobile) {
     return (
       <>
