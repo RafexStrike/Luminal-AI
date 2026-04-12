@@ -3,10 +3,9 @@
 
 import { MongoClient } from "mongodb";
 import bcrypt from "bcrypt";
-import { v4 as uuidv4 } from "uuid";
 
 const mongoUri = process.env.MONGODB_URI;
-const dbName = "luminalDB";
+const dbName = process.env.DB_NAME || "luminalDB";
 
 if (!mongoUri) {
   console.error("❌ Error: MONGODB_URI environment variable is not set");
@@ -48,7 +47,6 @@ async function seedAdminUsers() {
 
     if (!adminExists) {
       const adminUser = {
-        id: uuidv4(),
         email: adminEmail,
         name: "Admin User",
         emailVerified: true,
@@ -64,11 +62,20 @@ async function seedAdminUsers() {
       console.log(`  └─ Password: ${adminPassword}`);
     } else {
       console.log("ℹ Admin user already exists:", adminEmail);
-      // Update role to ensure it's set
-      if (!adminExists.role) {
-        await usersCollection.updateOne({ email: adminEmail }, { $set: { role: "admin" } });
-        console.log("  └─ Updated admin role");
-      }
+      // Update password and role for existing admin
+      await usersCollection.updateOne(
+        { email: adminEmail },
+        {
+          $set: {
+            password: hashedAdminPassword,
+            role: "admin",
+            emailVerified: true,
+            updatedAt: now,
+          },
+        }
+      );
+      console.log("  └─ Updated admin password and role");
+      console.log(`  └─ New password: ${adminPassword}`);
     }
 
     // Check if demo user already exists
@@ -76,7 +83,6 @@ async function seedAdminUsers() {
 
     if (!demoExists) {
       const demoUser = {
-        id: uuidv4(),
         email: demoEmail,
         name: "Demo User",
         emailVerified: true,
@@ -92,11 +98,20 @@ async function seedAdminUsers() {
       console.log(`  └─ Password: ${demoPassword}`);
     } else {
       console.log("ℹ Demo user already exists:", demoEmail);
-      // Update role if not set
-      if (!demoExists.role) {
-        await usersCollection.updateOne({ email: demoEmail }, { $set: { role: "user" } });
-        console.log("  └─ Updated user role");
-      }
+      // Update password and role for existing demo user
+      await usersCollection.updateOne(
+        { email: demoEmail },
+        {
+          $set: {
+            password: hashedDemoPassword,
+            role: "user",
+            emailVerified: true,
+            updatedAt: now,
+          },
+        }
+      );
+      console.log("  └─ Updated demo user password and role");
+      console.log(`  └─ New password: ${demoPassword}`);
     }
 
     console.log("\n✅ Seeding complete!");

@@ -25,7 +25,7 @@ const betterAuthInstance = betterAuth({
   // Email and password signin
   emailAndPassword: {
     enabled: true,
-    autoSignUpEmail: true, // Auto-signup on first login attempt (no verification needed)
+    autoSignUpEmail: false, // Temporarily enabled to create users via API
     minPasswordLength: 6,
   },
 

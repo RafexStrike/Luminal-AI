@@ -72,7 +72,7 @@ function LoginContent() {
       // Log in as admin with the demo admin credentials
       const { data, error: loginError } = await authClient.signIn.email({
         email: "admin@luminal.com",
-        password: "admin@123",
+        password: "admin@luminal.com",
       });
 
       if (loginError) {
@@ -93,8 +93,8 @@ function LoginContent() {
 
     try {
       const { data, error: loginError } = await authClient.signIn.email({
-        email: "rafi@rafi.com",
-        password: "rafi123",
+        email: "rafi@luminal.com",
+        password: "rafi@luminal.com",
       });
 
       if (loginError) {
@@ -210,21 +210,21 @@ function LoginContent() {
 
           {/* Quick Access Section */}
           <div className="mt-8 pt-6 border-t border-purple-500/20">
-            <p className="text-center text-purple-200/60 text-xs font-semibold uppercase tracking-wider mb-4">Quick Access</p>
+            <p className="text-center text-purple-200/60 text-xs font-semibold uppercase tracking-wider mb-4">Quick Access Demo</p>
             <div className="space-y-3">
               <button
                 onClick={handleDemoAdminLogin}
                 disabled={loading}
-                className="w-full py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium rounded-lg hover:from-amber-500 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm animate-pulse hover:animate-none"
+                className="w-full py-2.5 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(124,58,237,0.25)] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] text-sm"
               >
-                {loading ? "Accessing..." : "🛡️ Demo Admin Login"}
+                {loading ? "Accessing..." : "🛡️ Admin Access"}
               </button>
               <button
                 onClick={handleDemoUserLogin}
                 disabled={loading}
-                className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] text-sm"
               >
-                {loading ? "Accessing..." : "👤 Demo Account Login"}
+                {loading ? "Accessing..." : "👤 User Account"}
               </button>
             </div>
           </div>
