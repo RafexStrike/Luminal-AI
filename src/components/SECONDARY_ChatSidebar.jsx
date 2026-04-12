@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Swal from 'sweetalert2';
 import theme from '../design/theme.config';
 import layout from '../design/layout.config';
 import { Skeleton } from './ui/skeleton';
@@ -355,7 +356,23 @@ export default function SECONDARY_ChatSidebar({
   const [contextMenu, setContextMenu] = useState(null);
   const [contextMenuPos, setContextMenuPos] = useState({ top: 0, left: 0 });
   const [isOperating, setIsOperating] = useState(false);
-  const [toast, setToast] = useState(null);
+  
+  const showToast = (type, title, message) => {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      icon: type,
+      title: title,
+      text: message,
+      customClass: {
+        popup: type === 'success' ? 'bg-green-900/80 text-green-100' : 'bg-red-900/80 text-red-100',
+      },
+    });
+  };
+
 
   // Load chats on mount
   useEffect(() => {
@@ -478,10 +495,10 @@ export default function SECONDARY_ChatSidebar({
         prev.map((c) => (c._id === renameModal._id ? { ...c, title: data.data.title } : c))
       );
       setRenameModal(null);
-      setToast({ type: 'success', message: 'Chat renamed successfully.' });
+      showToast('success', 'Chat Renamed', 'Chat renamed successfully.');
     } catch (err) {
       console.error('Rename error:', err);
-      setToast({ type: 'error', message: 'Failed to rename chat.' });
+      showToast('error', 'Error', 'Failed to rename chat.');
     } finally {
       setIsOperating(false);
     }
@@ -499,15 +516,15 @@ export default function SECONDARY_ChatSidebar({
       if (!res.ok) throw new Error('Failed to move chat');
       const data = await res.json();
 
-      setChats((prev) =>
-        prev.map((c) => (c._id === moveModal._id ? { ...c, collection: data.data.collection } : c))
-      );
-      setMoveModal(null);
-      setToast({ type: 'success', message: `Chat moved to "${collectionName}".` });
-    } catch (err) {
-      console.error('Move error:', err);
-      setToast({ type: 'error', message: 'Failed to move chat.' });
-    } finally {
+       setChats((prev) =>
+         prev.map((c) => (c._id === moveModal._id ? { ...c, collection: data.data.collection } : c))
+       );
+       setMoveModal(null);
+       showToast('success', 'Chat Moved', `Chat moved to "${collectionName}".`);
+     } catch (err) {
+       console.error('Move error:', err);
+       showToast('error', 'Error', 'Failed to move chat.');
+     } finally {
       setIsOperating(false);
     }
   };
@@ -523,19 +540,19 @@ export default function SECONDARY_ChatSidebar({
 
       if (!res.ok) throw new Error('Failed to delete chat');
 
-      setChats((prev) => prev.filter((c) => c._id !== deleteModal._id));
-      setDeleteModal(null);
-
-      // If deleted chat is currently open, notify parent
-      if (deleteModal._id === currentChatId) {
-        onChatDeleted(deleteModal._id);
-      }
-
-      setToast({ type: 'success', message: 'Chat deleted.' });
-    } catch (err) {
-      console.error('Delete error:', err);
-      setToast({ type: 'error', message: 'Failed to delete chat.' });
-    } finally {
+       setChats((prev) => prev.filter((c) => c._id !== deleteModal._id));
+       setDeleteModal(null);
+ 
+       // If deleted chat is currently open, notify parent
+       if (deleteModal._id === currentChatId) {
+         onChatDeleted(deleteModal._id);
+       }
+ 
+       showToast('success', 'Chat Deleted', 'Chat deleted.');
+     } catch (err) {
+       console.error('Delete error:', err);
+       showToast('error', 'Error', 'Failed to delete chat.');
+     } finally {
       setIsOperating(false);
     }
   };
@@ -626,9 +643,10 @@ export default function SECONDARY_ChatSidebar({
                     setContextMenu(chat);
                     setContextMenuPos(pos);
                   }}
-                  selectedChatId={currentChatId}
-                  onError={(msg) => setToast({ type: 'error', message: msg })}
-                />
+                   selectedChatId={currentChatId}
+                   onError={(msg) => showToast('error', 'Error', msg)}
+                 />
+
               ))}
             </div>
           )}
@@ -693,28 +711,15 @@ export default function SECONDARY_ChatSidebar({
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteModal && (
-        <DeleteConfirmModal
-          chat={deleteModal}
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setDeleteModal(null)}
-          isLoading={isOperating}
-        />
-      )}
-
-      {/* Toast Notification */}
-      {toast && (
-        <div
-          className={`fixed bottom-4 left-4 px-4 py-2 rounded-lg text-sm font-medium transition-opacity ${
-            toast.type === 'error'
-              ? 'bg-red-900/80 text-red-100'
-              : 'bg-green-900/80 text-green-100'
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
-    </div>
-  );
-}
+       {/* Delete Confirmation Modal */}
+       {deleteModal && (
+         <DeleteConfirmModal
+           chat={deleteModal}
+           onConfirm={handleDeleteConfirm}
+           onCancel={() => setDeleteModal(null)}
+           isLoading={isOperating}
+         />
+       )}
+     </div>
+   );
+ }
